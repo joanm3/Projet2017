@@ -101,6 +101,7 @@ GameObject:
   - 33: {fileID: 305555913}
   - 64: {fileID: 305555912}
   - 23: {fileID: 305555911}
+  - 114: {fileID: 305555915}
   m_Layer: 0
   m_Name: Plane (6)
   m_TagString: Untagged
@@ -169,115 +170,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 10
---- !u!1 &391460313
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 1000011490800640, guid: f327aa198a8ed2f498ea5f40e5b8a9a7,
-    type: 2}
-  m_PrefabInternal: {fileID: 1262732890}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 391460314}
-  m_Layer: 0
-  m_Name: 2
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &391460314
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 4000011617118626, guid: f327aa198a8ed2f498ea5f40e5b8a9a7,
-    type: 2}
-  m_PrefabInternal: {fileID: 1262732890}
-  m_GameObject: {fileID: 391460313}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.0101495, y: 0, z: -1.1241889}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_Children: []
-  m_Father: {fileID: 2017708858}
-  m_RootOrder: 1
---- !u!1 &405929907
-GameObject:
+--- !u!114 &305555915
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 405929911}
-  - 33: {fileID: 405929910}
-  - 64: {fileID: 405929909}
-  - 23: {fileID: 405929908}
-  m_Layer: 0
-  m_Name: Plane
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!23 &405929908
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 405929907}
+  m_GameObject: {fileID: 305555910}
   m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_Materials:
-  - {fileID: 2100000, guid: 70c53691c17b2e145a75a84cb584de39, type: 2}
-  m_SubsetIndices: 
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_PreserveUVs: 1
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_SelectedWireframeHidden: 0
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
---- !u!64 &405929909
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 405929907}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Convex: 0
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!33 &405929910
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 405929907}
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!4 &405929911
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 405929907}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.07, y: 0, z: -67.18}
-  m_LocalScale: {x: 17.424118, y: 17.424118, z: 17.424118}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e484e2aea8a33549849d4ba2c2ce8ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Properties:
+    Id: 0
+    Name: 
+    Confort_angle: 39.2
+    Glide_angle: 25
+    Glide_force: 1
+    maxGlideSpeed: 15
+    velocityGlideAcceleration:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    velocityTransitionSpeed_acceleration: 2
+    velocityTransitionSpeed_decceleration: 0.5
 --- !u!1 &658365136
 GameObject:
   m_ObjectHideFlags: 0
@@ -289,6 +217,7 @@ GameObject:
   - 33: {fileID: 658365139}
   - 64: {fileID: 658365138}
   - 23: {fileID: 658365137}
+  - 114: {fileID: 658365141}
   m_Layer: 0
   m_Name: Plane (1)
   m_TagString: Untagged
@@ -357,6 +286,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 5
+--- !u!114 &658365141
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 658365136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e484e2aea8a33549849d4ba2c2ce8ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Properties:
+    Id: -1
+    Name: 
+    Confort_angle: 30.4
+    Glide_angle: 25
+    Glide_force: 1
+    maxGlideSpeed: 15
+    velocityGlideAcceleration:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    velocityTransitionSpeed_acceleration: 2
+    velocityTransitionSpeed_decceleration: 0.5
 --- !u!1 &728774933
 GameObject:
   m_ObjectHideFlags: 0
@@ -492,7 +457,7 @@ CharacterController:
   serializedVersion: 2
   m_Height: 2
   m_Radius: 0.5
-  m_SlopeLimit: 60
+  m_SlopeLimit: 100
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
@@ -604,7 +569,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Confort_angle: 12.6
-  Glide_angle: 70
+  Glide_angle: 49.8
+  Glide_force: 1
   maxGlideSpeed: 15
   velocityGlideAcceleration:
     serializedVersion: 2
@@ -675,8 +641,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
-  _t_time: 0
-  _v_value: 0
+  t_time: 0
+  v_value: 0
+  m_actualSurface: {fileID: 0}
 --- !u!1 &756136651
 GameObject:
   m_ObjectHideFlags: 0
@@ -688,6 +655,7 @@ GameObject:
   - 33: {fileID: 756136654}
   - 64: {fileID: 756136653}
   - 23: {fileID: 756136652}
+  - 114: {fileID: 756136656}
   m_Layer: 0
   m_Name: Plane (8)
   m_TagString: Untagged
@@ -756,36 +724,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 12
---- !u!1 &766445601
-GameObject:
+--- !u!114 &756136656
+MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 1000013806001514, guid: f327aa198a8ed2f498ea5f40e5b8a9a7,
-    type: 2}
-  m_PrefabInternal: {fileID: 1262732890}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 766445602}
-  m_Layer: 0
-  m_Name: 1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &766445602
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 4000010303696214, guid: f327aa198a8ed2f498ea5f40e5b8a9a7,
-    type: 2}
-  m_PrefabInternal: {fileID: 1262732890}
-  m_GameObject: {fileID: 766445601}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.0898504, y: 0, z: -2.964189}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_Children: []
-  m_Father: {fileID: 2017708858}
-  m_RootOrder: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 756136651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e484e2aea8a33549849d4ba2c2ce8ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Properties:
+    Id: 0
+    Name: 
+    Confort_angle: 17.2
+    Glide_angle: 25
+    Glide_force: 1
+    maxGlideSpeed: 15
+    velocityGlideAcceleration:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    velocityTransitionSpeed_acceleration: 2
+    velocityTransitionSpeed_decceleration: 0.5
 --- !u!1 &813126834
 GameObject:
   m_ObjectHideFlags: 0
@@ -904,6 +878,7 @@ GameObject:
   - 33: {fileID: 1074472301}
   - 64: {fileID: 1074472300}
   - 23: {fileID: 1074472299}
+  - 114: {fileID: 1074472303}
   m_Layer: 0
   m_Name: Plane (4)
   m_TagString: Untagged
@@ -972,6 +947,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 8
+--- !u!114 &1074472303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1074472298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e484e2aea8a33549849d4ba2c2ce8ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Properties:
+    Id: 0
+    Name: 
+    Confort_angle: 25
+    Glide_angle: 25
+    Glide_force: 1
+    maxGlideSpeed: 15
+    velocityGlideAcceleration:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    velocityTransitionSpeed_acceleration: 2
+    velocityTransitionSpeed_decceleration: 0.5
 --- !u!1 &1154079790
 GameObject:
   m_ObjectHideFlags: 0
@@ -1070,6 +1081,7 @@ GameObject:
   - 33: {fileID: 1222213353}
   - 64: {fileID: 1222213352}
   - 23: {fileID: 1222213351}
+  - 114: {fileID: 1222213355}
   m_Layer: 0
   m_Name: Plane (3)
   m_TagString: Untagged
@@ -1138,6 +1150,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 7
+--- !u!114 &1222213355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1222213350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e484e2aea8a33549849d4ba2c2ce8ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Properties:
+    Id: 0
+    Name: 
+    Confort_angle: 15.5
+    Glide_angle: 68.2
+    Glide_force: 1
+    maxGlideSpeed: 15
+    velocityGlideAcceleration:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    velocityTransitionSpeed_acceleration: 2
+    velocityTransitionSpeed_decceleration: 0.5
 --- !u!1001 &1262732890
 Prefab:
   m_ObjectHideFlags: 0
@@ -1216,7 +1264,6 @@ Prefab:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: f327aa198a8ed2f498ea5f40e5b8a9a7, type: 2}
-  m_RootGameObject: {fileID: 2017708853}
   m_IsPrefabParent: 0
 --- !u!1 &1305113492
 GameObject:
@@ -1229,6 +1276,7 @@ GameObject:
   - 33: {fileID: 1305113495}
   - 64: {fileID: 1305113494}
   - 23: {fileID: 1305113493}
+  - 114: {fileID: 1305113497}
   m_Layer: 0
   m_Name: Plane (5)
   m_TagString: Untagged
@@ -1297,6 +1345,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 9
+--- !u!114 &1305113497
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1305113492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e484e2aea8a33549849d4ba2c2ce8ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Properties:
+    Id: 0
+    Name: 
+    Confort_angle: 11.4
+    Glide_angle: 25
+    Glide_force: 1
+    maxGlideSpeed: 15
+    velocityGlideAcceleration:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    velocityTransitionSpeed_acceleration: 2
+    velocityTransitionSpeed_decceleration: 0.5
 --- !u!1 &1333877630
 GameObject:
   m_ObjectHideFlags: 0
@@ -1308,6 +1392,7 @@ GameObject:
   - 33: {fileID: 1333877633}
   - 64: {fileID: 1333877632}
   - 23: {fileID: 1333877631}
+  - 114: {fileID: 1333877635}
   m_Layer: 0
   m_Name: Plane (7)
   m_TagString: Untagged
@@ -1376,6 +1461,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 11
+--- !u!114 &1333877635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1333877630}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e484e2aea8a33549849d4ba2c2ce8ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Properties:
+    Id: 0
+    Name: 
+    Confort_angle: 5.6
+    Glide_angle: 25
+    Glide_force: 1
+    maxGlideSpeed: 15
+    velocityGlideAcceleration:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    velocityTransitionSpeed_acceleration: 2
+    velocityTransitionSpeed_decceleration: 0.5
 --- !u!1 &1394232157
 GameObject:
   m_ObjectHideFlags: 0
@@ -1387,6 +1508,7 @@ GameObject:
   - 33: {fileID: 1394232160}
   - 64: {fileID: 1394232159}
   - 23: {fileID: 1394232158}
+  - 114: {fileID: 1394232162}
   m_Layer: 0
   m_Name: Plane (2)
   m_TagString: Untagged
@@ -1455,6 +1577,125 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 6
+--- !u!114 &1394232162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1394232157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e484e2aea8a33549849d4ba2c2ce8ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Properties:
+    Id: 0
+    Name: 
+    Confort_angle: 8.4
+    Glide_angle: 25
+    Glide_force: 1
+    maxGlideSpeed: 15
+    velocityGlideAcceleration:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    velocityTransitionSpeed_acceleration: 2
+    velocityTransitionSpeed_decceleration: 0.5
+--- !u!1 &1426600690 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1000013649319874, guid: f327aa198a8ed2f498ea5f40e5b8a9a7,
+    type: 2}
+  m_PrefabInternal: {fileID: 1262732890}
+--- !u!114 &1426600696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1426600690}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e484e2aea8a33549849d4ba2c2ce8ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Properties:
+    Id: -1
+    Name: 
+    Confort_angle: 25
+    Glide_angle: 25
+    Glide_force: 1
+    maxGlideSpeed: 15
+    velocityGlideAcceleration:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    velocityTransitionSpeed_acceleration: 2
+    velocityTransitionSpeed_decceleration: 0.5
+--- !u!1001 &1634686318
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4000012261373456, guid: 9ea96e08acd1e234ea5fb5a801a5eaf7, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: -0.07
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012261373456, guid: 9ea96e08acd1e234ea5fb5a801a5eaf7, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012261373456, guid: 9ea96e08acd1e234ea5fb5a801a5eaf7, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: -67.18
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012261373456, guid: 9ea96e08acd1e234ea5fb5a801a5eaf7, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012261373456, guid: 9ea96e08acd1e234ea5fb5a801a5eaf7, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012261373456, guid: 9ea96e08acd1e234ea5fb5a801a5eaf7, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012261373456, guid: 9ea96e08acd1e234ea5fb5a801a5eaf7, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4000012261373456, guid: 9ea96e08acd1e234ea5fb5a801a5eaf7, type: 2}
+      propertyPath: m_RootOrder
+      value: 2
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 9ea96e08acd1e234ea5fb5a801a5eaf7, type: 2}
+  m_IsPrefabParent: 0
 --- !u!1 &1705762001
 GameObject:
   m_ObjectHideFlags: 0
@@ -1546,6 +1787,7 @@ GameObject:
   - 33: {fileID: 1772521868}
   - 64: {fileID: 1772521867}
   - 23: {fileID: 1772521866}
+  - 114: {fileID: 1772521870}
   m_Layer: 0
   m_Name: Plane (10)
   m_TagString: Untagged
@@ -1614,6 +1856,42 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 14
+--- !u!114 &1772521870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1772521865}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e484e2aea8a33549849d4ba2c2ce8ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Properties:
+    Id: 0
+    Name: 
+    Confort_angle: 39.6
+    Glide_angle: 90
+    Glide_force: 1
+    maxGlideSpeed: 15
+    velocityGlideAcceleration:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    velocityTransitionSpeed_acceleration: 2
+    velocityTransitionSpeed_decceleration: 0.5
 --- !u!1 &1848292130
 GameObject:
   m_ObjectHideFlags: 0
@@ -1625,6 +1903,7 @@ GameObject:
   - 33: {fileID: 1848292133}
   - 64: {fileID: 1848292132}
   - 23: {fileID: 1848292131}
+  - 114: {fileID: 1848292135}
   m_Layer: 0
   m_Name: Plane (9)
   m_TagString: Untagged
@@ -1693,111 +1972,39 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 13
---- !u!1 &2017708853
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 1000013649319874, guid: f327aa198a8ed2f498ea5f40e5b8a9a7,
-    type: 2}
-  m_PrefabInternal: {fileID: 1262732890}
-  serializedVersion: 4
-  m_Component:
-  - 4: {fileID: 2017708858}
-  - 33: {fileID: 2017708857}
-  - 64: {fileID: 2017708856}
-  - 23: {fileID: 2017708855}
-  - 114: {fileID: 2017708854}
-  m_Layer: 0
-  m_Name: DeformedPlane 1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2017708854
+--- !u!114 &1848292135
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 114000013867677960, guid: f327aa198a8ed2f498ea5f40e5b8a9a7,
-    type: 2}
-  m_PrefabInternal: {fileID: 1262732890}
-  m_GameObject: {fileID: 2017708853}
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1848292130}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3a34217997397042bb36a0683adb126, type: 3}
+  m_Script: {fileID: 11500000, guid: 7e484e2aea8a33549849d4ba2c2ce8ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Target1: {fileID: 766445602}
-  Target2: {fileID: 391460314}
-  waves:
-  - Length: 0.95
-    Speed: 1.85
-    Scale: 0.4
-  - Length: 2
-    Speed: 2
-    Scale: 0.6
---- !u!23 &2017708855
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 23000013217189348, guid: f327aa198a8ed2f498ea5f40e5b8a9a7,
-    type: 2}
-  m_PrefabInternal: {fileID: 1262732890}
-  m_GameObject: {fileID: 2017708853}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_Materials:
-  - {fileID: 2100000, guid: 70c53691c17b2e145a75a84cb584de39, type: 2}
-  m_SubsetIndices: 
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_PreserveUVs: 1
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_SelectedWireframeHidden: 0
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
---- !u!64 &2017708856
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 64000011282755218, guid: f327aa198a8ed2f498ea5f40e5b8a9a7,
-    type: 2}
-  m_PrefabInternal: {fileID: 1262732890}
-  m_GameObject: {fileID: 2017708853}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Convex: 0
-  m_Mesh: {fileID: 0}
---- !u!33 &2017708857
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 33000014072990086, guid: f327aa198a8ed2f498ea5f40e5b8a9a7,
-    type: 2}
-  m_PrefabInternal: {fileID: 1262732890}
-  m_GameObject: {fileID: 2017708853}
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!4 &2017708858
-Transform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 4000011955700480, guid: f327aa198a8ed2f498ea5f40e5b8a9a7,
-    type: 2}
-  m_PrefabInternal: {fileID: 1262732890}
-  m_GameObject: {fileID: 2017708853}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 30, y: -0, z: 63.6}
-  m_LocalScale: {x: 8.988293, y: 8.988295, z: 8.988295}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_Children:
-  - {fileID: 766445602}
-  - {fileID: 391460314}
-  m_Father: {fileID: 0}
-  m_RootOrder: 1
+  Properties:
+    Id: 0
+    Name: 
+    Confort_angle: 25
+    Glide_angle: 25
+    Glide_force: 1
+    maxGlideSpeed: 15
+    velocityGlideAcceleration:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    velocityTransitionSpeed_acceleration: 2
+    velocityTransitionSpeed_decceleration: 0.5

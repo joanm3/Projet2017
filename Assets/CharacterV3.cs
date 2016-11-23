@@ -15,9 +15,9 @@ public class CharacterV3 : MonoBehaviour
     [Tooltip("Jusqu'à quel angle sommes nous en Glide (au delà = Fall) (Gizmos violet puis rouge)")]
     [Range(45.0f, 90.0f)]
     public float Glide_angle = 25.0f;
-    public float Glide_force = 1f; 
+    public float Gliding_force_time = 1f;
 
-     [Space(20.0f)]
+    [Space(20.0f)]
     [Header("Surface")]
 
     [Tooltip("La vitesse que donne la surface de Glide_angle maximum")]
@@ -60,6 +60,19 @@ public class CharacterV3 : MonoBehaviour
     private enum CurvesOfSpeed { Accelerate, Deccelerate, NotMoving };
 
     private CharacterController m_myController;
+    [SerializeField]
+    private Surface m_actualSurface;
+    private Surface m_lastSurface;
+
+
+    private float m_standard_confort_angle = 25.0f;
+    private float m_standard_glide_angle = 25.0f;
+    private float m_standard_glide_force = 1f;
+    private float m_standard_maxGlideSpeed = 15.0f;
+    private AnimationCurve m_standard_velocityGlideAcceleration = AnimationCurve.EaseInOut(0.0f, 0.0f, 1.0f, 1.0f);
+    private float m_standard_velocityTransitionSpeed_acceleration = 2.0f;
+    private float m_standard_velocityTransitionSpeed_decceleration = 0.5f;
+
     private RaycastHit m_rayHit;
     private Vector3 m_surfaceNormal;
     private Vector3 m_current_VelocitySpeedDir = Vector3.zero;    //Velocité actuelle
@@ -71,34 +84,59 @@ public class CharacterV3 : MonoBehaviour
     private CurvesOfSpeed lastFrameCurveOfSpeed = CurvesOfSpeed.NotMoving;
 
     private float m_currentRotationSpeed = 0.0f;
-    private float m_oldGlideAngle;
+    //private float m_oldGlideAngle;
     private float m_startTime;
+
+    private float m_timer;
 
     void Start()
     {
         m_myController = GetComponent<CharacterController>();
-       // m_myController.slopeLimit = Glide_angle;
-        m_oldGlideAngle = Glide_angle;
-        m_startTime = Time.time; 
+        // m_myController.slopeLimit = Glide_angle;
+        //m_oldGlideAngle = Glide_angle;
+        m_startTime = Time.time;
+        m_actualSurface = null;
+        m_lastSurface = null;
+
+        m_standard_confort_angle = Confort_angle;
+        m_standard_glide_angle = Glide_angle;
+        m_standard_glide_force = Gliding_force_time;
+        m_standard_maxGlideSpeed = maxGlideSpeed;
+        m_standard_velocityGlideAcceleration = velocityGlideAcceleration;
+        m_standard_velocityTransitionSpeed_acceleration = velocityTransitionSpeed_acceleration;
+        m_standard_velocityTransitionSpeed_decceleration = velocityTransitionSpeed_decceleration;
+
     }
 
 
     void FixedUpdate()
     {
-        if (m_oldGlideAngle != Glide_angle)
-        {
-           // m_myController.slopeLimit = Glide_angle;
-            m_oldGlideAngle = Glide_angle;
-        }
+        //if (m_oldGlideAngle != Glide_angle)
+        //{
+        //    // m_myController.slopeLimit = Glide_angle;
+        //    m_oldGlideAngle = Glide_angle;
+        //}
 
         //Vector3 _rayDirection = -Vector3.up;
         Vector3 _rayDirection = (-m_rayHit.normal != Vector3.zero) ? -m_rayHit.normal : -Vector3.up;
-        Debug.Log(_rayDirection);
+        //Debug.Log(_rayDirection);
 
         if (Physics.Raycast(transform.position + (-Vector3.up * (m_myController.bounds.extents.y - 0.1f)), _rayDirection, out m_rayHit, Mathf.Infinity))
         {
             Debug.DrawRay(transform.position + (-Vector3.up * (m_myController.bounds.extents.y - 0.1f)), _rayDirection, Color.red);
             m_surfaceNormal = m_rayHit.normal;
+            m_actualSurface = m_rayHit.collider.GetComponent<Surface>();
+        }
+        else
+        {
+            m_actualSurface = null;
+        }
+
+
+        if (m_lastSurface != m_actualSurface)
+        {
+            SetSurfaceProperties();
+            m_lastSurface = m_actualSurface;
         }
 
         //Input dir + velocity
@@ -141,6 +179,31 @@ public class CharacterV3 : MonoBehaviour
         Gizmos.DrawLine(m_rayHit.point, m_rayHit.point + m_surfaceNormal * 2.5f);
     }
 
+
+    private void SetSurfaceProperties()
+    {
+        if (m_actualSurface != null)
+        {
+            Confort_angle = m_actualSurface.Properties.Confort_angle;
+            Glide_angle = m_actualSurface.Properties.Glide_angle;
+            Gliding_force_time = m_actualSurface.Properties.Gliding_force_time;
+            maxGlideSpeed = m_actualSurface.Properties.maxGlideSpeed;
+            velocityGlideAcceleration = m_actualSurface.Properties.velocityGlideAcceleration;
+            velocityTransitionSpeed_acceleration = m_actualSurface.Properties.velocityTransitionSpeed_acceleration;
+            velocityTransitionSpeed_decceleration = m_actualSurface.Properties.velocityTransitionSpeed_decceleration;
+        }
+        else
+        {
+            Confort_angle = m_standard_confort_angle;
+            Glide_angle = m_standard_glide_angle;
+            Gliding_force_time = m_standard_glide_force;
+            maxGlideSpeed = m_standard_maxGlideSpeed;
+            velocityGlideAcceleration = m_standard_velocityGlideAcceleration;
+            velocityTransitionSpeed_acceleration = m_standard_velocityTransitionSpeed_acceleration;
+            velocityTransitionSpeed_decceleration = m_standard_velocityTransitionSpeed_decceleration;
+        }
+    }
+
     /// <summary>
     /// Vitesse et direction du joueur par surface
     /// </summary>
@@ -180,16 +243,45 @@ public class CharacterV3 : MonoBehaviour
     private Vector3 GetInputSpeedDir()
     {
 
-        Vector3 _vectorToReturn = Vector3.zero;
-
-        float fracComplete = (Time.time - m_startTime) / Glide_force;
+        Vector3 _inputSpeedDir = Vector3.zero;
+        Vector3 _glideVector = Vector3.zero;
 
         //Direction
         Vector3 _inputVector = (Vector3.forward * Input.GetAxis("Vertical")) + Vector3.right * Input.GetAxis("Horizontal"); //Input Axis en tant que vec3
-        if (Vector3.Angle(Vector3.up, m_surfaceNormal) > Glide_angle)
-            //_inputVector = Vector3.zero;
-            _inputVector = Vector3.Slerp(_inputVector, Vector3.zero, fracComplete); 
 
+        //What happens when we are in a surface with a bigger max angle allowed
+        if (Vector3.Angle(Vector3.up, m_surfaceNormal) > Glide_angle)
+        {
+            float fracComplete = (Time.time - m_startTime) / Gliding_force_time;
+            Debug.Log(fracComplete);
+
+            //see if angle is positif or negatif
+            bool _positifAngle = true;
+            Vector3 _crossProduct = Vector3.Cross(Vector3.up, m_surfaceNormal);
+            if (_crossProduct.z < 0) _positifAngle = !_positifAngle;
+            Vector3 _slerpVector = new Vector3(Mathf.Abs(_inputVector.x), Mathf.Abs(_inputVector.y), Mathf.Abs(_inputVector.z));
+            if (!_positifAngle) _slerpVector *= -1;
+
+            //set slerp
+            if (m_timer < Gliding_force_time)
+            {
+                _glideVector = Vector3.Slerp(Vector3.zero, _slerpVector, fracComplete);
+                m_timer += Time.deltaTime;
+            }
+            else if (m_timer >= Gliding_force_time)
+            {
+                _glideVector = Vector3.zero;
+                m_timer = 0f;
+            }
+        }
+        else
+        {
+            // try to improve this to not call it every update
+            m_timer = 0f;
+        }
+
+        _inputVector -= _glideVector;
+        //Debug.Log(m_timer);
 
         //		print("input magnitude " + _inputVector.magnitude);
         Vector3 _vectorTolook = _inputVector;       //Direction que le controler doit regarder
@@ -206,13 +298,15 @@ public class CharacterV3 : MonoBehaviour
         transform.rotation = Quaternion.RotateTowards(transform.rotation, _toRot, m_currentRotationSpeed * Time.deltaTime);
 
         //au cas ou on look nul part
-        _vectorToReturn = transform.forward;
+        _inputSpeedDir = transform.forward;
 
         //Translation Speed
         //		_vectorToReturn *= maxInputSpeed * _inputVector.magnitude;
-        _vectorToReturn = _vectorToReturn.normalized * GetCurrentSpeedByCurve(_vectorTolook.normalized * _inputVector.magnitude);
+        float _currentSpeedByCurve = GetCurrentSpeedByCurve(_vectorTolook.normalized * _inputVector.magnitude);
+        _inputSpeedDir = _inputSpeedDir.normalized * _currentSpeedByCurve;
+        //Debug.Log(_currentSpeedByCurve); 
 
-        return _vectorToReturn;
+        return _inputSpeedDir;
     }
 
     /// <summary>
@@ -250,7 +344,7 @@ public class CharacterV3 : MonoBehaviour
             {
                 t_time = SetTimeToEquivalent(InputDecceleration, v_value, 20);
                 currentCurveOfSpeed = CurvesOfSpeed.Deccelerate;
-                //				print("Begin deccelerate" + _t_time);
+                //print("Begin deccelerate" + _t_time);
             }
 
             t_time += Time.deltaTime;
