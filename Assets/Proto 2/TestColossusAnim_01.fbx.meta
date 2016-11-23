@@ -1,0 +1,155 @@
+fileFormatVersion: 2
+guid: d4d461544d188764ca1a057c55b59cd8
+timeCreated: 1477995559
+licenseType: Free
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: Arm_L
+    100002: Arm_R
+    100004: Armature
+    100006: Back
+    100008: BackBone
+    100010: BackTail
+    100012: Body
+    100014: EndTail
+    100016: EndTail_end
+    100018: Feet_IK_L
+    100020: Feet_IK_L_end
+    100022: Feet_IK_R
+    100024: Feet_IK_R_end
+    100026: Feet_L
+    100028: Feet_L_end
+    100030: Feet_R
+    100032: Feet_R_end
+    100034: Hand_IK_L
+    100036: Hand_IK_L_end
+    100038: Hand_IK_R
+    100040: Hand_IK_R_end
+    100042: Hand_L
+    100044: Hand_L_end
+    100046: Hand_R
+    100048: Hand_R_end
+    100050: Head
+    100052: Leg_L
+    100054: Leg_R
+    100056: Neck
+    100058: Nose
+    100060: Nose_end
+    100062: Nose_IK
+    100064: Nose_IK_end
+    100066: Root
+    100068: Root_end
+    100070: Tail
+    100072: Tail_IK
+    100074: Tail_IK_end
+    100076: //RootNode
+    100078: ZBrush_defualt_group
+    400000: Arm_L
+    400002: Arm_R
+    400004: Armature
+    400006: Back
+    400008: BackBone
+    400010: BackTail
+    400012: Body
+    400014: EndTail
+    400016: EndTail_end
+    400018: Feet_IK_L
+    400020: Feet_IK_L_end
+    400022: Feet_IK_R
+    400024: Feet_IK_R_end
+    400026: Feet_L
+    400028: Feet_L_end
+    400030: Feet_R
+    400032: Feet_R_end
+    400034: Hand_IK_L
+    400036: Hand_IK_L_end
+    400038: Hand_IK_R
+    400040: Hand_IK_R_end
+    400042: Hand_L
+    400044: Hand_L_end
+    400046: Hand_R
+    400048: Hand_R_end
+    400050: Head
+    400052: Leg_L
+    400054: Leg_R
+    400056: Neck
+    400058: Nose
+    400060: Nose_end
+    400062: Nose_IK
+    400064: Nose_IK_end
+    400066: Root
+    400068: Root_end
+    400070: Tail
+    400072: Tail_IK
+    400074: Tail_IK_end
+    400076: //RootNode
+    400078: ZBrush_defualt_group
+    4300000: ZBrush_defualt_group
+    7400000: Armature|ArmatureAction
+    9500000: //RootNode
+    13700000: ZBrush_defualt_group
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 40
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
