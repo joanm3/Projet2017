@@ -88,6 +88,7 @@ public class CharacterV3 : MonoBehaviour
     private float m_startTime;
 
     private float m_timer;
+    private float m_gravityTimer; 
 
     void Start()
     {
@@ -108,6 +109,7 @@ public class CharacterV3 : MonoBehaviour
 
     }
 
+    public bool isGrounded = true;
 
     void FixedUpdate()
     {
@@ -146,9 +148,40 @@ public class CharacterV3 : MonoBehaviour
         m_current_VelocitySpeedDir = GetVelocitySpeedDir();
 
         m_shouldSpeedDir = m_inputSpeedDir + m_current_VelocitySpeedDir;
+        Vector3 Gravity = new Vector3(0f, Mathf.Pow(9.8f, 2), 0f);
+        Vector3 Acceleration = -Gravity;//insert other forces here
+
+
+        //float gravityPerSecond = -5f;
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            //isGrounded = false;
+            m_gravityTimer = 0f;
+            m_shouldSpeedDir += new Vector3(0f, 1000f); // Add an upward impulse
+        }
+        Ray rayJump = new Ray(transform.position + (-Vector3.up * (m_myController.bounds.extents.y - 0.1f)), -Vector3.up);
+        Debug.DrawRay(rayJump.origin, rayJump.direction, Color.red);
+
+
+        if (Physics.Raycast(rayJump, out m_rayHit, 1f))
+        {
+            isGrounded = true;
+        } 
+        else
+        { isGrounded = false;  }
+
+
+
+        if (!isGrounded)
+        {
+            m_gravityTimer += Time.fixedDeltaTime;
+            m_myController.transform.position += m_shouldSpeedDir * m_gravityTimer + 0.5f * Acceleration * m_gravityTimer * Time.fixedDeltaTime;
+            m_shouldSpeedDir += Acceleration * m_gravityTimer;
+            //Debug.Log(m_shouldSpeedDir); 
+        }
 
         m_myController.Move(m_shouldSpeedDir * Time.fixedDeltaTime);
-
+        //Debug.Log(m_shouldSpeedDir * Time.fixedDeltaTime);
         ////Pseudo grav
         //if (Physics.Raycast(transform.position, _rayDirection, out m_rayHit, 1000))
         //{
@@ -156,6 +189,7 @@ public class CharacterV3 : MonoBehaviour
         //    _tempVector.y = m_rayHit.point.y + m_myController.bounds.extents.y;
         //    m_myController.transform.position = _tempVector;
         //}
+
 
     }
 
@@ -204,6 +238,31 @@ public class CharacterV3 : MonoBehaviour
         }
     }
 
+    private void SetGravity(float velocity, bool isGrounded)
+    {
+
+
+
+        if (!isGrounded)
+        {
+            //X = Xi + Vx * tx
+
+            Vector3 position = new Vector3 (
+                m_myController.transform.position.x + (velocity * Time.deltaTime),
+                m_myController.transform.position.y + (velocity * Time.deltaTime),
+                m_myController.transform.position.z + (velocity * Time.deltaTime)); 
+
+
+            Vector3 _tempVector = m_myController.transform.position;
+            _tempVector.y -= 0.01f; 
+
+            _tempVector.y = m_rayHit.point.y + m_myController.bounds.extents.y;
+            m_myController.transform.position = _tempVector;
+        }
+    }
+
+
+
     /// <summary>
     /// Vitesse et direction du joueur par surface
     /// </summary>
@@ -228,11 +287,13 @@ public class CharacterV3 : MonoBehaviour
 
         if (m_surface_VelocitySpeedDir.magnitude > m_current_VelocitySpeedDir.magnitude)
         {
-            return Vector3.MoveTowards(m_current_VelocitySpeedDir, m_surface_VelocitySpeedDir, velocityTransitionSpeed_acceleration * Time.deltaTime);
+            return Vector3.MoveTowards(m_current_VelocitySpeedDir, 
+                m_surface_VelocitySpeedDir, velocityTransitionSpeed_acceleration * Time.deltaTime);
         }
         else
         {
-            return Vector3.MoveTowards(m_current_VelocitySpeedDir, m_surface_VelocitySpeedDir, velocityTransitionSpeed_decceleration * Time.deltaTime);
+            return Vector3.MoveTowards(m_current_VelocitySpeedDir, 
+                m_surface_VelocitySpeedDir, velocityTransitionSpeed_decceleration * Time.deltaTime);
         }
 
     }
@@ -246,14 +307,17 @@ public class CharacterV3 : MonoBehaviour
         Vector3 _inputSpeedDir = Vector3.zero;
         Vector3 _glideVector = Vector3.zero;
 
-        //Direction
-        Vector3 _inputVector = (Vector3.forward * Input.GetAxis("Vertical")) + Vector3.right * Input.GetAxis("Horizontal"); //Input Axis en tant que vec3
+        //Direction 
+        //Input Axis en tant que vec3
+        Vector3 _inputVector = 
+            (Vector3.forward * Input.GetAxis("Vertical")) + (Vector3.right * Input.GetAxis("Horizontal"));
+        //Debug.Log(_inputVector); 
 
         //What happens when we are in a surface with a bigger max angle allowed
         if (Vector3.Angle(Vector3.up, m_surfaceNormal) > Glide_angle)
         {
             float fracComplete = (Time.time - m_startTime) / Gliding_force_time;
-            Debug.Log(fracComplete);
+            //Debug.Log(fracComplete);
 
             //see if angle is positif or negatif
             bool _positifAngle = true;
@@ -265,6 +329,7 @@ public class CharacterV3 : MonoBehaviour
             //set slerp
             if (m_timer < Gliding_force_time)
             {
+                //error with this. 
                 _glideVector = Vector3.Slerp(Vector3.zero, _slerpVector, fracComplete);
                 m_timer += Time.deltaTime;
             }
@@ -306,6 +371,7 @@ public class CharacterV3 : MonoBehaviour
         _inputSpeedDir = _inputSpeedDir.normalized * _currentSpeedByCurve;
         //Debug.Log(_currentSpeedByCurve); 
 
+        //Debug.Log(_inputSpeedDir); 
         return _inputSpeedDir;
     }
 
