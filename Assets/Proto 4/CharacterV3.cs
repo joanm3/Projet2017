@@ -1,9 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
+using ProjecGiant.Constants; 
+
 
 [RequireComponent(typeof (CharacterController))]
 public class CharacterV3 : MonoBehaviour {
 
+
+	public Constants constantsB = new Constants(); 
 
 	[Header("Angles")]
 	[Space(20.0f)]
@@ -62,12 +66,23 @@ public class CharacterV3 : MonoBehaviour {
 	CharacterParenting myCharaparenting;
 	Camera cam;
 
+	[HideInInspector]
+	public Vector3 FirstTang = Vector3.zero;
+	[HideInInspector]
+	public Vector3 TangDownwards = Vector3.zero;
+	[HideInInspector]
+	public float fromCtoG = 0f;
+
+	public GravityController myGravControl;
+
 	void Start ()
 	{
+		if(constantsB == null) constantsB = new Constants(); 
 		myController = GetComponent<CharacterController>();
 		myController.slopeLimit = Glide_angle;
 		myCharaparenting = GetComponent<CharacterParenting>();
 		cam = GameObject.Find("Main Camera").GetComponent<Camera>();
+
 	}
 
 
@@ -91,15 +106,17 @@ public class CharacterV3 : MonoBehaviour {
 
 		myController.Move(shouldSpeedDir * Time.deltaTime);
 
-		//Pseudo grav
+		//GRAV
 		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, Mathf.Infinity)){
 			Vector3 _tempVector = myController.transform.position;
 			_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
 			myController.transform.position = _tempVector;
 		}
+		myController.transform.position = myGravControl.GetVerticalPosition();
 
 		DebugFunction();
 	}
+
 
 
 	/// <summary>
@@ -112,14 +129,14 @@ public class CharacterV3 : MonoBehaviour {
 
 		//Direction
 
-		Vector3 _tempTang = Vector3.Cross(rayHit.normal, Vector3.up);
-		Vector3 _tang = Vector3.Cross(rayHit.normal, _tempTang);
+		FirstTang = Vector3.Cross(rayHit.normal, Vector3.up);
+		TangDownwards = Vector3.Cross(rayHit.normal, FirstTang);
 
-		Debug.DrawLine(rayHit.point, rayHit.point + _tang * 5f, Color.black);
+		Debug.DrawLine(rayHit.point, rayHit.point + TangDownwards * 5f, Color.black);
 
-		float fromCtoG = ((Vector3.Angle(Vector3.up, surfaceNormal) - Confort_angle)) / (Glide_angle - Confort_angle);
+		fromCtoG = ((Vector3.Angle(Vector3.up, surfaceNormal) - Confort_angle)) / (Glide_angle - Confort_angle);
 		fromCtoG = Mathf.Clamp(fromCtoG, 0f, 1f);
-		surface_VelocitySpeedDir = _tang.normalized * (maxGlideSpeed * velocityGlideAcceleration.Evaluate(fromCtoG));
+		surface_VelocitySpeedDir = TangDownwards.normalized * (maxGlideSpeed * velocityGlideAcceleration.Evaluate(fromCtoG));
 
 //		print(velocityGlideAcceleration.Evaluate(fromCtoG));
 
@@ -166,7 +183,9 @@ public class CharacterV3 : MonoBehaviour {
 
 		//Rotation
 		Quaternion _toRot = Quaternion.LookRotation(_vectorTolook, transform.up);
-		transform.rotation = Quaternion.RotateTowards(transform.rotation, _toRot, currentRotationSpeed * Time.deltaTime);
+		Quaternion _rRot = Quaternion.RotateTowards(transform.rotation, _toRot, currentRotationSpeed * Time.deltaTime);
+
+		transform.rotation = _rRot;
 
 		//au cas ou on look nul part
 		_vectorToReturn = transform.forward;
@@ -282,4 +301,29 @@ public class CharacterV3 : MonoBehaviour {
 		//Surface Normal
 		Debug.DrawLine(rayHit.point, rayHit.point + surfaceNormal * 2.5f, (Vector3.Angle(Vector3.up, surfaceNormal) < Confort_angle) ? Color.cyan : (Vector3.Angle(Vector3.up, surfaceNormal) < Glide_angle) ? violet : Color.red);
 	}
+}
+
+
+
+namespace ProjecGiant.Constants
+{
+[System.Serializable]
+public class Constants 
+{
+	public float gravity; 
+	public float test; 
+
+
+		public Constants()
+		{
+			//gravity = 9.8f; 
+		}
+
+		public Constants(float gravity)
+		{
+			this.gravity = gravity; 
+		}
+
+
+}
 }
