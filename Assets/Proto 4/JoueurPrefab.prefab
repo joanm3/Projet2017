@@ -70,7 +70,6 @@ GameObject:
   m_Component:
   - 4: {fileID: 4000011000430194}
   - 33: {fileID: 33000010137193754}
-  - 136: {fileID: 136000013310526658}
   - 23: {fileID: 23000012061186750}
   m_Layer: 0
   m_Name: Capsule (1)
@@ -90,9 +89,10 @@ GameObject:
   - 33: {fileID: 33000010545152178}
   - 23: {fileID: 23000010106580110}
   - 143: {fileID: 143000012178638682}
-  - 114: {fileID: 114000011838206404}
-  - 114: {fileID: 114000011878821592}
   - 114: {fileID: 114000010382376396}
+  - 114: {fileID: 114000012426060392}
+  - 114: {fileID: 114000010923527466}
+  - 114: {fileID: 114000013031213406}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -120,7 +120,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000014017118232}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.5864928, y: -1.4103024, z: -1.4797935}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
@@ -134,7 +134,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000010814601904}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.5864928, y: -3.1003022, z: -1.4797935}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
@@ -148,7 +148,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000010877206510}
   m_LocalRotation: {x: 0.042444356, y: -0, z: -0, w: 0.99909884}
-  m_LocalPosition: {x: 0.82109547, y: 2.77, z: -11.169137}
+  m_LocalPosition: {x: 0.82109547, y: 2.77, z: -17.36}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 4.8240004, y: 0, z: 0}
   m_Children: []
@@ -160,8 +160,9 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000010100958318}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.76539737, y: 4.9203024, z: 2.6489305}
+  m_LocalRotation: {x: 0.000000021855694, y: 0.000000029802322, z: 0.000000029802322,
+    w: 1}
+  m_LocalPosition: {x: 3.2, y: 187.8, z: -52.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
@@ -186,7 +187,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 2000
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -314,9 +315,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e933eb861c19c848a5ceaa709134dd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  constantsB:
+    gravity: 0
+    test: 0
   Confort_angle: 12.6
   Glide_angle: 70
-  maxGlideSpeed: 15
+  maxGlideSpeed: 50
   velocityGlideAcceleration:
     serializedVersion: 2
     m_Curve:
@@ -335,7 +339,7 @@ MonoBehaviour:
     m_RotationOrder: 0
   velocityTransitionSpeed_acceleration: 10.4
   velocityTransitionSpeed_decceleration: 8.6
-  maxInputSpeed: 20
+  maxInputSpeed: 30.56
   max_RotationSpeed: 1440
   min_RotationSpeed: 206
   rotationBySpeed:
@@ -386,155 +390,97 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
+  FirstTang: {x: 0, y: 0, z: 0}
+  TangDownwards: {x: 0, y: 0, z: 0}
+  fromCtoG: 0
+  myGravControl:
+    qqqq: 0
+  gravForceOverTime:
+    serializedVersion: 2
+    m_Curve:
+    - time: 0
+      value: 0
+      inSlope: 0.18073234
+      outSlope: 0.18073234
+      tangentMode: 0
+    - time: 1
+      value: 1
+      inSlope: 6.7375674
+      outSlope: 6.7375674
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
   _t_time: 0
   _v_value: 0
---- !u!114 &114000011838206404
+--- !u!114 &114000010923527466
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000014017118232}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e5ce7b6fcd0a13948bf7216a577377ba, type: 3}
+  m_Script: {fileID: 11500000, guid: 2fe1aed5567a3fd44ba312dc103f59d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speedInputMax: 17.8
-  speedInputMax_whileTurning: 9.9
-  inputAcceleration:
+--- !u!114 &114000012426060392
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1000014017118232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79a1ffe31584ea549bff9ad1af3fa4a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxSpeedFall: 90
+  maxAngleBeforeFall: 75
+  rotSpeedByAngle:
     serializedVersion: 2
     m_Curve:
-    - time: 0
-      value: 0
-      inSlope: 0.7320451
-      outSlope: 0.7320451
-      tangentMode: 0
-    - time: 4
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  inputDeceleration:
-    serializedVersion: 2
-    m_Curve:
-    - time: 0.0010221004
-      value: 1
-      inSlope: -0.19038275
-      outSlope: -0.19038275
-      tangentMode: 0
-    - time: 0.5
-      value: 0
-      inSlope: -6.4727387
-      outSlope: -6.4727387
-      tangentMode: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  inputTuring:
-    serializedVersion: 2
-    m_Curve:
-    - time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-    - time: 0.1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  input180Deceleration:
-    serializedVersion: 2
-    m_Curve:
-    - time: 0
-      value: 1
+    - time: 0.003554502
+      value: 0.119798206
       inSlope: 0
       outSlope: 0
       tangentMode: 0
     - time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
+      value: 0.99873894
+      inSlope: 2.1286223
+      outSlope: 2.1286223
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
-  input180Acceleration:
-    serializedVersion: 2
-    m_Curve:
-    - time: 0
-      value: 0
-      inSlope: 6.10206
-      outSlope: 6.10206
-      tangentMode: 0
-    - time: 0.5
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  minSpeedRotation: 1
-  maxSpeedRotation: 50
-  Confort_angle: 25
-  Glide_angle: 60
-  gravityForce: 5
-  maxVelocity: 10
-  currentSpeed: 0
-  t_input: 0
-  v_input: 0
---- !u!114 &114000011878821592
+--- !u!114 &114000013031213406
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000014017118232}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cfe9d0092fc2a342ae26dbc141491c4, type: 3}
+  m_Script: {fileID: 11500000, guid: 92053d2836c5cc4489b4488615807928, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speedInputMax: 25
-  speedInputMax_whileTurning: 15
-  inputAcceleration:
-    serializedVersion: 2
-    m_Curve:
-    - time: 0
-      value: 0
-      inSlope: 0.7359275
-      outSlope: 0.7359275
-      tangentMode: 0
-    - time: 4
-      value: 1
-      inSlope: 0.017960127
-      outSlope: 0.017960127
-      tangentMode: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  inputDeceleration:
-    serializedVersion: 2
-    m_Curve:
-    - time: 0
-      value: 1
-      inSlope: -0.036080718
-      outSlope: -0.036080718
-      tangentMode: 0
-    - time: 0.25
-      value: 0
-      inSlope: -12.416961
-      outSlope: -12.416961
-      tangentMode: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
+  resetPlayerVerticality: 1
+  links:
+  - name: Head
+    myCollider: {fileID: 0}
+    myBone: {fileID: 0}
+  - name: Body
+    myCollider: {fileID: 0}
+    myBone: {fileID: 0}
+  - name: Arms
+    myCollider: {fileID: 0}
+    myBone: {fileID: 0}
+  - name: Legs
+    myCollider: {fileID: 0}
+    myBone: {fileID: 0}
+  - name: Tail
+    myCollider: {fileID: 0}
+    myBone: {fileID: 0}
 --- !u!124 &124000011872121174
 Behaviour:
   m_ObjectHideFlags: 1
@@ -542,19 +488,6 @@ Behaviour:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000010877206510}
   m_Enabled: 1
---- !u!136 &136000013310526658
-CapsuleCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1000011541441482}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!143 &143000012178638682
 CharacterController:
   m_ObjectHideFlags: 1
