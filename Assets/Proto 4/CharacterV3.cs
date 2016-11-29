@@ -75,6 +75,8 @@ public class CharacterV3 : MonoBehaviour {
 
 	public GravityController myGravControl;
 
+	public AnimationCurve gravForceOverTime;
+
 	void Start ()
 	{
 		if(constantsB == null) constantsB = new Constants(); 
@@ -108,11 +110,14 @@ public class CharacterV3 : MonoBehaviour {
 
 		//GRAV
 		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, Mathf.Infinity)){
+
+
 			Vector3 _tempVector = myController.transform.position;
 			_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
 			myController.transform.position = _tempVector;
+
 		}
-		myController.transform.position = myGravControl.GetVerticalPosition();
+//		myController.transform.position = myGravControl.GetVerticalPosition();
 
 		DebugFunction();
 	}
