@@ -12,7 +12,7 @@ public class CameraShakeEffect : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		Debug.Log (shake); 
+		//Debug.Log (shake); 
 
 		if(Input.GetKeyDown(KeyCode.Q))
 			{

@@ -374,6 +374,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thirdPersonCameraMovement: {fileID: 0}
   newDistance: 5
+  newX: 90
   lerpTime: 1
 --- !u!23 &965640296
 MeshRenderer:
@@ -574,6 +575,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thirdPersonCameraMovement: {fileID: 0}
   newDistance: 20
+  newX: 0
   lerpTime: 5
 --- !u!1 &1277910893
 GameObject:
@@ -742,7 +744,6 @@ GameObject:
   m_Component:
   - 4: {fileID: 1511734958}
   - 114: {fileID: 1511734957}
-  - 65: {fileID: 1511734959}
   m_Layer: 0
   m_Name: CameraMovement
   m_TagString: Untagged
@@ -775,7 +776,10 @@ MonoBehaviour:
   fadeMask:
     serializedVersion: 2
     m_Bits: 1024
-  m_colliderRenderer: {fileID: 0}
+  limitXAngle: 0
+  xTest: 1
+  waitingTimeToMoveCamera: 2
+  testX: 0
 --- !u!4 &1511734958
 Transform:
   m_ObjectHideFlags: 0
@@ -790,18 +794,6 @@ Transform:
   - {fileID: 1148975608}
   m_Father: {fileID: 0}
   m_RootOrder: 3
---- !u!65 &1511734959
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1511734956}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: -0.52, y: 0.51, z: 0}
 --- !u!1 &1644457737
 GameObject:
   m_ObjectHideFlags: 0
@@ -1030,7 +1022,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1678126280}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dd6d4281e5d7cd44d8c6e38bc2c1b8d8, type: 3}
   m_Name: 
