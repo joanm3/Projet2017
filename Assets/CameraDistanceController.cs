@@ -47,7 +47,7 @@ public class CameraDistanceController : MonoBehaviour
 
 	void OnTriggerEnter (Collider other)
 	{
-		Debug.Log ("trigger entered"); 
+		//Debug.Log ("trigger entered"); 
 		if (other.tag == "Player") {
 			startTime = Time.time; 
 			journeyLength = Mathf.Abs (thirdPersonCameraMovement.distance - newDistance); 
