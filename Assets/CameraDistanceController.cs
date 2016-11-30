@@ -7,13 +7,13 @@ public class CameraDistanceController : MonoBehaviour
 
 	public float newDistance = 10f;
 
-	[Range(0,1)]
+	[Range (0f, 5f)]
 	public float lerpTime = 0.1f;
 
 	private bool changeDistance = false;
 
-	private float startTime; 
-	private float journeyLength; 
+	private float startTime;
+	private float journeyLength;
 
 	void Start ()
 	{
@@ -25,16 +25,17 @@ public class CameraDistanceController : MonoBehaviour
 
 	}
 
-	void Update ()
+	void FixedUpdate ()
 	{
-		if (changeDistance == true) {
+		float distCovered = (changeDistance == true) ? (Time.time - startTime) * (1f/lerpTime) : 0f; 
+		float fracJourney = distCovered / journeyLength; 
+		//Debug.Log (fracJourney); 
 
-			float distCovered = (Time.time - startTime) * lerpTime; 
-			float fracJourney = distCovered / journeyLength; 
+		if (changeDistance == true) {
 
 			thirdPersonCameraMovement.distance = Mathf.Lerp (thirdPersonCameraMovement.distance, newDistance, fracJourney); 
 
-			if (Mathf.Abs (thirdPersonCameraMovement.distance - newDistance) >= 0.1f) {
+			if (Mathf.Abs (thirdPersonCameraMovement.distance - newDistance) <= 0.1f) {
 				thirdPersonCameraMovement.distance = newDistance;
 				changeDistance = false; 
 			}
@@ -47,12 +48,11 @@ public class CameraDistanceController : MonoBehaviour
 	void OnTriggerEnter (Collider other)
 	{
 		Debug.Log ("trigger entered"); 
-		Debug.Log (other.name); 
 		if (other.tag == "Player") {
 			startTime = Time.time; 
 			journeyLength = Mathf.Abs (thirdPersonCameraMovement.distance - newDistance); 
 			changeDistance = true; 
-			Debug.Log ("player entered"); 
+
 		}
 	}
 

@@ -82,7 +82,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 				m_colliderRenderer.material.color = new Color (m_colliderRenderer.material.color.r, m_colliderRenderer.material.color.g, m_colliderRenderer.material.color.b, _lerpedAlpha); 
 				m_trueDistance = Mathf.Lerp (m_trueDistance, _hit.distance, Time.fixedDeltaTime * lerpVelocity * 2f);
 				m_obstacleRaycastEntered = true; 
-				Debug.Log (-m_trueDistance); 
+				//Debug.Log (-m_trueDistance); 
 
 
 			} else if ((_hit.collider.gameObject.layer == LayerMask.NameToLayer (fadeleLayerString))) {
