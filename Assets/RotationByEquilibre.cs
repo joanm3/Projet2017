@@ -3,16 +3,19 @@ using System.Collections;
 
 public class RotationByEquilibre : MonoBehaviour {
 
-	[Tooltip("Par seconde. la curve définit quel pourcentage de cette valeur est appliquée à la rotation du joueur")]
+	[Tooltip("Vitesse de chute (rotation) maximum par seconde. La curve définit quel pourcentage de cette valeur est appliquée à la rotation du joueur")]
+	[Range(10f, 360f)]
 	public float maxSpeedFall = 10f;
 
 	[Tooltip("A partir de cet angle, le personnage tombe")]
+	[Range(25f, 80f)]
 	public float maxAngleBeforeFall = 75f;
 
 	[Range(10f, 90f)]
 	public float Recovery_Angle = 15f;
 
 	[Tooltip("Temps pour se relever (en secondes)")]
+	[Range(0.1f, 5f)]
 	public float timeToRecover = 1f;
 
 	[Tooltip("time 0 = max confort, time 1 = max glide")]

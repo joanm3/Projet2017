@@ -123,6 +123,18 @@ public class CharacterV3 : MonoBehaviour {
 		//GRAV
 		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, Mathf.Infinity)){
 
+			//If grounded
+			if(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) < 0.1f)
+			{
+				
+			}
+
+			//If Fall angle
+			if(Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
+			{
+				
+			}
+
 
 			Vector3 _tempVector = myController.transform.position;
 			_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
