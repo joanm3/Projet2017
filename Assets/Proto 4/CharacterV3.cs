@@ -72,10 +72,13 @@ public class CharacterV3 : MonoBehaviour {
 	public Vector3 TangDownwards = Vector3.zero;
 	[HideInInspector]
 	public float fromCtoG = 0f;
+	[HideInInspector]
+	public bool canUseInput = true;
 
 	public GravityController myGravControl;
 
 	public AnimationCurve gravForceOverTime;
+
 
 	void Start ()
 	{
@@ -99,10 +102,19 @@ public class CharacterV3 : MonoBehaviour {
 			
 
 		//Input dir + velocity
-		InputSpeedDir = GetInputSpeedDir();
+		if(canUseInput)
+		{
+			InputSpeedDir = GetInputSpeedDir();
+		}
+		else
+		{
+			InputSpeedDir = Vector3.zero;
+		}
 
 		//Surface dir + velocity
 		SetVelocitySpeedDir();
+
+
 
 		shouldSpeedDir = InputSpeedDir + current_VelocitySpeedDir;
 
@@ -188,6 +200,7 @@ public class CharacterV3 : MonoBehaviour {
 
 		//Rotation
 		Quaternion _toRot = Quaternion.LookRotation(_vectorTolook, transform.up);
+//		_toRot.eulerAngles.y = 0f;
 		Quaternion _rRot = Quaternion.RotateTowards(transform.rotation, _toRot, currentRotationSpeed * Time.deltaTime);
 
 		transform.rotation = _rRot;
