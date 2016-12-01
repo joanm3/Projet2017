@@ -98,9 +98,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1812814023594600}
-  m_LocalRotation: {x: 0.000000021855694, y: 0.000000029802322, z: 0.000000029802322,
-    w: 1}
-  m_LocalPosition: {x: 3, y: 185.2, z: -52}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.79, y: 3.58, z: 26.97}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4940760010739926}
@@ -271,10 +270,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   constantsB:
-    gravity: 0
+    gravity: 9.8
     test: 0
   Confort_angle: 12.6
-  Glide_angle: 70
+  Glide_angle: 90
   maxGlideSpeed: 50
   velocityGlideAcceleration:
     serializedVersion: 2
@@ -356,26 +355,25 @@ MonoBehaviour:
   FirstTang: {x: 0, y: 0, z: 0}
   TangDownwards: {x: 0, y: 0, z: 0}
   fromCtoG: 0
-  myGravControl:
-    qqqq: 0
   gravForceOverTime:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 2
       time: 0
       value: 0
-      inSlope: 0.18073234
-      outSlope: 0.18073234
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
     - serializedVersion: 2
       time: 1
       value: 1
-      inSlope: 6.7375674
-      outSlope: 6.7375674
+      inSlope: 0
+      outSlope: 0
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
+  maxGravForce: 100
   _t_time: 0
   _v_value: 0
   inputVector: {x: 0, y: 0, z: 0}
@@ -393,7 +391,7 @@ CharacterController:
   serializedVersion: 2
   m_Height: 2
   m_Radius: 0.5
-  m_SlopeLimit: 60
+  m_SlopeLimit: 90
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
