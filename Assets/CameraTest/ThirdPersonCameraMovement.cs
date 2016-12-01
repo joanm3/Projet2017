@@ -15,10 +15,11 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 	public float lerpVelocity = 5f;
 	public LayerMask obstacleMask;
 	public LayerMask fadeMask;
+	public LayerMask terrainMask;
 
 	public bool limitXAngle = false;
 	public float xTest = 1f;
-	public float waitingTimeToMoveCamera = 2f; 
+	public float waitingTimeToMoveCamera = 2f;
 
 	private Transform m_transform;
 	private Camera m_cam;
@@ -26,7 +27,9 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
 	private bool m_fadeRaycastEntered = false;
 	private bool m_obstacleRaycastEntered = false;
-	private MeshRenderer m_colliderRenderer = null;
+	private bool m_terrainRaycastEntered = false; 
+	private Renderer m_colliderRend = null;
+	private TerrainCollider m_terrainCollider = null;
 
 	private const float Y_ANGLE_MIN = -20.0f;
 	private const float Y_ANGLE_MAX = 50.0f;
@@ -35,10 +38,12 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 	private const float X_ANGLE_MIN = -50.0f;
 	private const float X_ANGLE_MAX = 50.0f;
 
-	private string obstacleLayerString = "Obstacle";
-	private string fadeLayerString = "Fade";
+	private const string obstacleLayerString = "Obstacle";
+	private const string fadeLayerString = "Fade";
+	private const string terrainLayerString = "Terrain";
 
-	private float m_noKeysTouchedTime = 0.0f; 
+
+	private float m_noKeysTouchedTime = 0.0f;
 
 	// Use this for initialization
 	void Start ()
@@ -46,82 +51,115 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 		m_transform = transform; 
 		m_cam = Camera.main; 
 		m_trueDistance = distance;
+
+		if (playerTransform == null)
+			playerTransform = GameObject.FindGameObjectWithTag ("Player").transform; 
+
+		if (playerController == null)
+			playerController = GameObject.FindGameObjectWithTag ("Player").GetComponent<CharacterController> (); 
 	}
 		
-	// Update is called once per frame
+
 	void Update ()
 	{
-		
+
+		//Debug.Log (m_trueDistance); 
 		currentX += Input.GetAxis ("Mouse X");
 		currentY += Input.GetAxis ("Mouse Y");
 
 		currentY = Mathf.Clamp (currentY, Y_ANGLE_MIN, Y_ANGLE_MAX); 
 		if (limitXAngle)
-			currentX = Mathf.Clamp (currentX, X_ANGLE_MIN, X_ANGLE_MAX); 			
-	}
+			currentX = Mathf.Clamp (currentX, X_ANGLE_MIN, X_ANGLE_MAX); 	
 
-
-
-	void FixedUpdate ()
-	{
 		Vector3 _rayDirection = playerTransform.position - m_transform.position; 
 		RaycastHit _hit; 
-		
-		Debug.DrawRay (playerTransform.position, -_rayDirection, Color.red); 
 
 		//When ray detected
-		if (Physics.Raycast (playerTransform.position, -_rayDirection, out _hit, distance, SumLayers (obstacleMask, fadeMask))) {
+		if (Physics.Raycast (playerTransform.position, -_rayDirection, out _hit, distance, SumLayers (obstacleMask, fadeMask, terrainMask))) {
 
 			//Obstacle behaviour
 			if (_hit.collider.gameObject.layer == LayerMask.NameToLayer (obstacleLayerString)) {
-				
-				m_colliderRenderer = _hit.collider.GetComponent<MeshRenderer> (); 
-				float _lerpedAlpha = (m_colliderRenderer.material.color.a >= 0.001f) ? Mathf.Lerp (m_colliderRenderer.material.color.a, 0.0f, Time.fixedDeltaTime * lerpVelocity * 3.5f) : 0f;  
-				m_colliderRenderer.material.color = new Color (m_colliderRenderer.material.color.r, m_colliderRenderer.material.color.g, m_colliderRenderer.material.color.b, _lerpedAlpha); 
-				m_trueDistance = Mathf.Lerp (m_trueDistance, _hit.distance, Time.fixedDeltaTime * lerpVelocity * 2f);
-				m_obstacleRaycastEntered = true; 
+				m_colliderRend = GetRendererFromCollision (_hit); 
+				//m_colliderRenderer = _hit.collider.GetComponent<MeshRenderer> (); 
+				if (m_colliderRend.enabled) {
+					float _lerpedAlpha = (m_colliderRend.material.color.a >= 0.001f) ? Mathf.Lerp (m_colliderRend.material.color.a, 0.0f, Time.fixedDeltaTime * lerpVelocity * 3.5f) : 0f;  
+					m_colliderRend.material.color = new Color (m_colliderRend.material.color.r, m_colliderRend.material.color.g, m_colliderRend.material.color.b, _lerpedAlpha); 
+					m_trueDistance = Mathf.Lerp (m_trueDistance, _hit.distance - 0.1f, Time.fixedDeltaTime * lerpVelocity * 2f);
+					m_obstacleRaycastEntered = true; 
+				}
 
-			// fade Object behaviour
+				// fade Object behaviour
 			} else if ((_hit.collider.gameObject.layer == LayerMask.NameToLayer (fadeLayerString))) {
 				
-				m_colliderRenderer = _hit.collider.GetComponent<MeshRenderer> (); 
-				float _lerpedAlpha = (m_colliderRenderer.material.color.a >= 0.001f) ? Mathf.Lerp (m_colliderRenderer.material.color.a, 0.5f, Time.fixedDeltaTime * lerpVelocity * 3f) : 0f;  
-				m_colliderRenderer.material.color = new Color (m_colliderRenderer.material.color.r, m_colliderRenderer.material.color.g, m_colliderRenderer.material.color.b, _lerpedAlpha); 
-				m_fadeRaycastEntered = true; 
-			}
-				
-		//when no ray behaviour
-		} else {
-			m_trueDistance = Mathf.Lerp (m_trueDistance, distance, Time.fixedDeltaTime * lerpVelocity); 
-
-			//when exiting a fade object
-			if (m_fadeRaycastEntered && m_colliderRenderer != null) {
-				
-				float _lerpedAlpha = Mathf.Lerp (m_colliderRenderer.material.color.a, 1f, Time.fixedDeltaTime * lerpVelocity); 
-				m_colliderRenderer.material.color = new Color (m_colliderRenderer.material.color.r, m_colliderRenderer.material.color.g, m_colliderRenderer.material.color.b, _lerpedAlpha); 
-				if (_lerpedAlpha >= 0.9f) {
-					m_colliderRenderer.material.color = new Color (m_colliderRenderer.material.color.r, m_colliderRenderer.material.color.g, m_colliderRenderer.material.color.b, 1f); 
-					m_colliderRenderer = null; 
-					m_fadeRaycastEntered = false; 
+				m_colliderRend = GetRendererFromCollision (_hit); 
+				if (!m_colliderRend.enabled) {
+				 
+					float _lerpedAlpha = (m_colliderRend.material.color.a >= 0.001f) ? Mathf.Lerp (m_colliderRend.material.color.a, 0.5f, Time.fixedDeltaTime * lerpVelocity * 3f) : 0f;  
+					m_colliderRend.material.color = new Color (m_colliderRend.material.color.r, m_colliderRend.material.color.g, m_colliderRend.material.color.b, _lerpedAlpha); 
+					m_fadeRaycastEntered = true; 
+				}
+				//terrain behaviour
+			} else if ((_hit.collider.gameObject.layer == LayerMask.NameToLayer (terrainLayerString))) {
+			
+				m_terrainCollider = _hit.collider.GetComponent<TerrainCollider> (); 
+				if (m_terrainCollider.enabled) {
+					m_trueDistance = Mathf.Lerp (m_trueDistance, _hit.distance - 0.1f, Time.fixedDeltaTime * lerpVelocity * 2f);
+					m_terrainRaycastEntered = true;  
 				}
 
-			//when exiting a obstacle object
-			} else if (m_obstacleRaycastEntered && m_colliderRenderer != null) {
+
+
+				//when no ray behaviour
+			} else {
 				
-				float _lerpedAlpha =  Mathf.Lerp (m_colliderRenderer.material.color.a, 1.0f, Time.fixedDeltaTime * lerpVelocity);  
-				m_colliderRenderer.material.color = new Color (m_colliderRenderer.material.color.r, m_colliderRenderer.material.color.g, m_colliderRenderer.material.color.b, _lerpedAlpha); 
-				if (_lerpedAlpha >= 0.9f) {
-					m_colliderRenderer.material.color = new Color (m_colliderRenderer.material.color.r, m_colliderRenderer.material.color.g, m_colliderRenderer.material.color.b, 1f);
-					m_colliderRenderer = null; 
-					m_obstacleRaycastEntered = false; 
+				//when exiting a fade object
+				if (m_fadeRaycastEntered && m_colliderRend != null) {
+				
+					float _lerpedAlpha = Mathf.Lerp (m_colliderRend.material.color.a, 1f, Time.fixedDeltaTime * lerpVelocity); 
+					m_colliderRend.material.color = new Color (m_colliderRend.material.color.r, m_colliderRend.material.color.g, m_colliderRend.material.color.b, _lerpedAlpha); 
+					if (_lerpedAlpha >= 0.9f) {
+						m_colliderRend.material.color = new Color (m_colliderRend.material.color.r, m_colliderRend.material.color.g, m_colliderRend.material.color.b, 1f); 
+						m_colliderRend = null; 
+						m_fadeRaycastEntered = false; 
+					}
+
+					//when exiting a obstacle object
+				} else if (m_obstacleRaycastEntered && m_colliderRend != null) {
+				
+					float _lerpedAlpha = Mathf.Lerp (m_colliderRend.material.color.a, 1.0f, Time.fixedDeltaTime * lerpVelocity);  
+					m_colliderRend.material.color = new Color (m_colliderRend.material.color.r, m_colliderRend.material.color.g, m_colliderRend.material.color.b, _lerpedAlpha); 
+					if (_lerpedAlpha >= 0.9f) {
+						m_colliderRend.material.color = new Color (m_colliderRend.material.color.r, m_colliderRend.material.color.g, m_colliderRend.material.color.b, 1f);
+						m_colliderRend = null; 
+						m_obstacleRaycastEntered = false; 
+					}
+
+				}  
+				//when exiting terrain
+				if (m_terrainRaycastEntered && m_terrainCollider != null) {
+
+					m_terrainCollider = null; 
+					m_terrainRaycastEntered = false; 
 				}
 
 			}
+
 
 		}
+
+		if (m_colliderRend == null && m_terrainCollider == null)
+			m_trueDistance = (Mathf.Abs (m_trueDistance - distance) > 0.1f) ? Mathf.Lerp (m_trueDistance, distance, Time.fixedDeltaTime * lerpVelocity) : distance; 
+		Debug.Log ("fade: " + m_fadeRaycastEntered); 
+		Debug.Log ("obstacle: " + m_obstacleRaycastEntered); 
+		Debug.Log ("terrain: " + m_terrainRaycastEntered); 
+		Debug.Log ("terrain collider: " + m_terrainCollider); 
+
+
+		//Debug.Log (m_trueDistance); 
 	}
 
-	public float testX = 0f; 
+
+	public float testX = 0f;
 
 	void LateUpdate ()
 	{
@@ -133,11 +171,40 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
 	}
 
+	private void OnDrawGizmos ()
+	{
+
+		if (!Application.isPlaying)
+			return; 
+		Vector3 _rayDirection = playerTransform.position - m_transform.position; 
+		Gizmos.color = Color.black; 
+		Debug.DrawRay (playerTransform.position, -_rayDirection); 
+	}
+
+
+	public static Renderer GetRendererFromCollision (RaycastHit hit)
+	{
+
+		Renderer _colliderRend = (Renderer)hit.collider.GetComponent<MeshRenderer> (); 
+		if (_colliderRend == null)
+			_colliderRend = (Renderer)hit.collider.GetComponent<MeshRenderer> (); 
+		if (_colliderRend == null)
+			_colliderRend = (Renderer)hit.collider.GetComponent<SkinnedMeshRenderer> (); 	
+
+		return _colliderRend; 
+
+	}
 
 	public static int SumLayers (LayerMask first, LayerMask second)
 	{
 
 		return first.value + second.value; 
+	}
+
+	public static int SumLayers (LayerMask first, LayerMask second, LayerMask third)
+	{
+
+		return first.value + second.value + third.value; 
 	}
 
 }

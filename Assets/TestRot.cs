@@ -18,7 +18,9 @@ public class TestRot : MonoBehaviour {
 		_vectorTolook = _vectorTolook - transform.position;
 
 		//Rotation d'input
-		Quaternion _ToLookRot = Quaternion.LookRotation(_vectorTolook);
+		//Quaternion _ToLookRot = Quaternion.LookRotation(_vectorTolook);
+		Quaternion _ToLookRot = Quaternion.identity;
+
 		Quaternion _rRot = Quaternion.RotateTowards(transform.rotation, _ToLookRot, 90f * Time.deltaTime);
 
 		//Rotation de surface
