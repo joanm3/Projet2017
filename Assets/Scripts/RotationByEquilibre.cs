@@ -3,6 +3,8 @@ using System.Collections;
 
 public class RotationByEquilibre : MonoBehaviour {
 
+	public bool useInclinaisonFeature = true;
+
 	public Transform playerRender;
 	[Tooltip("Vitesse de chute (rotation) maximum par seconde. La curve définit quel pourcentage de cette valeur est appliquée à la rotation du joueur")]
 	[Range(10f, 360f)]
@@ -68,15 +70,6 @@ public class RotationByEquilibre : MonoBehaviour {
 
 	void Update ()
 	{
-
-//		Quaternion _temp = Quaternion.FromToRotation(playerRender.up, Vector3.up);
-//		_temp *= Quaternion.LookRotation(myCharacterV3Script._inputVector, Vector3.up);
-//		_temp *= Quaternion.Inverse(_temp);
-//		LookTowardInput();
-
-		//temp * looktoward input) * temp.inverse)
-		//temp *= currentinclinaison
-		//playerrot = temp
 
 		//If grounded
 		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, myController.bounds.extents.y + 0.1f))
@@ -150,17 +143,12 @@ public class RotationByEquilibre : MonoBehaviour {
 			
 		}
 
+		if(useInclinaisonFeature)
+		{
+			playerRender.rotation = currentInclinaison;
 
-
-//		currentInclinaison *= 
-//		_temp *= currentInclinaison;
-
-//		LookTowardInput();
-		playerRender.rotation = currentInclinaison;
-
-		//playeren.rot = quat.looktoward(input, playrend.up)
-//		playerRender.rotation = Quaternion.LookRotation(myCharacterV3Script._inputVector, playerRender.up);
-		playerRender.rotation = Quaternion.AngleAxis(Quaternion.FromToRotation(playerRender.forward, myCharacterV3Script.inputVector).eulerAngles.y, playerRender.up)*playerRender.rotation;
+			playerRender.rotation = Quaternion.AngleAxis(Quaternion.FromToRotation(playerRender.forward, myCharacterV3Script.inputVector).eulerAngles.y, playerRender.up) * playerRender.rotation;
+		}
 
 		UpdateFeedBack();
 

@@ -20,6 +20,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 	public bool limitXAngle = false;
 	public float xTest = 1f;
 	public float waitingTimeToMoveCamera = 2f;
+	public bool useJoystick = false;
+
 
 	private Transform m_transform;
 	private Camera m_cam;
@@ -65,8 +67,17 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 	{
 
 		//Debug.Log (m_trueDistance); 
-		currentX += Input.GetAxis ("Mouse X");
-		currentY += Input.GetAxis ("Mouse Y");
+		if(!useJoystick)
+		{
+			currentX += Input.GetAxis ("Mouse X");
+			currentY += Input.GetAxis ("Mouse Y");
+		} else 
+		{
+			currentX += Input.GetAxis("360_R_Stick_X");
+			currentY += Input.GetAxis("360_R_Stick_Y");
+		}
+//		Debug.Log("Mouse Value: " + Input.GetAxis("Mouse X")); 
+//		Debug.Log("Joystick Value: " + Input.GetAxis("360_R_Stick_X")); 
 
 		currentY = Mathf.Clamp (currentY, Y_ANGLE_MIN, Y_ANGLE_MAX); 
 		if (limitXAngle)
@@ -166,10 +177,27 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
 	void LateUpdate ()
 	{
-
 		Vector3 _dir = new Vector3 (0, 0, -m_trueDistance); 
-		Quaternion _rotation = Quaternion.Euler (currentY, currentX + testX, 0f); 
-		m_transform.position = playerTransform.position + _rotation * _dir; 
+		Quaternion _rotation;
+		Vector3 _rotationEuler; 
+
+		if(!useJoystick)
+		{
+			_rotation = Quaternion.Euler (currentY, currentX + testX, 0f); 
+			m_transform.position = playerTransform.position + _rotation * _dir; 
+		} else{
+			_rotation = Quaternion.Euler (currentY, currentX + testX, 0f); 
+			m_transform.position = playerTransform.position + _rotation * _dir; 
+//			
+//			float velocity = 5f; 
+//			_rotationEuler = new Vector3(_rotationEuler.x + currentY * velocity,_rotationEuler.x +  ((currentX * velocity) + testX), 0f); 
+//
+//			m_transform.position = new Vector3(playerTransform.position.x + _rotationEuler.x * _dir, playerTransform.position.y + _rotationEuler.y * _dir, playerTransform.position.z + _rotationEuler.z * _dir); 
+//
+		}
+
+
+
 		m_transform.LookAt (playerTransform.position); 
 
 	}
