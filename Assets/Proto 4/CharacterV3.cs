@@ -74,6 +74,8 @@ public class CharacterV3 : MonoBehaviour {
 	public float fromCtoG = 0f;
 	[HideInInspector]
 	public bool canUseInput = true;
+	[HideInInspector]
+	public Vector3 _inputVector;
 
 	public GravityController myGravControl;
 
@@ -182,7 +184,6 @@ public class CharacterV3 : MonoBehaviour {
 			
 	}
 
-
 	/// <summary>
 	/// Vitesse et direction du joueur par Input
 	/// </summary>
@@ -194,7 +195,7 @@ public class CharacterV3 : MonoBehaviour {
 		//Direction
 //		Vector3 _inputVector = (Vector3.forward * Input.GetAxis("Vertical")) + Vector3.right * Input.GetAxis("Horizontal");	//Input Axis en tant que vec3
 
-		Vector3 _inputVector = (cam.transform.forward * Input.GetAxis("Vertical")) + (cam.transform.right * Input.GetAxis("Horizontal"));
+		_inputVector = (cam.transform.forward * Input.GetAxis("Vertical")) + (cam.transform.right * Input.GetAxis("Horizontal"));
 		_inputVector.y = 0f;
 		_inputVector.Normalize();
 

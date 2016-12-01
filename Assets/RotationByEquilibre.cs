@@ -53,6 +53,15 @@ public class RotationByEquilibre : MonoBehaviour {
 	void Update ()
 	{
 
+//		Quaternion _temp = Quaternion.FromToRotation(playerRender.up, Vector3.up);
+//		_temp *= Quaternion.LookRotation(myCharacterV3Script._inputVector, Vector3.up);
+//		_temp *= Quaternion.Inverse(_temp);
+//		LookTowardInput();
+
+		//temp * looktoward input) * temp.inverse)
+		//temp *= currentinclinaison
+		//playerrot = temp
+
 		//If grounded
 		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, myController.bounds.extents.y + 0.1f))
 		{
@@ -125,10 +134,27 @@ public class RotationByEquilibre : MonoBehaviour {
 			
 		}
 
+
+
+//		currentInclinaison *= 
+//		_temp *= currentInclinaison;
+
+//		LookTowardInput();
 		playerRender.rotation = currentInclinaison;
+
+		//playeren.rot = quat.looktoward(input, playrend.up)
+//		playerRender.rotation = Quaternion.LookRotation(myCharacterV3Script._inputVector, playerRender.up);
+		playerRender.rotation = Quaternion.AngleAxis(Quaternion.FromToRotation(playerRender.forward, myCharacterV3Script._inputVector).eulerAngles.y, playerRender.up)*playerRender.rotation;
 
 		UpdateFeedBack();
 
+	}
+
+	void LookTowardInput()
+	{
+		Vector3 myInputVector = playerRender.position + myCharacterV3Script._inputVector;
+		myInputVector.y = playerRender.position.y;
+		playerRender.LookAt(myInputVector);
 	}
 
 	void LateUpdate()
