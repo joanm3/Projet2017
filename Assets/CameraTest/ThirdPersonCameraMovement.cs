@@ -83,10 +83,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 				m_colliderRend = GetRendererFromCollision (_hit); 
 				//m_colliderRenderer = _hit.collider.GetComponent<MeshRenderer> (); 
 				if (m_colliderRend.enabled) {
-					float _lerpedAlpha = (m_colliderRend.material.color.a >= 0.001f) ? Mathf.Lerp (m_colliderRend.material.color.a, 0.0f, Time.fixedDeltaTime * lerpVelocity * 3.5f) : 0f;  
+					float _lerpedAlpha = (m_colliderRend.material.color.a >= 0.001f) ? Mathf.Lerp (m_colliderRend.material.color.a, 0.0f, Time.deltaTime * lerpVelocity * 3.5f) : 0f;  
 					m_colliderRend.material.color = new Color (m_colliderRend.material.color.r, m_colliderRend.material.color.g, m_colliderRend.material.color.b, _lerpedAlpha); 
 					//Debug.Log (_lerpedAlpha); 
-					m_trueDistance = Mathf.Lerp (m_trueDistance, _hit.distance, Time.fixedDeltaTime * lerpVelocity * 2f);
+					m_trueDistance = Mathf.Lerp (m_trueDistance, _hit.distance, Time.deltaTime * lerpVelocity * 2f);
 					m_obstacleRaycastEntered = true; 
 				}
 
@@ -95,7 +95,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 				
 				m_colliderRend = GetRendererFromCollision (_hit); 
 				if (m_colliderRend.enabled) {				 
-					float _lerpedAlpha = (m_colliderRend.material.color.a >= 0.001f) ? Mathf.Lerp (m_colliderRend.material.color.a, 0.5f, Time.fixedDeltaTime * lerpVelocity * 3f) : 0f;  
+					float _lerpedAlpha = (m_colliderRend.material.color.a >= 0.001f) ? Mathf.Lerp (m_colliderRend.material.color.a, 0.5f, Time.deltaTime * lerpVelocity * 3f) : 0f;  
 					m_colliderRend.material.color = new Color (m_colliderRend.material.color.r, m_colliderRend.material.color.g, m_colliderRend.material.color.b, _lerpedAlpha); 
 					m_fadeRaycastEntered = true; 
 				}
@@ -104,7 +104,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 			
 				m_terrainCollider = _hit.collider.GetComponent<TerrainCollider> (); 
 				if (m_terrainCollider.enabled) {
-					m_trueDistance = Mathf.Lerp (m_trueDistance, _hit.distance, Time.fixedDeltaTime * lerpVelocity * 2f);
+					m_trueDistance = Mathf.Lerp (m_trueDistance, _hit.distance, Time.deltaTime * lerpVelocity * 2f);
 					Debug.Log (_hit.distance);
 					point = _hit.point; 
 					m_terrainRaycastEntered = true;  

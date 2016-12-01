@@ -56,6 +56,11 @@ public class UpdateCollider : MonoBehaviour {
 
 	public void OnDrawGizmosSelected ()
 	{
+
+
+		if (!Application.isPlaying)
+			return; 
+
 		if(EDITOR_drawDistanceLines){
 			
 			if(player != null){
