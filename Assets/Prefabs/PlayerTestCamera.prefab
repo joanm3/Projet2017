@@ -168,6 +168,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fe1aed5567a3fd44ba312dc103f59d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  loadSceneOnSpacePressed: 0
+  loadActifScene: 1
+  sceneToLoad: 0
 --- !u!114 &114240109599462678
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -179,6 +182,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fe1aed5567a3fd44ba312dc103f59d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  loadSceneOnSpacePressed: 0
+  loadActifScene: 1
+  sceneToLoad: 0
 --- !u!114 &114488124147356034
 MonoBehaviour:
   m_ObjectHideFlags: 1

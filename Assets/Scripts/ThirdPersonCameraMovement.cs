@@ -99,7 +99,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 					m_colliderRend.material.color = new Color (m_colliderRend.material.color.r, m_colliderRend.material.color.g, m_colliderRend.material.color.b, _lerpedAlpha); 
 					m_fadeRaycastEntered = true; 
 				}
-				//terrain behaviour
+
+			//terrain behaviour
 			} else if ((_hit.collider.gameObject.layer == LayerMask.NameToLayer (terrainLayerString))) {
 			
 				m_terrainCollider = _hit.collider.GetComponent<TerrainCollider> (); 

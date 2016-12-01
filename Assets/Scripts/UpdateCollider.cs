@@ -25,7 +25,7 @@ public class UpdateCollider : MonoBehaviour {
 	}
 
 	void Start(){
-		player = GameObject.Find("Player").transform;
+		player = GameObject.FindGameObjectWithTag("Player").transform;
 
 		myCollider = GetComponent<MeshCollider>();
 		myMeshRenderer = GetComponent<SkinnedMeshRenderer>();
@@ -71,7 +71,7 @@ public class UpdateCollider : MonoBehaviour {
 				}
 			}else{
 				print("null player ref, please name your player GameObject 'Player'");
-				player = GameObject.Find("Player").transform;
+				player = GameObject.FindGameObjectWithTag("Player").transform;
 				print("Error corrected, do as if i didn't say anything :)");
 
 	//			if(player != null){
