@@ -149,7 +149,7 @@ public class CharacterV3 : MonoBehaviour
 
         //GRAV
         _rayDirection = -Vector3.up;
-        _rayDistance = ((myController.bounds.extents.y)) + 0.5f;
+        _rayDistance = ((myController.bounds.extents.y)) + 0.1f;
         //_rayDistance = 10f;
 
         ////when in ground
@@ -162,7 +162,7 @@ public class CharacterV3 : MonoBehaviour
             {
                 characterState = CharacterState.Instable;
             }
-            else if (Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle && myController.isGrounded)
+            else if (Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
             {
                 characterState = CharacterState.FallTest; 
             }
@@ -192,9 +192,9 @@ public class CharacterV3 : MonoBehaviour
             case CharacterState.FallTest:
                 current_VelocitySpeedDir.y = -maxGravForce * gravForceOverTime.Evaluate(tGrav);
                 tGrav += Time.deltaTime; 
-                _tempVector = myController.transform.position;
-                _tempVector.y -= constantsB.gravity / 50f;
-                myController.transform.position = _tempVector;
+                //_tempVector = myController.transform.position;
+                //_tempVector.y -= constantsB.gravity / 50f;
+                //myController.transform.position = _tempVector;
                 inputGravityMultiplier *= 0.99f; 
                 break; 
 
