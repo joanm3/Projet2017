@@ -60,8 +60,8 @@ public class CharacterV3 : MonoBehaviour
 	public Vector3 TangDownwards = Vector3.zero;
 	[HideInInspector]
 	public float fromCtoG = 0f;
-	public GravityController myGravControl;
 	public AnimationCurve gravForceOverTime;
+    public float maxGravForce = 100f; 
 	[Range (0f, 1f)]
 	public float _t_time = 0.0f;
 	[Range (0f, 1f)]	
@@ -71,6 +71,9 @@ public class CharacterV3 : MonoBehaviour
     [HideInInspector]
     public bool canUseInput = true;
     public CharacterParenting myCharaparenting;
+
+
+    private float tGrav = 0f; 
 
 	private Camera cam;
 	private CharacterController myController;
@@ -91,6 +94,9 @@ public class CharacterV3 : MonoBehaviour
 	private CurvesOfSpeed currentCurveOfSpeed = CurvesOfSpeed.NotMoving;
 	private CurvesOfSpeed lastFrameCurveOfSpeed = CurvesOfSpeed.NotMoving;
 
+    private enum CharacterState { Balanced, Instable, Air, FallTest };
+    private CharacterState characterState; 
+
     private enum CurvesOfSpeed
     {
         Accelerate,
@@ -102,6 +108,7 @@ public class CharacterV3 : MonoBehaviour
 	{
 		if (constantsB == null)
 			constantsB = new Constants (); 
+
 		myController = GetComponent<CharacterController> ();
 		myController.slopeLimit = Glide_angle;
 		cam = Camera.main;
@@ -109,12 +116,11 @@ public class CharacterV3 : MonoBehaviour
         if (myCharaparenting == null)
         {
             myCharaparenting = FindObjectOfType<CharacterParenting>(); 
-            if(myCharaparenting == null)
-                Debug.LogError("Please assign a CharacterParenting to Player, you bastard!"); 
         }
 
 	}
 
+    float inputGravityMultiplier = 1f; 
 
 	void Update ()
 	{
@@ -126,6 +132,7 @@ public class CharacterV3 : MonoBehaviour
 			surfaceNormal = rayHit.normal;
 
 			//CETTE LIGNE SERT A CE QUE LE JOUEUR BOUGE EN MEME TEMPS QUE SA PLATE FORME
+            if(myCharaparenting != null)
 			myCharaparenting.SetPlayerParent (transform, rayHit);
 		}
 
@@ -136,40 +143,68 @@ public class CharacterV3 : MonoBehaviour
         else
             InputSpeedDir = Vector3.zero; 
 
-		//Surface dir + velocity
+        //Surface dir + velocity
 		SetVelocitySpeedDir ();
-		shouldSpeedDir = InputSpeedDir + current_VelocitySpeedDir;
-		myController.Move (shouldSpeedDir * Time.deltaTime);
 
-		//GRAV
-		_rayDirection = -Vector3.up;
-        _rayDistance = ((myController.bounds.extents.y)) + 5f; 
+
+        //GRAV
+        _rayDirection = -Vector3.up;
+        _rayDistance = ((myController.bounds.extents.y)) + 0.5f;
+        //_rayDistance = 10f;
 
         ////when in ground
-        Debug.DrawRay(transform.position, _rayDirection * _rayDistance, Color.green); 
+        Debug.DrawRay(transform.position, _rayDirection * _rayDistance, Color.green);
+
         if (Physics.Raycast(transform.position, _rayDirection, out rayHit, _rayDistance))
         {
-            Debug.Log("i am on ground");
-            Vector3 _tempVector = myController.transform.position;
-            _tempVector.y = rayHit.point.y + myController.bounds.extents.y;
-            myController.transform.position = _tempVector;
-
-            if(Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
+            characterState = CharacterState.Balanced;
+            if(Vector3.Angle(rayHit.normal, Vector3.up) > Confort_angle )
             {
-                Debug.Log("i am on air");
-                _tempVector = myController.transform.position;
-                _tempVector.y -= (constantsB.gravity) / 50f;
-                myController.transform.position = _tempVector;
+                characterState = CharacterState.Instable;
             }
+            else if (Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle && myController.isGrounded)
+            {
+                characterState = CharacterState.FallTest; 
+            }
+
         }
-        else
+        else if(!myController.isGrounded)
         {
-            Debug.Log("i am on air");
-            Vector3 _tempVector = myController.transform.position;
-            _tempVector.y -= (constantsB.gravity) / 50f;
-            myController.transform.position = _tempVector;
+            //add second boxcast to know if we have something new there. 
+            characterState = CharacterState.Air;
         }
-        ////		myController.transform.position = myGravControl.GetVerticalPosition();
+
+        Debug.Log(characterState);
+
+        Vector3 _tempVector; 
+        switch(characterState)
+        {
+
+            case CharacterState.Balanced:
+            case CharacterState.Instable:
+                tGrav = 0f; 
+                _tempVector = myController.transform.position;
+                _tempVector.y = rayHit.point.y + myController.bounds.extents.y;
+                myController.transform.position = _tempVector;
+                inputGravityMultiplier = 1f; 
+                break;
+            case CharacterState.Air:
+            case CharacterState.FallTest:
+                current_VelocitySpeedDir.y = -maxGravForce * gravForceOverTime.Evaluate(tGrav);
+                tGrav += Time.deltaTime; 
+                _tempVector = myController.transform.position;
+                _tempVector.y -= constantsB.gravity / 50f;
+                myController.transform.position = _tempVector;
+                inputGravityMultiplier *= 0.99f; 
+                break; 
+
+        }
+
+        Debug.Log(inputGravityMultiplier); 
+
+		shouldSpeedDir = (InputSpeedDir * (inputGravityMultiplier)) + current_VelocitySpeedDir;
+		myController.Move (shouldSpeedDir * Time.deltaTime);
+
     }
 
 
@@ -339,7 +374,7 @@ namespace ProjecGiant.Constants
 	[System.Serializable]
 	public class Constants
 	{
-		public float gravity;
+        public float gravity = 9.8f; 
 		public float test;
 
 
