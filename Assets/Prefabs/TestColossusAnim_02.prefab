@@ -306,6 +306,7 @@ GameObject:
   - component: {fileID: 4570528735977918}
   - component: {fileID: 95105089046582350}
   - component: {fileID: 114041235992104190}
+  - component: {fileID: 114524870536314666}
   m_Layer: 0
   m_Name: TestColossusAnim_02
   m_TagString: Untagged
@@ -1172,6 +1173,34 @@ MonoBehaviour:
   distanceMax: 75
   EDITOR_drawDistanceLines: 1
   player: {fileID: 0}
+--- !u!114 &114524870536314666
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1607638568202028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92053d2836c5cc4489b4488615807928, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  resetPlayerVerticality: 1
+  links:
+  - name: Head
+    myCollider: {fileID: 4189719821424988}
+    myBone: {fileID: 4995642917532516}
+  - name: Body
+    myCollider: {fileID: 4876956755323888}
+    myBone: {fileID: 4500948227965412}
+  - name: Arms
+    myCollider: {fileID: 4426257437500174}
+    myBone: {fileID: 4500948227965412}
+  - name: Legs
+    myCollider: {fileID: 4056184497023436}
+    myBone: {fileID: 4870857315083938}
+  - name: Tail
+    myCollider: {fileID: 4871868551881054}
+    myBone: {fileID: 4870857315083938}
 --- !u!114 &114657402810850784
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1256,7 +1285,7 @@ SkinnedMeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: e21e7fa58cc09124797c7cff315ec8e9, type: 2}
+  - {fileID: 2100000, guid: bfbe9741c53277c4bb7d93d38cebd475, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1323,7 +1352,7 @@ SkinnedMeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: e21e7fa58cc09124797c7cff315ec8e9, type: 2}
+  - {fileID: 2100000, guid: bfbe9741c53277c4bb7d93d38cebd475, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1390,7 +1419,7 @@ SkinnedMeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: e21e7fa58cc09124797c7cff315ec8e9, type: 2}
+  - {fileID: 2100000, guid: bfbe9741c53277c4bb7d93d38cebd475, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1457,7 +1486,7 @@ SkinnedMeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: e21e7fa58cc09124797c7cff315ec8e9, type: 2}
+  - {fileID: 2100000, guid: bfbe9741c53277c4bb7d93d38cebd475, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1524,7 +1553,7 @@ SkinnedMeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: e21e7fa58cc09124797c7cff315ec8e9, type: 2}
+  - {fileID: 2100000, guid: bfbe9741c53277c4bb7d93d38cebd475, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1591,7 +1620,7 @@ SkinnedMeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: e21e7fa58cc09124797c7cff315ec8e9, type: 2}
+  - {fileID: 2100000, guid: bfbe9741c53277c4bb7d93d38cebd475, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1658,7 +1687,7 @@ SkinnedMeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: e21e7fa58cc09124797c7cff315ec8e9, type: 2}
+  - {fileID: 2100000, guid: bfbe9741c53277c4bb7d93d38cebd475, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -3,6 +3,7 @@ using System.Collections;
 
 public class RotationByEquilibre : MonoBehaviour {
 
+	public Transform playerRender;
 	[Tooltip("Vitesse de chute (rotation) maximum par seconde. La curve définit quel pourcentage de cette valeur est appliquée à la rotation du joueur")]
 	[Range(10f, 360f)]
 	public float maxSpeedFall = 10f;
@@ -24,7 +25,6 @@ public class RotationByEquilibre : MonoBehaviour {
 	RaycastHit rayHit;
 	CharacterController myController;
 	CharacterV3 myCharacterV3Script;
-	Transform playerRender;
 	Material feedbackMat;
 
 	Quaternion currentInclinaison = Quaternion.identity;
@@ -44,10 +44,26 @@ public class RotationByEquilibre : MonoBehaviour {
 	{
 		myController = GetComponent<CharacterController>();
 		myCharacterV3Script = GetComponent<CharacterV3>();
-		playerRender = GameObject.Find("PlayerRender").transform;
+
+        if(playerRender == null)
+        {
+            Debug.Log("I entered here 1");
+            GameObject _rend = GameObject.FindGameObjectWithTag("PlayerRenderer");
+ 
+        if (_rend == null)
+        {
+            Debug.Log("I entered here 2");
+            Debug.LogError("Please Apply a Transform to PlayerRender");
+            Destroy(this); 
+        }
+
+            playerRender = _rend.transform;
+        }
+
+
 		feedbackMat = playerRender.GetComponentInChildren<MeshRenderer>().material;
 
-		playerRender.parent = GameObject.Find("JoueurPrefab").transform;
+		playerRender.parent = GameObject.FindGameObjectWithTag("Player").transform;
 	}
 
 	void Update ()
@@ -144,7 +160,7 @@ public class RotationByEquilibre : MonoBehaviour {
 
 		//playeren.rot = quat.looktoward(input, playrend.up)
 //		playerRender.rotation = Quaternion.LookRotation(myCharacterV3Script._inputVector, playerRender.up);
-		playerRender.rotation = Quaternion.AngleAxis(Quaternion.FromToRotation(playerRender.forward, myCharacterV3Script._inputVector).eulerAngles.y, playerRender.up)*playerRender.rotation;
+		playerRender.rotation = Quaternion.AngleAxis(Quaternion.FromToRotation(playerRender.forward, myCharacterV3Script.inputVector).eulerAngles.y, playerRender.up)*playerRender.rotation;
 
 		UpdateFeedBack();
 
@@ -152,7 +168,7 @@ public class RotationByEquilibre : MonoBehaviour {
 
 	void LookTowardInput()
 	{
-		Vector3 myInputVector = playerRender.position + myCharacterV3Script._inputVector;
+		Vector3 myInputVector = playerRender.position + myCharacterV3Script.inputVector;
 		myInputVector.y = playerRender.position.y;
 		playerRender.LookAt(myInputVector);
 	}

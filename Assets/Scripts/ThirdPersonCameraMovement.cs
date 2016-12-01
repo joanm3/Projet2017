@@ -106,7 +106,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 				m_terrainCollider = _hit.collider.GetComponent<TerrainCollider> (); 
 				if (m_terrainCollider.enabled) {
 					m_trueDistance = Mathf.Lerp (m_trueDistance, _hit.distance, Time.deltaTime * lerpVelocity * 2f);
-					Debug.Log (_hit.distance);
+					//Debug.Log (_hit.distance);
 					point = _hit.point; 
 					m_terrainRaycastEntered = true;  
 				}

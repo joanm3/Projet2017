@@ -66,8 +66,12 @@ public class CharacterV3 : MonoBehaviour
 	public float _t_time = 0.0f;
 	[Range (0f, 1f)]	
 	public float _v_value = 0.0f;
+    [HideInInspector]
+    public Vector3 inputVector;
+    [HideInInspector]
+    public bool canUseInput = true;
+    public CharacterParenting myCharaparenting;
 
-	private CharacterParenting myCharaparenting;
 	private Camera cam;
 	private CharacterController myController;
 	private RaycastHit rayHit;
@@ -84,17 +88,15 @@ public class CharacterV3 : MonoBehaviour
 	private float currentRotationSpeed = 0.0f;
 	private Color violet = new Color (0.5f, 0.0f, 0.5f);
 
-
-	private enum CurvesOfSpeed
-	{
-		Accelerate,
-		Deccelerate,
-		NotMoving}
-
-	;
-
 	private CurvesOfSpeed currentCurveOfSpeed = CurvesOfSpeed.NotMoving;
 	private CurvesOfSpeed lastFrameCurveOfSpeed = CurvesOfSpeed.NotMoving;
+
+    private enum CurvesOfSpeed
+    {
+        Accelerate,
+        Deccelerate,
+        NotMoving
+    };
 
 	void Start ()
 	{
@@ -102,8 +104,15 @@ public class CharacterV3 : MonoBehaviour
 			constantsB = new Constants (); 
 		myController = GetComponent<CharacterController> ();
 		myController.slopeLimit = Glide_angle;
-		myCharaparenting = GetComponent<CharacterParenting> ();
 		cam = Camera.main;
+
+        if (myCharaparenting == null)
+        {
+            myCharaparenting = FindObjectOfType<CharacterParenting>(); 
+            if(myCharaparenting == null)
+                Debug.LogError("Please assign a CharacterParenting to Player, you bastard!"); 
+        }
+
 	}
 
 
@@ -117,35 +126,51 @@ public class CharacterV3 : MonoBehaviour
 			surfaceNormal = rayHit.normal;
 
 			//CETTE LIGNE SERT A CE QUE LE JOUEUR BOUGE EN MEME TEMPS QUE SA PLATE FORME
-			myCharaparenting.SetPlayerParent (rayHit);
+			myCharaparenting.SetPlayerParent (transform, rayHit);
 		}
-			
-		//Input dir + velocity
-		InputSpeedDir = GetInputSpeedDir ();
+
+
+        //input dir + vel
+        if (canUseInput)
+            InputSpeedDir = GetInputSpeedDir();
+        else
+            InputSpeedDir = Vector3.zero; 
+
 		//Surface dir + velocity
 		SetVelocitySpeedDir ();
 		shouldSpeedDir = InputSpeedDir + current_VelocitySpeedDir;
 		myController.Move (shouldSpeedDir * Time.deltaTime);
 
-
-
 		//GRAV
-		_rayDirection = -Vector3.up; 
-		//when in ground
-		if (Physics.Raycast (transform.position, _rayDirection, out rayHit, _rayDistance)) {
-			Vector3 _tempVector = myController.transform.position;
-			_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
-			myController.transform.position = _tempVector;
+		_rayDirection = -Vector3.up;
+        _rayDistance = ((myController.bounds.extents.y)) + 5f; 
 
-		} 
-		//in air
-		else {	
-			Vector3 _tempVector = myController.transform.position; 
-			_tempVector.y += (-1 * 9.8f) / 50f; 
-			myController.transform.position = _tempVector; 
-		}
-//		myController.transform.position = myGravControl.GetVerticalPosition();
-	}
+        ////when in ground
+        Debug.DrawRay(transform.position, _rayDirection * _rayDistance, Color.green); 
+        if (Physics.Raycast(transform.position, _rayDirection, out rayHit, _rayDistance))
+        {
+            Debug.Log("i am on ground");
+            Vector3 _tempVector = myController.transform.position;
+            _tempVector.y = rayHit.point.y + myController.bounds.extents.y;
+            myController.transform.position = _tempVector;
+
+            if(Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
+            {
+                Debug.Log("i am on air");
+                _tempVector = myController.transform.position;
+                _tempVector.y -= (constantsB.gravity) / 50f;
+                myController.transform.position = _tempVector;
+            }
+        }
+        else
+        {
+            Debug.Log("i am on air");
+            Vector3 _tempVector = myController.transform.position;
+            _tempVector.y -= (constantsB.gravity) / 50f;
+            myController.transform.position = _tempVector;
+        }
+        ////		myController.transform.position = myGravControl.GetVerticalPosition();
+    }
 
 
 
@@ -181,22 +206,23 @@ public class CharacterV3 : MonoBehaviour
 	}
 
 
-	/// <summary>
-	/// Vitesse et direction du joueur par Input
-	/// </summary>
-	Vector3 GetInputSpeedDir ()
+
+    /// <summary>
+    /// Vitesse et direction du joueur par Input
+    /// </summary>
+    Vector3 GetInputSpeedDir ()
 	{
 
 		Vector3 _vectorToReturn = Vector3.zero;
 		//Direction
-		Vector3 _inputVector = (cam.transform.forward * Input.GetAxis ("Vertical")) + (cam.transform.right * Input.GetAxis ("Horizontal"));
-		_inputVector.y = 0f;
-		_inputVector.Normalize ();
+		 inputVector = (cam.transform.forward * Input.GetAxis ("Vertical")) + (cam.transform.right * Input.GetAxis ("Horizontal"));
+		inputVector.y = 0f;
+		inputVector.Normalize ();
 
 		if (Vector3.Angle (Vector3.up, surfaceNormal) > Glide_angle)
-			_inputVector = Vector3.zero;
-		Vector3 _vectorTolook = _inputVector;		//Direction que le controler doit regarder
-		if (_inputVector.magnitude < 0.3)
+			inputVector = Vector3.zero;
+		Vector3 _vectorTolook = inputVector;		//Direction que le controler doit regarder
+		if (inputVector.magnitude < 0.3)
 			_vectorTolook = transform.forward;
 
 		//Rotation speed
@@ -212,7 +238,7 @@ public class CharacterV3 : MonoBehaviour
 		_vectorToReturn = transform.forward;
 
 		//Translation Speed
-		_vectorToReturn = _vectorToReturn.normalized * GetCurrentSpeedByCurve (_vectorTolook.normalized * _inputVector.magnitude);
+		_vectorToReturn = _vectorToReturn.normalized * GetCurrentSpeedByCurve (_vectorTolook.normalized * inputVector.magnitude);
 
 		return _vectorToReturn;
 	}

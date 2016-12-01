@@ -19,25 +19,29 @@ public class CharacterParenting : MonoBehaviour {
 
 	public BoneColliderLink[] links;
 
-	public void SetPlayerParent (RaycastHit rayhit)
+	public void SetPlayerParent (Transform characterTransform, RaycastHit rayhit)
 	{
+
+        if (rayhit.collider == null)
+            return; 
+
 		//Compare le collider sur lequel on a les pieds avec tous les colliders de la liste
 		for (int i = 0; i < links.Length; i++)
 		{
 			//Lorsqu'on trouve le collider, on récupère le bone auquel il est link
 			if(rayhit.collider.transform == links[i].myCollider)
 			{
-				transform.parent = links[i].myBone;
+				characterTransform.parent = links[i].myBone;
 //				print(transform.parent.name);
 				break;
 			}else{
-				transform.parent = null;
+				characterTransform.parent = null;
 			}
 		}
 	
 		if(resetPlayerVerticality)
 		{
-			transform.rotation = Quaternion.LookRotation(transform.forward, Vector3.up);
+			characterTransform.rotation = Quaternion.LookRotation(characterTransform.forward, Vector3.up);
 		}
 
 	}
