@@ -689,11 +689,6 @@ Prefab:
       propertyPath: playerController
       value: 
       objectReference: {fileID: 1793834774}
-    - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
-        type: 2}
-      propertyPath: distance
-      value: 30
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: e326332f5efa2c141a0c57df35432282, type: 2}
   m_IsPrefabParent: 0
@@ -781,7 +776,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4000012589972750, guid: f391d4ab3399099498e8624d13f11dc0, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 59.2
+      value: 177.3
       objectReference: {fileID: 0}
     - target: {fileID: 4000012589972750, guid: f391d4ab3399099498e8624d13f11dc0, type: 2}
       propertyPath: m_LocalPosition.z
@@ -839,11 +834,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4000011311772816, guid: f391d4ab3399099498e8624d13f11dc0, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4000011311772816, guid: f391d4ab3399099498e8624d13f11dc0, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 124.3
+      value: -94.3
       objectReference: {fileID: 0}
     - target: {fileID: 4000011311772816, guid: f391d4ab3399099498e8624d13f11dc0, type: 2}
       propertyPath: m_LocalPosition.z
