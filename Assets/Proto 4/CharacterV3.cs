@@ -80,7 +80,8 @@ public class CharacterV3 : MonoBehaviour {
 	public GravityController myGravControl;
 
 	public AnimationCurve gravForceOverTime;
-
+	public float maxGravForce;
+	private float tGrav = 0f;
 
 	void Start ()
 	{
@@ -116,33 +117,31 @@ public class CharacterV3 : MonoBehaviour {
 		//Surface dir + velocity
 		SetVelocitySpeedDir();
 
+		//GRAV
+		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, Mathf.Infinity)){
 
+
+			if(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.1f || Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
+			{
+				current_VelocitySpeedDir.y = -maxGravForce * gravForceOverTime.Evaluate(tGrav);
+				tGrav += Time.deltaTime;
+			}
+			else
+			{
+				tGrav = 0f;
+				Vector3 _tempVector = myController.transform.position;
+				_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
+				myController.transform.position = _tempVector;
+			}
+
+
+		}
 
 		shouldSpeedDir = InputSpeedDir + current_VelocitySpeedDir;
 
 		myController.Move(shouldSpeedDir * Time.deltaTime);
 
-		//GRAV
-		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, Mathf.Infinity)){
 
-			//If grounded
-			if(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) < 0.1f)
-			{
-				
-			}
-
-			//If Fall angle
-			if(Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
-			{
-				
-			}
-
-
-			Vector3 _tempVector = myController.transform.position;
-			_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
-			myController.transform.position = _tempVector;
-
-		}
 //		myController.transform.position = myGravControl.GetVerticalPosition();
 
 		DebugFunction();
