@@ -63,6 +63,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
 	Vector3 point; 
 
+	public float speed = 10f;
+
 	void Update ()
 	{
 
@@ -73,8 +75,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 			currentY += Input.GetAxis ("Mouse Y");
 		} else 
 		{
-			currentX += Input.GetAxis("360_R_Stick_X");
-			currentY += Input.GetAxis("360_R_Stick_Y");
+			currentX += Input.GetAxis("360_R_Stick_X") * speed;
+			currentY += Input.GetAxis("360_R_Stick_Y") * speed;
 		}
 //		Debug.Log("Mouse Value: " + Input.GetAxis("Mouse X")); 
 //		Debug.Log("Joystick Value: " + Input.GetAxis("360_R_Stick_X")); 

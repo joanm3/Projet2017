@@ -131,67 +131,47 @@ public class CharacterV3 : MonoBehaviour
 
 
         //input dir + vel
-        if (canUseInput)
+		if (canUseInput && Vector3.Angle(rayHit.normal, Vector3.up) < Glide_angle)
+		{
+//			print("je toooooombe pas !!! " + Vector3.Angle(rayHit.normal, Vector3.up));
+
             InputSpeedDir = GetInputSpeedDir();
-        else
+		}
+		else
+		{
+//			print("je toooooombe !!! " + Vector3.Angle(rayHit.normal, Vector3.up));
             InputSpeedDir = Vector3.zero; 
+		}
 
         //Surface dir + velocity
-		SetVelocitySpeedDir ();
+//		if(Vector3.Angle(rayHit.normal, Vector3.up) < Glide_angle)
+			SetVelocitySpeedDir ();
 
 
-        //GRAV
-        _rayDirection = -Vector3.up;
-        _rayDistance = ((myController.bounds.extents.y)) + 0.1f;
-        //_rayDistance = 10f;
+		//GRAV
+		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, Mathf.Infinity)){
 
-        ////when in ground
-        Debug.DrawRay(transform.position, _rayDirection * _rayDistance, Color.green);
 
-        if (Physics.Raycast(transform.position, _rayDirection, out rayHit, _rayDistance))
-        {
-            characterState = CharacterState.Balanced;
-            if(Vector3.Angle(rayHit.normal, Vector3.up) > Confort_angle )
-            {
-                characterState = CharacterState.Instable;
-            }
-            else if (Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
-            {
-                characterState = CharacterState.FallTest; 
-            }
+			if(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.1f || Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
+			{
+				current_VelocitySpeedDir.y = -maxGravForce * gravForceOverTime.Evaluate(tGrav);
+				tGrav += Time.deltaTime;
+			}
+			else
+			{
+				tGrav = 0f;
+				Vector3 _tempVector = myController.transform.position;
+				_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
+//				myController.transform.position = _tempVector;
+			}
 
-        }
-        else if(!myController.isGrounded)
-        {
-            //add second boxcast to know if we have something new there. 
-            characterState = CharacterState.Air;
-        }
 
-        Debug.Log(characterState);
-
-        Vector3 _tempVector; 
-        switch(characterState)
-        {
-
-            case CharacterState.Balanced:
-            case CharacterState.Instable:
-                tGrav = 0f; 
-                _tempVector = myController.transform.position;
-                _tempVector.y = rayHit.point.y + myController.bounds.extents.y;
-//                myController.transform.position = _tempVector;
-                inputGravityMultiplier = 1f; 
-                break;
-            case CharacterState.Air:
-            case CharacterState.FallTest:
-                current_VelocitySpeedDir.y = -maxGravForce * gravForceOverTime.Evaluate(tGrav);
-                tGrav += Time.deltaTime; 
-                inputGravityMultiplier *= 0.99f; 
-                break; 
-
-        }
-
-        Debug.Log(inputGravityMultiplier); 
-
+		}
+//		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, Mathf.Infinity)){
+//			Vector3 _tempVector = myController.transform.position;
+//			_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
+//			myController.transform.position = _tempVector;
+//		}
 		shouldSpeedDir = (InputSpeedDir * (inputGravityMultiplier)) + current_VelocitySpeedDir;
 		myController.Move (shouldSpeedDir * Time.deltaTime);
 
@@ -222,9 +202,14 @@ public class CharacterV3 : MonoBehaviour
 
 		//lerp de current à surface
 
-		if (surface_VelocitySpeedDir.magnitude > current_VelocitySpeedDir.magnitude) {
+		//si accelere
+		if (surface_VelocitySpeedDir.magnitude > current_VelocitySpeedDir.magnitude)
+		{
 			current_VelocitySpeedDir = Vector3.MoveTowards (current_VelocitySpeedDir, surface_VelocitySpeedDir, velocityTransitionSpeed_acceleration * Time.deltaTime);
-		} else {
+		}
+		//Si decelere
+		else
+		{
 			current_VelocitySpeedDir = Vector3.MoveTowards (current_VelocitySpeedDir, surface_VelocitySpeedDir, velocityTransitionSpeed_decceleration * Time.deltaTime);
 		}
 			

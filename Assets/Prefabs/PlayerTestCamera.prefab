@@ -99,7 +99,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1812814023594600}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.79, y: 3.58, z: 26.97}
+  m_LocalPosition: {x: 4.79, y: 195.5, z: -22.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4940760010739926}
@@ -221,7 +221,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fe1aed5567a3fd44ba312dc103f59d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  loadSceneOnSpacePressed: 0
+  loadSceneOnSpacePressed: 1
   loadActifScene: 1
   sceneToLoad: 0
 --- !u!114 &114557843707777254
@@ -235,6 +235,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79a1ffe31584ea549bff9ad1af3fa4a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useInclinaisonFeature: 0
   playerRender: {fileID: 4940760010739926}
   maxSpeedFall: 90
   maxAngleBeforeFall: 75
@@ -269,9 +270,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e933eb861c19c848a5ceaa709134dd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  constantsB:
-    gravity: 9.8
-    test: 0
   Confort_angle: 12.6
   Glide_angle: 90
   maxGlideSpeed: 50
