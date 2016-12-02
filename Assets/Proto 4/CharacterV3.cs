@@ -1,13 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
-using ProjecGiant.Constants; 
-
 
 [RequireComponent(typeof (CharacterController))]
 public class CharacterV3 : MonoBehaviour {
 
-
-	public Constants constantsB = new Constants(); 
 
 	[Header("Angles")]
 	[Space(20.0f)]
@@ -85,7 +81,6 @@ public class CharacterV3 : MonoBehaviour {
 
 	void Start ()
 	{
-		if(constantsB == null) constantsB = new Constants(); 
 		myController = GetComponent<CharacterController>();
 		myController.slopeLimit = Glide_angle;
 		myCharaparenting = GetComponent<CharacterParenting>();
@@ -105,7 +100,7 @@ public class CharacterV3 : MonoBehaviour {
 			
 
 		//Input dir + velocity
-		if(canUseInput)
+		if(canUseInput)// && Vector3.Angle(rayHit.normal, Vector3.up) < Glide_angle)
 		{
 			InputSpeedDir = GetInputSpeedDir();
 		}
@@ -120,19 +115,31 @@ public class CharacterV3 : MonoBehaviour {
 		//GRAV
 		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, Mathf.Infinity)){
 
+//			Vector3 _tempVector = myController.transform.position;
+//			_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
+//			myController.transform.position = _tempVector;
 
-			if(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.1f || Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
+
+
+			if(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.2f)// || Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
 			{
+				print(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point));
+		
+				print("GRAVITY");
 				current_VelocitySpeedDir.y = -maxGravForce * gravForceOverTime.Evaluate(tGrav);
 				tGrav += Time.deltaTime;
 			}
 			else
 			{
+				print("snap");
 				tGrav = 0f;
-				Vector3 _tempVector = myController.transform.position;
+//				Vector3 _tempVector = myController.transform.position;
+				Vector3 _tempVector = rayHit.point;
 				_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
 				myController.transform.position = _tempVector;
+
 			}
+
 
 
 		}
@@ -334,26 +341,3 @@ public class CharacterV3 : MonoBehaviour {
 }
 
 
-
-namespace ProjecGiant.Constants
-{
-[System.Serializable]
-public class Constants 
-{
-	public float gravity; 
-	public float test; 
-
-
-		public Constants()
-		{
-			//gravity = 9.8f; 
-		}
-
-		public Constants(float gravity)
-		{
-			this.gravity = gravity; 
-		}
-
-
-}
-}
