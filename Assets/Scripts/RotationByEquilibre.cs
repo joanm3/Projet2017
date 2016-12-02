@@ -72,7 +72,7 @@ public class RotationByEquilibre : MonoBehaviour {
 	{
 
 		//If grounded
-		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, myController.bounds.extents.y + 0.1f))
+		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, myController.bounds.extents.y + 0.2f))
 		{
 
 			if(myStabilityState == StabilityState.Stable || myStabilityState == StabilityState.Unstable)
