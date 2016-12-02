@@ -1,14 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
-using ProjecGiant.Constants;
-
 
 [RequireComponent (typeof(CharacterController))]
 public class CharacterV3 : MonoBehaviour
 {
-
-
-	public Constants constantsB = new Constants ();
 
 	[Header ("Angles")]
 	[Space (20.0f)]
@@ -106,8 +101,6 @@ public class CharacterV3 : MonoBehaviour
 
 	void Start ()
 	{
-		if (constantsB == null)
-			constantsB = new Constants (); 
 
 		myController = GetComponent<CharacterController> ();
 		myController.slopeLimit = Glide_angle;
@@ -185,16 +178,13 @@ public class CharacterV3 : MonoBehaviour
                 tGrav = 0f; 
                 _tempVector = myController.transform.position;
                 _tempVector.y = rayHit.point.y + myController.bounds.extents.y;
-                myController.transform.position = _tempVector;
+//                myController.transform.position = _tempVector;
                 inputGravityMultiplier = 1f; 
                 break;
             case CharacterState.Air:
             case CharacterState.FallTest:
                 current_VelocitySpeedDir.y = -maxGravForce * gravForceOverTime.Evaluate(tGrav);
                 tGrav += Time.deltaTime; 
-                //_tempVector = myController.transform.position;
-                //_tempVector.y -= constantsB.gravity / 50f;
-                //myController.transform.position = _tempVector;
                 inputGravityMultiplier *= 0.99f; 
                 break; 
 
@@ -364,30 +354,5 @@ public class CharacterV3 : MonoBehaviour
 			(Vector3.Angle (Vector3.up, surfaceNormal) < Glide_angle) ? 
 			violet : Color.yellow;
 		Gizmos.DrawLine (rayHit.point, rayHit.point + surfaceNormal * 2.5f); 
-	}
-}
-
-
-
-namespace ProjecGiant.Constants
-{
-	[System.Serializable]
-	public class Constants
-	{
-        public float gravity = 9.8f; 
-		public float test;
-
-
-		public Constants ()
-		{
-			//gravity = 9.8f; 
-		}
-
-		public Constants (float gravity)
-		{
-			this.gravity = gravity; 
-		}
-
-
 	}
 }
