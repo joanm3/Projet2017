@@ -222,6 +222,8 @@ MonoBehaviour:
   limitXAngle: 0
   xTest: 1
   waitingTimeToMoveCamera: 2
+  useJoystick: 1
+  speed: 2
   testX: 0
 --- !u!114 &114886960839568128
 MonoBehaviour:

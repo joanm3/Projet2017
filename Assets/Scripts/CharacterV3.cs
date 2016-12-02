@@ -129,6 +129,22 @@ public class CharacterV3 : MonoBehaviour
 			myCharaparenting.SetPlayerParent (transform, rayHit);
 		}
 
+//		if(Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
+//		{
+//			print("fall");
+//		}
+//		else if(Vector3.Angle(rayHit.normal, Vector3.up) < Glide_angle)
+//		{
+//			if(Vector3.Angle(rayHit.normal, Vector3.up) < Confort_angle)
+//			{
+//				print("Confort");
+//			}
+//			else
+//			{
+//				print("GLIDE " + Vector3.Angle(rayHit.normal, Vector3.up));
+//			}
+//		}
+
 
         //input dir + vel
 		if (canUseInput && Vector3.Angle(rayHit.normal, Vector3.up) < Glide_angle)
@@ -152,17 +168,22 @@ public class CharacterV3 : MonoBehaviour
 		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, Mathf.Infinity)){
 
 
-			if(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.1f || Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
+			if(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.5f || Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
 			{
-				current_VelocitySpeedDir.y = -maxGravForce * gravForceOverTime.Evaluate(tGrav);
+//				current_VelocitySpeedDir.y = -maxGravForce * gravForceOverTime.Evaluate(tGrav);
+				gravForce += Vector3.up * (-maxGravForce * gravForceOverTime.Evaluate(tGrav));
 				tGrav += Time.deltaTime;
+//				print("GRAVITY");
 			}
 			else
 			{
 				tGrav = 0f;
-				Vector3 _tempVector = myController.transform.position;
-				_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
+				gravForce = -Vector3.up * 10f;
+//				current_VelocitySpeedDir.y -= 100f;
+//				Vector3 _tempVector = myController.transform.position;
+//				_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
 //				myController.transform.position = _tempVector;
+//				print("snap");
 			}
 
 
@@ -172,12 +193,13 @@ public class CharacterV3 : MonoBehaviour
 //			_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
 //			myController.transform.position = _tempVector;
 //		}
-		shouldSpeedDir = (InputSpeedDir * (inputGravityMultiplier)) + current_VelocitySpeedDir;
+		shouldSpeedDir = (InputSpeedDir * (inputGravityMultiplier)) + current_VelocitySpeedDir + gravForce;
+		print("Total : " + shouldSpeedDir + " / input : " + InputSpeedDir + " / velocity : " + current_VelocitySpeedDir);
 		myController.Move (shouldSpeedDir * Time.deltaTime);
 
     }
 
-
+	Vector3 gravForce = Vector3.zero;
 
 	/// <summary>
 	/// Vitesse et direction du joueur par surface
@@ -212,6 +234,8 @@ public class CharacterV3 : MonoBehaviour
 		{
 			current_VelocitySpeedDir = Vector3.MoveTowards (current_VelocitySpeedDir, surface_VelocitySpeedDir, velocityTransitionSpeed_decceleration * Time.deltaTime);
 		}
+
+//		print("Angle : " + Vector3.Angle (Vector3.up, surfaceNormal) + " / CG : " + fromCtoG + " / surfForce : " + surface_VelocitySpeedDir);
 			
 	}
 

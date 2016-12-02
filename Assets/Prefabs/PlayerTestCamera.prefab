@@ -271,7 +271,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Confort_angle: 12.6
-  Glide_angle: 90
+  Glide_angle: 70
   maxGlideSpeed: 50
   velocityGlideAcceleration:
     serializedVersion: 2
@@ -291,9 +291,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
-  velocityTransitionSpeed_acceleration: 10.4
+  velocityTransitionSpeed_acceleration: 13.4
   velocityTransitionSpeed_decceleration: 8.6
-  maxInputSpeed: 30.56
+  maxInputSpeed: 27.8
   max_RotationSpeed: 1440
   min_RotationSpeed: 206
   rotationBySpeed:
@@ -391,6 +391,6 @@ CharacterController:
   m_Radius: 0.5
   m_SlopeLimit: 90
   m_StepOffset: 0.3
-  m_SkinWidth: 0.08
+  m_SkinWidth: 0.1
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}

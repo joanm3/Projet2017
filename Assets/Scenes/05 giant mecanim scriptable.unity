@@ -439,11 +439,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 6
       objectReference: {fileID: 0}
-    - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
-        type: 2}
-      propertyPath: useJoystick
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: e326332f5efa2c141a0c57df35432282, type: 2}
   m_IsPrefabParent: 0
@@ -491,11 +486,6 @@ Prefab:
       propertyPath: myCharaparenting
       value: 
       objectReference: {fileID: 1084162876}
-    - target: {fileID: 114557843707777254, guid: ac597da8563e0094f99098b420590814,
-        type: 2}
-      propertyPath: useInclinaisonFeature
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ac597da8563e0094f99098b420590814, type: 2}
   m_IsPrefabParent: 0
