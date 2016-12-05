@@ -194,7 +194,7 @@ public class CharacterV3 : MonoBehaviour
 //			myController.transform.position = _tempVector;
 //		}
 		shouldSpeedDir = (InputSpeedDir * (inputGravityMultiplier)) + current_VelocitySpeedDir + gravForce;
-		print("Total : " + shouldSpeedDir + " / input : " + InputSpeedDir + " / velocity : " + current_VelocitySpeedDir);
+		//print("Total : " + shouldSpeedDir + " / input : " + InputSpeedDir + " / velocity : " + current_VelocitySpeedDir);
 		myController.Move (shouldSpeedDir * Time.deltaTime);
 
     }

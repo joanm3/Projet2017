@@ -6,7 +6,8 @@ public class CameraDistanceController : MonoBehaviour
 	public ThirdPersonCameraMovement thirdPersonCameraMovement;
 
 	public float newDistance = 10f;
-	public float newX = 90f; 
+	public float newX = 0f;
+    public float newY = 0f; 
 
 	[Range (0f, 5f)]
 	public float lerpTime = 1f;
@@ -35,12 +36,16 @@ public class CameraDistanceController : MonoBehaviour
 		if (changeDistance == true) {
 
 			thirdPersonCameraMovement.distance = Mathf.Lerp (thirdPersonCameraMovement.distance, newDistance, fracJourney); 
-			thirdPersonCameraMovement.testX = Mathf.Lerp (thirdPersonCameraMovement.testX, newX, fracJourney); 
+			thirdPersonCameraMovement.xModificationAngle = Mathf.Lerp (thirdPersonCameraMovement.xModificationAngle, newX, fracJourney);
+            thirdPersonCameraMovement.xModificationAngle = Mathf.Lerp(thirdPersonCameraMovement.yModificationAngle, newY, fracJourney);
 
-			if (Mathf.Abs (thirdPersonCameraMovement.distance - newDistance) <= 0.1f) {
+
+
+            if (Mathf.Abs (thirdPersonCameraMovement.distance - newDistance) <= 0.1f) {
 				thirdPersonCameraMovement.distance = newDistance;
-				thirdPersonCameraMovement.testX = newX; 
-				changeDistance = false; 
+				thirdPersonCameraMovement.xModificationAngle = newX;
+                thirdPersonCameraMovement.yModificationAngle = newY;
+                changeDistance = false; 
 			}
 		}
 

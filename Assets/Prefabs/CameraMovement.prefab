@@ -84,7 +84,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1762149443730198}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 2.8, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4694644725746146}
@@ -97,14 +97,14 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1573390960575860}
-  m_LocalRotation: {x: 0.042444356, y: -0, z: -0, w: 0.99909884}
-  m_LocalPosition: {x: 0.82109547, y: 229.1, z: 1.9}
+  m_LocalRotation: {x: 0.1397877, y: -0, z: -0, w: 0.99018157}
+  m_LocalPosition: {x: 0, y: 7.6, z: -24.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4832717959196630}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 16.071001, y: 0, z: 0}
 --- !u!20 &20188294762983464
 Camera:
   m_ObjectHideFlags: 1
@@ -204,12 +204,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerTransform: {fileID: 0}
   playerController: {fileID: 0}
+  useJoystick: 0
   distance: 30
-  currentX: 0
-  currentY: 0
+  cameraSpeed: 2
   sensitivityX: 5
   sensitivityY: 5
-  lerpVelocity: 5
+  lerpVelocity: 1
   obstacleMask:
     serializedVersion: 2
     m_Bits: 512
@@ -219,12 +219,23 @@ MonoBehaviour:
   terrainMask:
     serializedVersion: 2
     m_Bits: 2048
+  currentX: 0
+  currentY: 0
+  yAngleMin: -20
+  yAngleMax: 50
   limitXAngle: 0
-  xTest: 1
+  xAngleMin: -50
+  xAngleMax: 50
+  xModificationAngle: 0
+  yModificationAngle: 0
   waitingTimeToMoveCamera: 2
-  useJoystick: 1
-  speed: 2
-  testX: 0
+  cameraPivotTransform: {fileID: 4832717959196630}
+  pivotXPosition: 0
+  pivotYPosition: 0
+  pivotZPosition: 0
+  pivotXRotation: 0
+  pivotYRotation: 0
+  pivotZRotation: 0
 --- !u!114 &114886960839568128
 MonoBehaviour:
   m_ObjectHideFlags: 1
