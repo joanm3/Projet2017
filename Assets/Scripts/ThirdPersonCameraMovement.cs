@@ -77,6 +77,11 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 		{
 			currentX += Input.GetAxis("360_R_Stick_X") * speed;
 			currentY += Input.GetAxis("360_R_Stick_Y") * speed;
+//			if(Input.GetAxis("360_R_Stick_X") < 0.3f && Input.GetAxis("360_R_Stick_Y") < 0.3f)
+//			{
+//				currentX = 0f;
+//				currentY = 0f;
+//			}
 		}
 //		Debug.Log("Mouse Value: " + Input.GetAxis("Mouse X")); 
 //		Debug.Log("Joystick Value: " + Input.GetAxis("360_R_Stick_X")); 

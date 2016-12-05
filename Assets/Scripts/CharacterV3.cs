@@ -129,33 +129,14 @@ public class CharacterV3 : MonoBehaviour
 			myCharaparenting.SetPlayerParent (transform, rayHit);
 		}
 
-//		if(Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
-//		{
-//			print("fall");
-//		}
-//		else if(Vector3.Angle(rayHit.normal, Vector3.up) < Glide_angle)
-//		{
-//			if(Vector3.Angle(rayHit.normal, Vector3.up) < Confort_angle)
-//			{
-//				print("Confort");
-//			}
-//			else
-//			{
-//				print("GLIDE " + Vector3.Angle(rayHit.normal, Vector3.up));
-//			}
-//		}
 
-
-        //input dir + vel
+        //Input dir + vel
 		if (canUseInput && Vector3.Angle(rayHit.normal, Vector3.up) < Glide_angle)
 		{
-//			print("je toooooombe pas !!! " + Vector3.Angle(rayHit.normal, Vector3.up));
-
             InputSpeedDir = GetInputSpeedDir();
 		}
 		else
 		{
-//			print("je toooooombe !!! " + Vector3.Angle(rayHit.normal, Vector3.up));
             InputSpeedDir = Vector3.zero; 
 		}
 
@@ -170,34 +151,63 @@ public class CharacterV3 : MonoBehaviour
 
 			if(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.5f || Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
 			{
-//				current_VelocitySpeedDir.y = -maxGravForce * gravForceOverTime.Evaluate(tGrav);
-				gravForce += Vector3.up * (-maxGravForce * gravForceOverTime.Evaluate(tGrav));
+				
+				gravForce = Vector3.up * (-maxGravForce * gravForceOverTime.Evaluate(tGrav));
 				tGrav += Time.deltaTime;
-//				print("GRAVITY");
+
+				//Check air blocage
+				AntiAirBlock(8);
+
 			}
 			else
 			{
 				tGrav = 0f;
 				gravForce = -Vector3.up * 10f;
-//				current_VelocitySpeedDir.y -= 100f;
-//				Vector3 _tempVector = myController.transform.position;
-//				_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
-//				myController.transform.position = _tempVector;
-//				print("snap");
+
 			}
 
 
 		}
-//		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, Mathf.Infinity)){
-//			Vector3 _tempVector = myController.transform.position;
-//			_tempVector.y = rayHit.point.y + myController.bounds.extents.y;
-//			myController.transform.position = _tempVector;
-//		}
+
 		shouldSpeedDir = (InputSpeedDir * (inputGravityMultiplier)) + current_VelocitySpeedDir + gravForce;
-		print("Total : " + shouldSpeedDir + " / input : " + InputSpeedDir + " / velocity : " + current_VelocitySpeedDir);
+//		print("Total : " + shouldSpeedDir + " / input : " + InputSpeedDir + " / velocity : " + current_VelocitySpeedDir + " / gravForce : " + gravForce);
 		myController.Move (shouldSpeedDir * Time.deltaTime);
 
     }
+
+	void AntiAirBlock(int accuracy)
+	{
+
+		Vector3 _origin = transform.position + (-Vector3.up * ((myController.bounds.extents.y/4f) *3f));
+		float inclinaison = 360f/accuracy;
+		Vector3 _direction = transform.forward;
+		RaycastHit _rayHit;
+
+		Vector3 _RepulsiveForce = Vector3.zero;
+
+		for (int i = 0; i < accuracy; i++) {
+
+			_direction = Quaternion.AngleAxis(inclinaison * i, transform.up) * _direction;
+
+			Debug.DrawRay(_origin, _direction, Color.black);
+			Debug.DrawLine(_origin, _origin + _direction.normalized, Color.blue);
+
+			if(Physics.Raycast(_origin, _direction, out _rayHit, 1f))
+			{
+				Vector3 _TempTang = Vector3.Cross(_rayHit.normal, Vector3.up);
+				Vector3 _TangDownwards = Vector3.Cross(_rayHit.normal, _TempTang);
+
+				Debug.DrawRay(_rayHit.point, _TangDownwards, Color.red);
+
+				_RepulsiveForce += (TangDownwards) + (_direction);
+				print(_RepulsiveForce);
+			}
+
+		}
+
+		gravForce += _RepulsiveForce.normalized;
+
+	}
 
 	Vector3 gravForce = Vector3.zero;
 

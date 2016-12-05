@@ -287,6 +287,11 @@ Prefab:
       propertyPath: m_RootOrder
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 114524870536314666, guid: 9def606c85eacca42a2b98ae3a037cb4,
+        type: 2}
+      propertyPath: links.Array.data[0].myBone
+      value: 
+      objectReference: {fileID: 1495728750}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 9def606c85eacca42a2b98ae3a037cb4, type: 2}
   m_IsPrefabParent: 0
@@ -442,6 +447,11 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: e326332f5efa2c141a0c57df35432282, type: 2}
   m_IsPrefabParent: 0
+--- !u!4 &1495728750 stripped
+Transform:
+  m_PrefabParentObject: {fileID: 4721494409962716, guid: 9def606c85eacca42a2b98ae3a037cb4,
+    type: 2}
+  m_PrefabInternal: {fileID: 666767881}
 --- !u!1001 &1597395223
 Prefab:
   m_ObjectHideFlags: 0
@@ -486,6 +496,11 @@ Prefab:
       propertyPath: myCharaparenting
       value: 
       objectReference: {fileID: 1084162876}
+    - target: {fileID: 114860416902355998, guid: ac597da8563e0094f99098b420590814,
+        type: 2}
+      propertyPath: Glide_angle
+      value: 60
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ac597da8563e0094f99098b420590814, type: 2}
   m_IsPrefabParent: 0
