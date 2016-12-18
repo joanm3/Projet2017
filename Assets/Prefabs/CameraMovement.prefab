@@ -203,13 +203,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerTransform: {fileID: 0}
-  playerController: {fileID: 0}
+  player: {fileID: 0}
   useJoystick: 0
-  distance: 30
+  maxDistance: 50
+  minDistance: 20
   cameraSpeed: 2
   sensitivityX: 5
   sensitivityY: 5
   lerpVelocity: 5
+  fadeDistanceFactor: 3
   obstacleMask:
     serializedVersion: 2
     m_Bits: 512
@@ -230,13 +232,12 @@ MonoBehaviour:
   yModificationAngle: 0
   waitingTimeToMoveCamera: 2
   cameraPivotTransform: {fileID: 4832717959196630}
-  pivotXPosition: 0
-  pivotYPosition: 0
-  pivotZPosition: 0
-  pivotXRotation: 0
-  pivotYRotation: 0
-  pivotZRotation: 0
-  m_testMappedLerp: 0
+  pivotPosition: {x: 0, y: 0, z: 0}
+  rotationByNormal: 1
+  rotationIntensity: 1
+  rotationLerp: 3
+  pivotRotation: {x: 0, y: 0, z: 0}
+  m_lerpedHeight: 0
   m_trueDistance: 0
 --- !u!114 &114886960839568128
 MonoBehaviour:

@@ -66,14 +66,15 @@ public class CharacterV3 : MonoBehaviour
     [HideInInspector]
     public bool canUseInput = true;
     public CharacterParenting myCharaparenting;
+    [HideInInspector]
+	public CharacterController controller;
 
 
     private float tGrav = 0f; 
 
 	private Camera cam;
-	private CharacterController myController;
 	private RaycastHit rayHit;
-	private Vector3 surfaceNormal;
+	public Vector3 surfaceNormal;
 	private Vector3 current_VelocitySpeedDir = Vector3.zero;
 	//Velocité actuelle
 	private Vector3 surface_VelocitySpeedDir = Vector3.zero;
@@ -102,8 +103,8 @@ public class CharacterV3 : MonoBehaviour
 	void Start ()
 	{
 
-		myController = GetComponent<CharacterController> ();
-		myController.slopeLimit = Glide_angle;
+		controller = GetComponent<CharacterController> ();
+		controller.slopeLimit = Glide_angle;
 		cam = Camera.main;
 
         if (myCharaparenting == null)
@@ -121,7 +122,7 @@ public class CharacterV3 : MonoBehaviour
 		Vector3 _rayDirection = -Vector3.up; 
 
 
-		if (Physics.Raycast (transform.position + (-Vector3.up * (myController.bounds.extents.y - 0.1f)), _rayDirection, out rayHit, _rayDistance)) {
+		if (Physics.Raycast (transform.position + (-Vector3.up * (controller.bounds.extents.y - 0.1f)), _rayDirection, out rayHit, _rayDistance)) {
 			surfaceNormal = rayHit.normal;
 
 			//CETTE LIGNE SERT A CE QUE LE JOUEUR BOUGE EN MEME TEMPS QUE SA PLATE FORME
@@ -168,7 +169,7 @@ public class CharacterV3 : MonoBehaviour
 		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, Mathf.Infinity)){
 
 
-			if(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.5f || Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
+			if(Vector3.Distance(transform.position - (Vector3.up * controller.bounds.extents.y), rayHit.point) > 0.5f || Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
 			{
 //				current_VelocitySpeedDir.y = -maxGravForce * gravForceOverTime.Evaluate(tGrav);
 				gravForce += Vector3.up * (-maxGravForce * gravForceOverTime.Evaluate(tGrav));
@@ -195,7 +196,7 @@ public class CharacterV3 : MonoBehaviour
 //		}
 		shouldSpeedDir = (InputSpeedDir * (inputGravityMultiplier)) + current_VelocitySpeedDir + gravForce;
 		//print("Total : " + shouldSpeedDir + " / input : " + InputSpeedDir + " / velocity : " + current_VelocitySpeedDir);
-		myController.Move (shouldSpeedDir * Time.deltaTime);
+		controller.Move (shouldSpeedDir * Time.deltaTime);
 
     }
 
@@ -355,7 +356,7 @@ public class CharacterV3 : MonoBehaviour
 		
 		Gizmos.color = Color.blue; 
 		//Player - up
-		Gizmos.DrawRay (transform.position + (Vector3.up * myController.bounds.extents.y), -Vector3.up); 
+		Gizmos.DrawRay (transform.position + (Vector3.up * controller.bounds.extents.y), -Vector3.up); 
 
 		//Surface Normal
 		Gizmos.color = (Vector3.Angle (Vector3.up, surfaceNormal) < Confort_angle) ? 

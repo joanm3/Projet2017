@@ -15,10 +15,10 @@
 		_CircleForce("Circle Force", Range(0,1)) = 0.25
 		_Expand("Inner Expand", Range(0,1)) = 0.5
 		_Radius("Radius", FLOAT) = 0.75
-		_WindowHeight("Window Height", FLOAT) = 0.0
+		//_WindowHeight("Window Height", FLOAT) = 0.0
 		_ChangePoint("Change at this distance", Float) = 5
-		_MaxDistance("Max hide value", Float) = 5
-		_Cloak("Cloak", Range(0,1)) = 0.0
+		//_MaxDistance("Max hide value", Float) = 5
+		_Cloak("Hide Effect (1 = no effect)", Range(0,1)) = 1
 
 		//outline properties
 		_LineWidth("Line Width", Range(0,1)) = 0.025
@@ -126,13 +126,16 @@
 
 
 				//***************************CIRCLE*********************//
-				float2 centerFromSfml = float2(0.5, _WindowHeight + 0.5);
+				//float2 centerFromSfml = float2(0.5, _WindowHeight + 0.5);
+				float2 centerFromSfml = float2(0.5, 0.5);
+
 				float2 p = (screenUV.xy - centerFromSfml) / _Radius;
 				float r = sqrt(dot(p, p));
 
+				//not exactly correct, 
 				float circleLerp = 1 - _CircleForce; 
 				float circle = lerp(circleLerp, noise, (r - _Expand) / (1 - _Expand));
-				float maskClip = 1; 
+				float maskClip = 0; 
 
 				if (r < 1.0)
 				{
@@ -146,7 +149,7 @@
 				}
 				//else
 				//{
-				//	//o.Albedo = 1; 
+				////	//o.Albedo = 1; 
 				//}
 
 				//uncomment to show noise

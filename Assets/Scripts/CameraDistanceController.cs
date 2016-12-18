@@ -23,7 +23,7 @@ public class CameraDistanceController : MonoBehaviour
 		if (thirdPersonCameraMovement == null)
 			thirdPersonCameraMovement = Camera.main.GetComponentInParent<ThirdPersonCameraMovement> (); 
 		
-		journeyLength = Mathf.Abs (thirdPersonCameraMovement.maxDistanceFromCamera - newDistance); 
+		journeyLength = Mathf.Abs (thirdPersonCameraMovement.maxDistance - newDistance); 
 
 	}
 
@@ -35,14 +35,14 @@ public class CameraDistanceController : MonoBehaviour
 
 		if (changeDistance == true) {
 
-			thirdPersonCameraMovement.maxDistanceFromCamera = Mathf.Lerp (thirdPersonCameraMovement.maxDistanceFromCamera, newDistance, fracJourney); 
+			thirdPersonCameraMovement.maxDistance = Mathf.Lerp (thirdPersonCameraMovement.maxDistance, newDistance, fracJourney); 
 			thirdPersonCameraMovement.xModificationAngle = Mathf.Lerp (thirdPersonCameraMovement.xModificationAngle, newX, fracJourney);
             thirdPersonCameraMovement.xModificationAngle = Mathf.Lerp(thirdPersonCameraMovement.yModificationAngle, newY, fracJourney);
 
 
 
-            if (Mathf.Abs (thirdPersonCameraMovement.maxDistanceFromCamera - newDistance) <= 0.1f) {
-				thirdPersonCameraMovement.maxDistanceFromCamera = newDistance;
+            if (Mathf.Abs (thirdPersonCameraMovement.maxDistance - newDistance) <= 0.1f) {
+				thirdPersonCameraMovement.maxDistance = newDistance;
 				thirdPersonCameraMovement.xModificationAngle = newX;
                 thirdPersonCameraMovement.yModificationAngle = newY;
                 changeDistance = false; 
@@ -58,7 +58,7 @@ public class CameraDistanceController : MonoBehaviour
 		//Debug.Log ("trigger entered"); 
 		if (other.tag == "Player") {
 			startTime = Time.time; 
-			journeyLength = Mathf.Abs (thirdPersonCameraMovement.maxDistanceFromCamera - newDistance); 
+			journeyLength = Mathf.Abs (thirdPersonCameraMovement.maxDistance - newDistance); 
 			changeDistance = true; 
 
 		}
