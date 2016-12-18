@@ -6,8 +6,8 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: AlphaMaterial
-  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  m_Name: worldMaskTest
+  m_Shader: {fileID: 4800000, guid: d75a37d976a181f44b7ffa73fc771b4a, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
   m_CustomRenderQueue: -1
@@ -48,7 +48,7 @@ Material:
     - first:
         name: _MainTex
       second:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 6061c2c34111b744e8e19f22e1dcbcff, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - first:
@@ -74,6 +74,15 @@ Material:
         name: _BumpScale
       second: 1
     - first:
+        name: _ChangePoint
+      second: 7.54
+    - first:
+        name: _CircleForce
+      second: 0.25
+    - first:
+        name: _Cloak
+      second: 0
+    - first:
         name: _Cutoff
       second: 0.5
     - first:
@@ -83,6 +92,9 @@ Material:
         name: _DstBlend
       second: 0
     - first:
+        name: _Expand
+      second: 0.5
+    - first:
         name: _GlossMapScale
       second: 1
     - first:
@@ -91,6 +103,9 @@ Material:
     - first:
         name: _GlossyReflections
       second: 1
+    - first:
+        name: _LineWidth
+      second: 0.025
     - first:
         name: _Metallic
       second: 0
@@ -104,6 +119,9 @@ Material:
         name: _Parallax
       second: 0.02
     - first:
+        name: _Radius
+      second: 0.75
+    - first:
         name: _SmoothnessTextureChannel
       second: 0
     - first:
@@ -116,12 +134,24 @@ Material:
         name: _UVSec
       second: 0
     - first:
+        name: _WindowHeight
+      second: 0
+    - first:
         name: _ZWrite
       second: 1
     m_Colors:
     - first:
         name: _Color
-      second: {r: 0.07586192, g: 0, b: 1, a: 1}
+      second: {r: 1, g: 1, b: 1, a: 1}
     - first:
         name: _EmissionColor
       second: {r: 0, g: 0, b: 0, a: 1}
+    - first:
+        name: _LineColor
+      second: {r: 1, g: 1, b: 1, a: 0}
+    - first:
+        name: _NoiseSettings
+      second: {r: 1, g: 1, b: 0, a: 0}
+    - first:
+        name: _NoiseSettings2
+      second: {r: 0.5, g: 2.5, b: 0.5, a: 0}
