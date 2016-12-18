@@ -20,7 +20,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4892790338838798}
   - component: {fileID: 114817659037358224}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: CameraMovement
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41,7 +41,7 @@ GameObject:
   - component: {fileID: 81413227262909392}
   - component: {fileID: 114886960839568128}
   - component: {fileID: 114231653325205182}
-  m_Layer: 8
+  m_Layer: 9
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -57,7 +57,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4832717959196630}
   - component: {fileID: 114612792698684352}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: CameraEffects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -84,7 +84,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1762149443730198}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.8, z: -0}
+  m_LocalPosition: {x: 0, y: 0, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4694644725746146}
@@ -97,14 +97,14 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1573390960575860}
-  m_LocalRotation: {x: 0.1397877, y: -0, z: -0, w: 0.99018157}
-  m_LocalPosition: {x: 0, y: 7.6, z: -24.6}
+  m_LocalRotation: {x: 0.33490282, y: -0, z: -0, w: 0.94225276}
+  m_LocalPosition: {x: 2.75, y: 15.73, z: -32.29}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4832717959196630}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 16.071001, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 39.133003, y: 0, z: 0}
 --- !u!20 &20188294762983464
 Camera:
   m_ObjectHideFlags: 1
@@ -209,7 +209,7 @@ MonoBehaviour:
   cameraSpeed: 2
   sensitivityX: 5
   sensitivityY: 5
-  lerpVelocity: 1
+  lerpVelocity: 5
   obstacleMask:
     serializedVersion: 2
     m_Bits: 512
@@ -221,7 +221,7 @@ MonoBehaviour:
     m_Bits: 2048
   currentX: 0
   currentY: 0
-  yAngleMin: -20
+  yAngleMin: 0
   yAngleMax: 50
   limitXAngle: 0
   xAngleMin: -50
@@ -236,6 +236,8 @@ MonoBehaviour:
   pivotXRotation: 0
   pivotYRotation: 0
   pivotZRotation: 0
+  m_testMappedLerp: 0
+  m_trueDistance: 0
 --- !u!114 &114886960839568128
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -24,6 +24,7 @@
 		//outline properties
 		_LineWidth("Line Width", Range(0,1)) = 0.025
 		_LineColor("Line Color (alpha = emission)", Color) = (1,1,1,0)
+		_Color("Color(not applied)", Color) = (1,1,1,1)
 	}
 
 		SubShader
@@ -64,6 +65,8 @@
 			uniform float _ChangePoint; 
 			uniform float4 _LineColor; 
 			uniform float _LineWidth; 
+			uniform float4 _Color; 
+
 
 			struct Input
 			{
@@ -157,6 +160,8 @@
 
 				float curDistance = distance(_WorldSpaceCameraPos.xyz, IN.worldPos);
 				float changeFactor = maskClip - (1 - (curDistance - _ChangePoint));
+				//float changeFactor = maskClip - _Cloak;
+				//float changeFactor = maskClip - _Cloak - (1 - (curDistance - _ChangePoint));
 
 
 				//hides pixels with value smaller than 0
