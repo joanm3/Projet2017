@@ -7,9 +7,6 @@
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
 		_Metallic("Metallic", Range(0,1)) = 0.0
 
-		//for test only
-		_Cloak("Cloak", FLOAT) = 0.0
-
 		//noise settings
 		_NoiseSettings("Noise settings : scale xy, offset xy", Vector) = (1, 1, 0, 0)
 		_NoiseSettings2("Noise settings gain, frequencyMul, baseWeight, na", Vector) = (0.5, 2.5, 0.5, 0)
@@ -20,6 +17,8 @@
 		_Radius("Radius", FLOAT) = 0.75
 		_WindowHeight("Window Height", FLOAT) = 0.0
 		_ChangePoint("Change at this distance", Float) = 5
+		_MaxDistance("Max hide value", Float) = 5
+		_Cloak("Cloak", Range(0,1)) = 0.0
 
 		//outline properties
 		_LineWidth("Line Width", Range(0,1)) = 0.025
@@ -66,7 +65,7 @@
 			uniform float4 _LineColor; 
 			uniform float _LineWidth; 
 			uniform float4 _Color; 
-
+			uniform float _MaxDistance; 
 
 			struct Input
 			{
@@ -131,7 +130,7 @@
 				float2 p = (screenUV.xy - centerFromSfml) / _Radius;
 				float r = sqrt(dot(p, p));
 
-				float circleLerp = _CircleForce; 
+				float circleLerp = 1 - _CircleForce; 
 				float circle = lerp(circleLerp, noise, (r - _Expand) / (1 - _Expand));
 				float maskClip = 1; 
 
@@ -159,9 +158,11 @@
 
 
 				float curDistance = distance(_WorldSpaceCameraPos.xyz, IN.worldPos);
-				float changeFactor = maskClip - (1 - (curDistance - _ChangePoint));
+				//if (curDistance < _MaxDistance)
+				//	curDistance = _MaxDistance;
 				//float changeFactor = maskClip - _Cloak;
-				//float changeFactor = maskClip - _Cloak - (1 - (curDistance - _ChangePoint));
+				//float changeFactor = maskClip - (1 - (curDistance - _ChangePoint));
+				float changeFactor = maskClip + (_Cloak * _ChangePoint * 1.1) - (1 - (curDistance - _ChangePoint));
 
 
 				//hides pixels with value smaller than 0

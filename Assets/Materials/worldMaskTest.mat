@@ -75,10 +75,10 @@ Material:
       second: 1
     - first:
         name: _ChangePoint
-      second: 20
+      second: 17.2
     - first:
         name: _CircleForce
-      second: 0.305
+      second: 0.916
     - first:
         name: _Cloak
       second: 0
@@ -93,7 +93,7 @@ Material:
       second: 0
     - first:
         name: _Expand
-      second: 0.861
+      second: 0.958
     - first:
         name: _GlossMapScale
       second: 1
@@ -106,6 +106,9 @@ Material:
     - first:
         name: _LineWidth
       second: 0.028
+    - first:
+        name: _MaxDistance
+      second: 17.4
     - first:
         name: _Metallic
       second: 0
