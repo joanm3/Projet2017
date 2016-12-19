@@ -48,7 +48,12 @@ public class CameraTrigger : MonoBehaviour
     void OnTriggerExit(Collider other)
     {
 
+        if (other.gameObject.layer == LayerMask.NameToLayer(ThirdPersonCameraMovement.fadeLayerString))
+        {
+            thirdPersonCamera.FadeExitBehaviour(ref thirdPersonCamera, other.GetComponent<Renderer>()); 
+        }
+
         //FADE BEHAVIOUR
-        thirdPersonCamera.FadeExitBehaviour(ref thirdPersonCamera, other); 
+        // thirdPersonCamera.FadeExitBehaviour(ref thirdPersonCamera, other); 
     }
 }

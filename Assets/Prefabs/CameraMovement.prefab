@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 114817659037358224}
   m_Layer: 0
   m_Name: CameraMovement
-  m_TagString: MainCamera
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -223,6 +223,8 @@ MonoBehaviour:
     m_Bits: 2048
   currentX: 0
   currentY: 0
+  minDistToStartFadeCharacter: 3
+  distanceToFullyDisappear: 1.8
   yAngleMin: 0
   yAngleMax: 50
   limitXAngle: 0
@@ -240,6 +242,8 @@ MonoBehaviour:
   m_lerpedHeight: 0
   m_trueDistance: 0
   fadeRenderers: []
+  obstacleRenderers: []
+  playerRenderers: []
 --- !u!114 &114886960839568128
 MonoBehaviour:
   m_ObjectHideFlags: 1

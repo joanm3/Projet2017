@@ -12,7 +12,6 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     [Header("Camera values")]
     public float maxDistance = 40f;
     public float minDistance = 10f;
-    //public float minDistanceFromCamera = 5f; 
     public float cameraSpeed = 2f;
     public float sensitivityX = 4.0f;
     public float sensitivityY = 1.0f;
@@ -24,6 +23,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     public LayerMask terrainMask;
     public float currentX = 0.0f;
     public float currentY = 0.0f;
+
+    [Header("Player Fadeout")]
+    public float minDistToStartFadeCharacter = 5f;
+    public float distanceToFullyDisappear = 1.8f;
 
     [Header("Angle clamp")]
     public float yAngleMin = -20.0f;
@@ -54,7 +57,6 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     private bool m_fadeRaycastEntered = false;
     private bool m_obstacleRaycastEntered = false;
     private bool m_terrainRaycastEntered = false;
-    private Renderer m_colliderRend = null;
     private TerrainCollider m_terrainCollider = null;
 
     //private List<Renderer> m_colliderRenderers = new List<Renderer>();
@@ -68,18 +70,22 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     [SerializeField]
     private float m_trueDistance;
     [SerializeField]
+    private Renderer m_colliderRend = null;
     public List<Renderer> fadeRenderers = new List<Renderer>();
-    [SerializeField]
     public List<Renderer> obstacleRenderers = new List<Renderer>();
+    [SerializeField]
+    private Renderer[] playerRenderers;
 
     private Quaternion m_rotation;
     private Vector3 m_dir;
+    private bool m_playerColorChanged = false;
 
 #if UNITY_EDITOR
 
     Vector3 gizmoPoint;
     Vector3 gizmoRayDirection;
     float gizmoDistance;
+    float gizmoRadius;
     Vector3 gizmoRayOrigin;
     Vector3 gizmoDownPoint;
     Vector3 gizmoDownRayDirection;
@@ -106,6 +112,16 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
         if (player == null)
             player = GameObject.FindGameObjectWithTag("Player").GetComponent<CharacterV3>();
+
+        if (player != null)
+        {
+            playerRenderers = playerTransform.GetComponentsInChildren<Renderer>();
+        }
+        else
+        {
+            Debug.LogError("playerTransform not assigned nor found for ThirdPersonCameraMovement");
+        }
+
     }
 
 
@@ -113,14 +129,9 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     void Update()
     {
 
-        //GET INPUT
-        //Debug.Log (m_trueDistance); 
-        if (!useJoystick)
-        {
-            currentX += Input.GetAxis("Mouse X");
-            currentY += Input.GetAxis("Mouse Y");
-        }
-        else
+
+        #region GET INPUT
+        if (useJoystick)
         {
             float inputXStick = (Input.GetAxis("360_R_Stick_X") > 0.15f || Input.GetAxis("360_R_Stick_X") < -0.15f) ? Input.GetAxis("360_R_Stick_X") : 0f;
             float inputYStick = (Input.GetAxis("360_R_Stick_Y") > 0.15f || Input.GetAxis("360_R_Stick_Y") < -0.15f) ? Input.GetAxis("360_R_Stick_Y") : 0f;
@@ -128,43 +139,51 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             currentX += inputXStick * cameraSpeed;
             currentY += inputYStick * cameraSpeed;
         }
+        else
+        {
+            currentX += Input.GetAxis("Mouse X");
+            currentY += Input.GetAxis("Mouse Y");
+        }
+        #endregion
 
+        #region BLOCK X AND Y CAMERA ANGLES 
         currentY = Mathf.Clamp(currentY, yAngleMin, yAngleMax);
         if (limitXAngle)
             currentX = Mathf.Clamp(currentX, xAngleMin, xAngleMax);
+        #endregion
 
-        //ray parameters
-        Vector3 _rayDirection = cameraPivotTransform.position - playerTransform.position;
-        Vector3 _rayOrigin = playerTransform.position;
-        RaycastHit _hit;
-        float _distance = maxDistance + (Vector3.Distance(m_transform.position, cameraPivotTransform.position));
+        //CAMERA BEHAVIOURS
 
-
-
-        //OTHER BEHAVIOURS
         //BEHAVIOUR Distance from ground
         m_lerpedHeight = MappedLerp(currentY, yAngleMin - minDistance, yAngleMax, maxDistance, 0f);
 
+        //BEHAVIOUR Rotation by normal
         if (rotationByNormal) CameraRotationByNormal(ref pivotRotation, rotationIntensity, rotationLerp);
 
-        if (!m_terrainRaycastEntered && !m_obstacleRaycastEntered && m_colliderRend == null)
+        //BEHAVIOUR Apply distance when no obstacle and with distance from ground
+        if (!m_terrainRaycastEntered && !m_obstacleRaycastEntered)
         {
             m_trueDistance = (Mathf.Abs(m_trueDistance - maxDistance) > 0.1f) ?
                 Mathf.Lerp(m_trueDistance, maxDistance - m_lerpedHeight, Time.fixedDeltaTime * lerpVelocity) :
                 maxDistance - m_lerpedHeight;
-
-            //m_trueDistance = maxDistance - m_lerpedHeight;
         }
 
-        ////Draw Gizmo
+
+        //BEHAVIOUR Obstacles raycasting
+        #region RAYCAST PARAMETERS
+        Vector3 _rayDirection = cameraPivotTransform.position - playerTransform.position;
+        Vector3 _rayOrigin = playerTransform.position;
+        RaycastHit _hit;
+        float _distance = maxDistance + (Vector3.Distance(m_transform.position, cameraPivotTransform.position));
+        float _plusObstacleRaycastDistance = 0.1f;
+        float _raycastDistance = maxDistance - m_lerpedHeight + _plusObstacleRaycastDistance;
+
+        //Draw Gizmo
         gizmoRayDirection = _rayDirection;
         gizmoDistance = 1f;
         gizmoRayOrigin = _rayOrigin;
+        #endregion
 
-        float _plusObstacleRaycastDistance = 0.1f;
-        //float _plusObstacleRaycastDistance = (m_obstacleRaycastEntered) ? 0.1f : 0f;
-
-        float _raycastDistance = maxDistance - m_lerpedHeight + _plusObstacleRaycastDistance; 
         //BEHAVIOUR WITH OBSTACLES
         if (Physics.Raycast(_rayOrigin, _rayDirection, out _hit, _raycastDistance, SumLayers(obstacleMask, fadeMask, terrainMask)))
         {
@@ -173,7 +192,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 #region OBSTACLE ENTER
                 m_fadeRaycastEntered = false;
                 m_terrainRaycastEntered = false;
-                gizmoPoint = _hit.point;
+                //gizmoPoint = _hit.point;
                 m_colliderRend = GetRendererFromCollision(_hit);
                 if (m_colliderRend.enabled)
                 {
@@ -209,9 +228,26 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 #region FADE ENTER
                 m_obstacleRaycastEntered = false;
                 m_terrainRaycastEntered = false;
-
+                float _radius = 20f;
+                gizmoRadius = _radius;
+                gizmoPoint = _hit.point;
                 m_colliderRend = GetRendererFromCollision(_hit);
-                if (!fadeRenderers.Contains(m_colliderRend)) { fadeRenderers.Add(m_colliderRend); }
+
+                //ADD LAYER MASK DONNO WHY IT IS NOT WORKING
+                RaycastHit[] _sphereHits = Physics.SphereCastAll(_hit.point, _radius, Vector3.one, Mathf.Infinity);
+
+                for (int i = 0; i < _sphereHits.Length; i++)
+                {
+
+                    if (_sphereHits[i].collider.gameObject.layer == LayerMask.NameToLayer(fadeLayerString))
+                    {
+                        Renderer _rend = _sphereHits[i].collider.GetComponent<Renderer>();
+                        if (!fadeRenderers.Contains(_rend) && _rend != null)
+                        {
+                            fadeRenderers.Add(_rend);
+                        }
+                    }
+                }
 
 
                 for (int i = 0; i < fadeRenderers.Count; i++)
@@ -269,7 +305,6 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 m_fadeRaycastEntered = false;
                 m_terrainRaycastEntered = false;
                 m_obstacleRaycastEntered = false;
-                Debug.Log("collisions with other objects");
                 #endregion
             }
         }
@@ -287,6 +322,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         //BEHAVIOUR when exiting a obstacle object
         if (!m_obstacleRaycastEntered && m_colliderRend != null)
         {
+            #region OBSTACLE EXIT
             for (int i = 0; i < obstacleRenderers.Count; i++)
             {
                 if (obstacleRenderers[i].enabled)
@@ -302,22 +338,95 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                     }
                 }
             }
+            #endregion
         }
 
+        if (!m_fadeRaycastEntered && m_colliderRend != null)
+        {
+            #region FADE EXIT
+            for (int i = 0; i < fadeRenderers.Count; i++)
+            {
 
+                Renderer _fadeRenderer = fadeRenderers[i];
+                if (_fadeRenderer.material.HasProperty("_Color"))
+                {
+                    float _lerpedAlpha = Mathf.Lerp(_fadeRenderer.material.color.a, 1f, Time.fixedDeltaTime * lerpVelocity);
+                    _fadeRenderer.material.color = new Color(_fadeRenderer.material.color.r, _fadeRenderer.material.color.g, _fadeRenderer.material.color.b, _lerpedAlpha);
+                    if (_lerpedAlpha >= 0.9f)
+                    {
+                        _fadeRenderer.material.color = new Color(_fadeRenderer.material.color.r, _fadeRenderer.material.color.g, _fadeRenderer.material.color.b, 1f);
+                        if (!_fadeRenderer.material.HasProperty("_Cloak"))
+                        {
+                            fadeRenderers.Remove(_fadeRenderer);
+                        }
+                    }
+                }
 
+                if (_fadeRenderer.material.HasProperty("_Cloak"))
+                {
+                    float _lerpedCloak = Mathf.Lerp(_fadeRenderer.material.GetFloat("_Cloak"), 1f, Time.fixedDeltaTime * lerpVelocity / 2);
+                    _fadeRenderer.material.SetFloat("_Cloak", _lerpedCloak);
+                    //Debug.Log("cloak: " + _lerpedCloak);
+                    if (_lerpedCloak >= 0.99f)
+                    {
+                        _fadeRenderer.material.SetFloat("_Cloak", 1f);
+                        fadeRenderers.Remove(_fadeRenderer);
+                    }
+                }
+            }
+
+            if (fadeRenderers.Count <= 0)
+            {
+                m_colliderRend = null;
+            }
+            #endregion
+        }
 
         //BEHAVIOUR when exiting terrain
         if (m_terrainRaycastEntered && m_terrainCollider != null)
         {
+            #region TERRAIN EXIT
             m_terrainCollider = null;
             m_terrainRaycastEntered = false;
+            #endregion
+        }
+
+
+        //BEHAVIOUR Player too close to the camera
+        float _distanceToPlayer = Vector3.Distance(playerTransform.position, m_cam.transform.position);
+        if (_distanceToPlayer < minDistToStartFadeCharacter)
+        {
+            #region PLAYER FADE OUT
+            float _mappedFadePlayer = MappedLerp(_distanceToPlayer, distanceToFullyDisappear, minDistToStartFadeCharacter, 0, 1f);
+            Color _lerpedColor = new Color(_mappedFadePlayer, _mappedFadePlayer, _mappedFadePlayer, _mappedFadePlayer);
+            foreach (Renderer renderer in playerRenderers)
+            {
+                if (renderer.material.HasProperty("_Color"))
+                {
+                    renderer.material.color = _lerpedColor;
+                }
+            }
+            m_playerColorChanged = true;
+        }
+        else if (m_playerColorChanged)
+        {
+            foreach (Renderer renderer in playerRenderers)
+            {
+                if (renderer.material.HasProperty("_Color"))
+                {
+                    renderer.material.color = Color.white;
+                }
+            }
+            m_playerColorChanged = false;
+            #endregion
         }
 
     }
 
+
     void LateUpdate()
     {
+        //APPLY MOVEMENT
         m_dir = new Vector3(0, 0, -m_trueDistance);
 
         m_rotation = Quaternion.Euler(currentY + yModificationAngle, currentX + xModificationAngle, 0f);
@@ -338,7 +447,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         //Vector3 gizmoRayDirection = playerTransform.position - m_transform.position;
         Gizmos.color = Color.yellow;
         Gizmos.DrawRay(gizmoRayOrigin, gizmoRayDirection * gizmoDistance);
-        Gizmos.DrawWireSphere(gizmoPoint, 1f);
+        Gizmos.DrawWireSphere(gizmoPoint, gizmoRadius);
 
 
         Gizmos.color = Color.cyan;
@@ -424,47 +533,92 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         return (((valueToTransform - oldMin) * newRange) / oldRange) + newMin;
     }
 
-
-    public void FadeExitBehaviour(ref ThirdPersonCameraMovement thirdPersonCamera, Collider other)
+    public void FadeExitBehaviour(ref ThirdPersonCameraMovement thirdPersonCamera, Renderer renderer)
     {
-        if (other.gameObject.layer == LayerMask.NameToLayer(ThirdPersonCameraMovement.fadeLayerString))
+
+        if (thirdPersonCamera.fadeRenderers.Contains(renderer))
         {
-            if (thirdPersonCamera.fadeRenderers.Contains(other.GetComponent<Renderer>()))
+            Renderer _fadeRenderer = renderer;
+            float _lerpVelocity = thirdPersonCamera.lerpVelocity;
+
+            if (_fadeRenderer.material.HasProperty("_Color"))
             {
-                Renderer _fadeRenderer = other.GetComponent<Renderer>();
-                float _lerpVelocity = thirdPersonCamera.lerpVelocity;
-
-                if (_fadeRenderer.material.HasProperty("_Color"))
+                float _lerpedAlpha = Mathf.Lerp(_fadeRenderer.material.color.a, 1f, Time.fixedDeltaTime * _lerpVelocity);
+                _fadeRenderer.material.color = new Color(_fadeRenderer.material.color.r, _fadeRenderer.material.color.g, _fadeRenderer.material.color.b, _lerpedAlpha);
+                if (_lerpedAlpha >= 0.9f)
                 {
-                    float _lerpedAlpha = Mathf.Lerp(_fadeRenderer.material.color.a, 1f, Time.fixedDeltaTime * _lerpVelocity);
-                    _fadeRenderer.material.color = new Color(_fadeRenderer.material.color.r, _fadeRenderer.material.color.g, _fadeRenderer.material.color.b, _lerpedAlpha);
-                    if (_lerpedAlpha >= 0.9f)
+                    _fadeRenderer.material.color =
+                        new Color(_fadeRenderer.material.color.r, _fadeRenderer.material.color.g, _fadeRenderer.material.color.b, 1f);
+                    if (!_fadeRenderer.material.HasProperty("_Cloak"))
                     {
-                        _fadeRenderer.material.color =
-                            new Color(_fadeRenderer.material.color.r, _fadeRenderer.material.color.g, _fadeRenderer.material.color.b, 1f);
-                        if (!_fadeRenderer.material.HasProperty("_Cloak"))
-                        {
-                            if (_fadeRenderer.material.HasProperty("_Cloak")) ;
-                        }
+                        if (_fadeRenderer.material.HasProperty("_Cloak")) ;
                     }
                 }
+            }
 
 
-                if (_fadeRenderer.material.HasProperty("_Cloak"))
+            if (_fadeRenderer.material.HasProperty("_Cloak"))
+            {
+                float _lerpedCloak = Mathf.Lerp(_fadeRenderer.material.GetFloat("_Cloak"), 1f, Time.fixedDeltaTime * _lerpVelocity / 2);
+                _fadeRenderer.material.SetFloat("_Cloak", _lerpedCloak);
+                //Debug.Log("cloak: " + _lerpedCloak);
+                if (_lerpedCloak >= 0.999f)
                 {
-                    float _lerpedCloak = Mathf.Lerp(_fadeRenderer.material.GetFloat("_Cloak"), 1f, Time.fixedDeltaTime * _lerpVelocity / 2);
-                    _fadeRenderer.material.SetFloat("_Cloak", _lerpedCloak);
-                    //Debug.Log("cloak: " + _lerpedCloak);
-                    if (_lerpedCloak >= 0.999f)
-                    {
-                        _fadeRenderer.material.SetFloat("_Cloak", 1f);
-                        thirdPersonCamera.fadeRenderers.Remove(_fadeRenderer);
-                    }
-                }
-                else
-                {
+                    _fadeRenderer.material.SetFloat("_Cloak", 1f);
                     thirdPersonCamera.fadeRenderers.Remove(_fadeRenderer);
                 }
+            }
+            else
+            {
+                thirdPersonCamera.fadeRenderers.Remove(_fadeRenderer);
+            }
+        }
+    }
+
+    public void FadeExitBehaviour(Renderer renderer)
+    {
+
+        if (fadeRenderers.Contains(renderer))
+        {
+            Renderer _fadeRenderer = renderer;
+            float _lerpVelocity = lerpVelocity;
+
+            if (_fadeRenderer.material.HasProperty("_Color"))
+            {
+                float _lerpedAlpha = Mathf.Lerp(_fadeRenderer.material.color.a, 1f, Time.fixedDeltaTime * _lerpVelocity);
+                _fadeRenderer.material.color = new Color(_fadeRenderer.material.color.r, _fadeRenderer.material.color.g, _fadeRenderer.material.color.b, _lerpedAlpha);
+                if (_lerpedAlpha >= 0.9f)
+                {
+                    _fadeRenderer.material.color =
+                        new Color(_fadeRenderer.material.color.r, _fadeRenderer.material.color.g, _fadeRenderer.material.color.b, 1f);
+                    if (!_fadeRenderer.material.HasProperty("_Cloak"))
+                    {
+                        fadeRenderers.Remove(_fadeRenderer);
+                        m_colliderRend = null;
+                        m_fadeRaycastEntered = false;
+                    }
+                }
+            }
+
+
+            if (_fadeRenderer.material.HasProperty("_Cloak"))
+            {
+                float _lerpedCloak = Mathf.Lerp(_fadeRenderer.material.GetFloat("_Cloak"), 1f, Time.fixedDeltaTime * _lerpVelocity / 2);
+                _fadeRenderer.material.SetFloat("_Cloak", _lerpedCloak);
+                //Debug.Log("cloak: " + _lerpedCloak);
+                if (_lerpedCloak >= 0.999f)
+                {
+                    _fadeRenderer.material.SetFloat("_Cloak", 1f);
+                    fadeRenderers.Remove(_fadeRenderer);
+                    m_colliderRend = null;
+                    m_fadeRaycastEntered = false;
+                }
+            }
+            else
+            {
+                m_colliderRend = null;
+                m_fadeRaycastEntered = false;
+                fadeRenderers.Remove(_fadeRenderer);
             }
         }
     }
