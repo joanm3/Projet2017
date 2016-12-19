@@ -303,27 +303,25 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             else
             {
                 #region OTHER COLLISIONS
-                m_fadeRaycastEntered = false;
-                m_terrainRaycastEntered = false;
-                m_obstacleRaycastEntered = false;
+                m_colliderRend = null;
                 #endregion
             }
         }
         else
         {
             #region NO COLLISIONS
-            m_fadeRaycastEntered = false;
-            m_terrainRaycastEntered = false;
-            m_obstacleRaycastEntered = false;
+            m_colliderRend = null;
+
             #endregion
         }
 
 
 
         //BEHAVIOUR when exiting a obstacle object
-        if (!m_obstacleRaycastEntered && m_colliderRend != null)
+        if (m_obstacleRaycastEntered && m_colliderRend == null)
         {
             #region OBSTACLE EXIT
+            Debug.Log("entered exit obstacle");
             for (int i = 0; i < obstacleRenderers.Count; i++)
             {
                 if (obstacleRenderers[i].enabled)
@@ -333,18 +331,25 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                     obstacleRenderers[i].material.color = new Color(obstacleRenderers[i].material.color.r, obstacleRenderers[i].material.color.g, obstacleRenderers[i].material.color.b, _lerpedAlpha);
                     if (_lerpedAlpha >= 0.95)
                     {
-                        m_obstacleRaycastEntered = false;
-                        m_colliderRend = null;
+                        obstacleRenderers[i].material.color = new Color(obstacleRenderers[i].material.color.r, obstacleRenderers[i].material.color.g, obstacleRenderers[i].material.color.b, 1f);
                         obstacleRenderers.Remove(obstacleRenderers[i]);
                     }
                 }
             }
+            if (obstacleRenderers.Count <= 0)
+            {
+                m_obstacleRaycastEntered = false;
+                //m_colliderRend = null;
+            }
+
             #endregion
         }
 
-        if (!m_fadeRaycastEntered && m_colliderRend != null)
+        if (m_fadeRaycastEntered && m_colliderRend == null)
         {
             #region FADE EXIT
+            //Debug.Log("entered exit fade");
+
             for (int i = 0; i < fadeRenderers.Count; i++)
             {
 
@@ -365,10 +370,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
                 if (_fadeRenderer.material.HasProperty("_Cloak"))
                 {
-                    float _lerpedCloak = Mathf.Lerp(_fadeRenderer.material.GetFloat("_Cloak"), 1.8f, Time.fixedDeltaTime * lerpVelocity / 10);
+                    float _lerpedCloak = Mathf.Lerp(_fadeRenderer.material.GetFloat("_Cloak"), 1f, Time.fixedDeltaTime * lerpVelocity / 10);
                     _fadeRenderer.material.SetFloat("_Cloak", _lerpedCloak);
                     //Debug.Log("cloak: " + _lerpedCloak);
-                    if (_lerpedCloak >= 1.5f)
+                    if (_lerpedCloak >= 0.75f)
                     {
                         _fadeRenderer.material.SetFloat("_Cloak", 1.8f);
                         fadeRenderers.Remove(_fadeRenderer);
@@ -378,16 +383,16 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
             if (fadeRenderers.Count <= 0)
             {
-                m_colliderRend = null;
+                m_fadeRaycastEntered = false;
             }
             #endregion
         }
 
         //BEHAVIOUR when exiting terrain
-        if (m_terrainRaycastEntered && m_terrainCollider != null)
+        if (!m_terrainRaycastEntered && m_terrainCollider != null)
         {
             #region TERRAIN EXIT
-            m_terrainCollider = null;
+            //m_terrainCollider = null;
             m_terrainRaycastEntered = false;
             #endregion
         }
@@ -532,96 +537,6 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         float oldRange = oldMax - oldMin;
         float newRange = newMax - newMin;
         return (((valueToTransform - oldMin) * newRange) / oldRange) + newMin;
-    }
-
-    public void FadeExitBehaviour(ref ThirdPersonCameraMovement thirdPersonCamera, Renderer renderer)
-    {
-
-        if (thirdPersonCamera.fadeRenderers.Contains(renderer))
-        {
-            Renderer _fadeRenderer = renderer;
-            float _lerpVelocity = thirdPersonCamera.lerpVelocity;
-
-            if (_fadeRenderer.material.HasProperty("_Color"))
-            {
-                float _lerpedAlpha = Mathf.Lerp(_fadeRenderer.material.color.a, 1f, Time.fixedDeltaTime * _lerpVelocity);
-                _fadeRenderer.material.color = new Color(_fadeRenderer.material.color.r, _fadeRenderer.material.color.g, _fadeRenderer.material.color.b, _lerpedAlpha);
-                if (_lerpedAlpha >= 0.9f)
-                {
-                    _fadeRenderer.material.color =
-                        new Color(_fadeRenderer.material.color.r, _fadeRenderer.material.color.g, _fadeRenderer.material.color.b, 1f);
-                    if (!_fadeRenderer.material.HasProperty("_Cloak"))
-                    {
-                        if (_fadeRenderer.material.HasProperty("_Cloak")) ;
-                    }
-                }
-            }
-
-
-            if (_fadeRenderer.material.HasProperty("_Cloak"))
-            {
-                float _lerpedCloak = Mathf.Lerp(_fadeRenderer.material.GetFloat("_Cloak"), 1f, Time.fixedDeltaTime * _lerpVelocity / 2);
-                _fadeRenderer.material.SetFloat("_Cloak", _lerpedCloak);
-                //Debug.Log("cloak: " + _lerpedCloak);
-                if (_lerpedCloak >= 0.999f)
-                {
-                    _fadeRenderer.material.SetFloat("_Cloak", 1f);
-                    thirdPersonCamera.fadeRenderers.Remove(_fadeRenderer);
-                }
-            }
-            else
-            {
-                thirdPersonCamera.fadeRenderers.Remove(_fadeRenderer);
-            }
-        }
-    }
-
-    public void FadeExitBehaviour(Renderer renderer)
-    {
-
-        if (fadeRenderers.Contains(renderer))
-        {
-            Renderer _fadeRenderer = renderer;
-            float _lerpVelocity = lerpVelocity;
-
-            if (_fadeRenderer.material.HasProperty("_Color"))
-            {
-                float _lerpedAlpha = Mathf.Lerp(_fadeRenderer.material.color.a, 1f, Time.fixedDeltaTime * _lerpVelocity);
-                _fadeRenderer.material.color = new Color(_fadeRenderer.material.color.r, _fadeRenderer.material.color.g, _fadeRenderer.material.color.b, _lerpedAlpha);
-                if (_lerpedAlpha >= 0.9f)
-                {
-                    _fadeRenderer.material.color =
-                        new Color(_fadeRenderer.material.color.r, _fadeRenderer.material.color.g, _fadeRenderer.material.color.b, 1f);
-                    if (!_fadeRenderer.material.HasProperty("_Cloak"))
-                    {
-                        fadeRenderers.Remove(_fadeRenderer);
-                        m_colliderRend = null;
-                        m_fadeRaycastEntered = false;
-                    }
-                }
-            }
-
-
-            if (_fadeRenderer.material.HasProperty("_Cloak"))
-            {
-                float _lerpedCloak = Mathf.Lerp(_fadeRenderer.material.GetFloat("_Cloak"), 1f, Time.fixedDeltaTime * _lerpVelocity / 2);
-                _fadeRenderer.material.SetFloat("_Cloak", _lerpedCloak);
-                //Debug.Log("cloak: " + _lerpedCloak);
-                if (_lerpedCloak >= 0.999f)
-                {
-                    _fadeRenderer.material.SetFloat("_Cloak", 1f);
-                    fadeRenderers.Remove(_fadeRenderer);
-                    m_colliderRend = null;
-                    m_fadeRaycastEntered = false;
-                }
-            }
-            else
-            {
-                m_colliderRend = null;
-                m_fadeRaycastEntered = false;
-                fadeRenderers.Remove(_fadeRenderer);
-            }
-        }
     }
 
 
