@@ -78,7 +78,7 @@ Material:
       second: 17.2
     - first:
         name: _CircleForce
-      second: 0.916
+      second: 0.784
     - first:
         name: _Cloak
       second: 1
@@ -93,7 +93,7 @@ Material:
       second: 0
     - first:
         name: _Expand
-      second: 0.958
+      second: 0.965
     - first:
         name: _GlossMapScale
       second: 1
@@ -105,7 +105,7 @@ Material:
       second: 1
     - first:
         name: _LineWidth
-      second: 0.028
+      second: 0.4
     - first:
         name: _MaxDistance
       second: 17.4
@@ -123,7 +123,7 @@ Material:
       second: 0.02
     - first:
         name: _Radius
-      second: 0.6
+      second: 0.72
     - first:
         name: _SmoothnessTextureChannel
       second: 0
@@ -151,7 +151,7 @@ Material:
       second: {r: 0, g: 0, b: 0, a: 1}
     - first:
         name: _LineColor
-      second: {r: 1, g: 0, b: 0, a: 1}
+      second: {r: 1, g: 0, b: 0, a: 0}
     - first:
         name: _NoiseSettings
       second: {r: 1, g: 1, b: 0, a: 0}

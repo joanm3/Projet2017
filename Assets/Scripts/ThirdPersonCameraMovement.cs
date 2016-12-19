@@ -228,12 +228,13 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 #region FADE ENTER
                 m_obstacleRaycastEntered = false;
                 m_terrainRaycastEntered = false;
-                float _radius = 20f;
+                float _radius = 15f;
                 gizmoRadius = _radius;
                 gizmoPoint = _hit.point;
                 m_colliderRend = GetRendererFromCollision(_hit);
 
                 //ADD LAYER MASK DONNO WHY IT IS NOT WORKING
+                //LATER ON CHANGE SPHERE COLLIDER FOR CAPSULE COLLIDER TO AVOID MAKING DISAPEAR OBJECTS FAR
                 RaycastHit[] _sphereHits = Physics.SphereCastAll(_hit.point, _radius, Vector3.one, Mathf.Infinity);
 
                 for (int i = 0; i < _sphereHits.Length; i++)
@@ -364,12 +365,12 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
                 if (_fadeRenderer.material.HasProperty("_Cloak"))
                 {
-                    float _lerpedCloak = Mathf.Lerp(_fadeRenderer.material.GetFloat("_Cloak"), 1f, Time.fixedDeltaTime * lerpVelocity / 2);
+                    float _lerpedCloak = Mathf.Lerp(_fadeRenderer.material.GetFloat("_Cloak"), 1.8f, Time.fixedDeltaTime * lerpVelocity / 10);
                     _fadeRenderer.material.SetFloat("_Cloak", _lerpedCloak);
                     //Debug.Log("cloak: " + _lerpedCloak);
-                    if (_lerpedCloak >= 0.99f)
+                    if (_lerpedCloak >= 1.5f)
                     {
-                        _fadeRenderer.material.SetFloat("_Cloak", 1f);
+                        _fadeRenderer.material.SetFloat("_Cloak", 1.8f);
                         fadeRenderers.Remove(_fadeRenderer);
                     }
                 }

@@ -23,7 +23,7 @@ GameObject:
   m_Layer: 0
   m_Name: CameraMovement
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 7250588514170254948, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -223,8 +223,8 @@ MonoBehaviour:
     m_Bits: 2048
   currentX: 0
   currentY: 0
-  minDistToStartFadeCharacter: 3
-  distanceToFullyDisappear: 1.8
+  minDistToStartFadeCharacter: 2
+  distanceToFullyDisappear: 1.2
   yAngleMin: 0
   yAngleMax: 50
   limitXAngle: 0
@@ -241,6 +241,7 @@ MonoBehaviour:
   pivotRotation: {x: 0, y: 0, z: 0}
   m_lerpedHeight: 0
   m_trueDistance: 0
+  m_colliderRend: {fileID: 0}
   fadeRenderers: []
   obstacleRenderers: []
   playerRenderers: []

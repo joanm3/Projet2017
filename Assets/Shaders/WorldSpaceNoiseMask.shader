@@ -18,12 +18,12 @@
 		//_WindowHeight("Window Height", FLOAT) = 0.0
 		_ChangePoint("Change at this distance", Float) = 5
 		//_MaxDistance("Max hide value", Float) = 5
-		_Cloak("Hide Effect (1 = no effect)", Range(0,1)) = 1
 
 		//outline properties
 		_LineWidth("Line Width", Range(0,1)) = 0.025
 		_LineColor("Line Color (alpha = emission)", Color) = (1,1,1,0)
 		_Color("Color(not applied)", Color) = (1,1,1,1)
+		_Cloak("Hide Effect (1 = no effect)", Range(0,1)) = 1
 	}
 
 		SubShader
@@ -179,7 +179,7 @@
 
 				if (changeFactor < _LineWidth)
 				{
-					o.Albedo = _LineColor.rgb; 
+					o.Albedo = c.rgb * _LineColor.rgb; 
 					o.Emission = _LineColor.a; 
 				}
 
