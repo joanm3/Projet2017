@@ -186,7 +186,7 @@ public class CharacterV3 : MonoBehaviour
         {
             grounded = false;
             //improve jump vector
-            m_jumpVector = surfaceNormal; 
+            m_jumpVector = (Vector3.up + (surfaceNormal * 0.5f)).normalized; 
 
             Debug.Log("Jump Vector: " + m_jumpVector);
         }
