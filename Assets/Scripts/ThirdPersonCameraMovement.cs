@@ -218,9 +218,11 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         float _raycastDistance = maxDistance - m_lerpedHeight + _plusObstacleRaycastDistance;
 
         //Draw Gizmo
+#if UNITY_EDITOR
         gizmoRayDirection = _rayDirection;
         gizmoDistance = 1f;
         gizmoRayOrigin = _rayOrigin;
+#endif
         #endregion
 
         //BEHAVIOUR WITH OBSTACLES
@@ -268,8 +270,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 m_obstacleRaycastEntered = false;
                 m_terrainRaycastEntered = false;
                 float _radius = 15f;
+#if UNITY_EDITOR
                 gizmoRadius = _radius;
                 gizmoPoint = _hit.point;
+#endif
                 m_colliderRend = GetRendererFromCollision(_hit);
 
                 //ADD LAYER MASK DONNO WHY IT IS NOT WORKING
@@ -486,6 +490,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+#if UNITY_EDITOR
 
         if (!Application.isPlaying)
             return;
@@ -499,6 +504,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         Gizmos.DrawRay(gizmoDownRayOrigin, gizmoDownRayDirection * gizmoDownDistance);
         Gizmos.DrawWireSphere(gizmoDownPoint, 1f);
 
+#endif
     }
 
     private void CameraRotationByNormal(ref Vector3 rotation, float intensity, float lerpFactor)
