@@ -115,6 +115,14 @@ public class CharacterV3 : MonoBehaviour
 
     float inputGravityMultiplier = 1f; 
 
+	public StabilityState myState = StabilityState.Stable;
+	public enum StabilityState
+	{
+		Stable,
+		Unstable,
+		Falling
+	}
+
 	void Update ()
 	{
 		float _rayDistance = 1f; 
@@ -129,27 +137,45 @@ public class CharacterV3 : MonoBehaviour
 			myCharaparenting.SetPlayerParent (transform, rayHit);
 		}
 
+		if(Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle || Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.5f)
+		{
+			myState = StabilityState.Falling;
+		}
+		else if(Vector3.Angle(rayHit.normal, Vector3.up) < Glide_angle)
+		{
+			if(Vector3.Angle(rayHit.normal, Vector3.up) < Confort_angle)
+			{
+				myState = StabilityState.Stable;
+			}
+			else
+			{
+				myState = StabilityState.Unstable;
+			}
+		}
+
 
         //Input dir + vel
-		if (canUseInput && Vector3.Angle(rayHit.normal, Vector3.up) < Glide_angle)
+		if (canUseInput && myState != StabilityState.Falling)
 		{
+//			print("je toooooombe pas !!! " + Vector3.Angle(rayHit.normal, Vector3.up));
+//			print("Grounded");
             InputSpeedDir = GetInputSpeedDir();
 		}
 		else
 		{
+//			print("je toooooombe !!! " + Vector3.Angle(rayHit.normal, Vector3.up));
             InputSpeedDir = Vector3.zero; 
 		}
 
         //Surface dir + velocity
-//		if(Vector3.Angle(rayHit.normal, Vector3.up) < Glide_angle)
-			SetVelocitySpeedDir ();
+		SetVelocitySpeedDir ();
 
 
 		//GRAV
 		if(Physics.Raycast(transform.position, -Vector3.up, out rayHit, Mathf.Infinity)){
 
 
-			if(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.5f || Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle)
+			if(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.5f || myState == StabilityState.Falling)
 			{
 				
 				gravForce = Vector3.up * (-maxGravForce * gravForceOverTime.Evaluate(tGrav));
@@ -175,39 +201,39 @@ public class CharacterV3 : MonoBehaviour
 
     }
 
-	void AntiAirBlock(int accuracy)
-	{
-
-		Vector3 _origin = transform.position + (-Vector3.up * ((myController.bounds.extents.y/4f) *3f));
-		float inclinaison = 360f/accuracy;
-		Vector3 _direction = transform.forward;
-		RaycastHit _rayHit;
-
-		Vector3 _RepulsiveForce = Vector3.zero;
-
-		for (int i = 0; i < accuracy; i++) {
-
-			_direction = Quaternion.AngleAxis(inclinaison * i, transform.up) * _direction;
-
-			Debug.DrawRay(_origin, _direction, Color.black);
-			Debug.DrawLine(_origin, _origin + _direction.normalized, Color.blue);
-
-			if(Physics.Raycast(_origin, _direction, out _rayHit, 1f))
-			{
-				Vector3 _TempTang = Vector3.Cross(_rayHit.normal, Vector3.up);
-				Vector3 _TangDownwards = Vector3.Cross(_rayHit.normal, _TempTang);
-
-				Debug.DrawRay(_rayHit.point, _TangDownwards, Color.red);
-
-				_RepulsiveForce += (TangDownwards) + (_direction);
-				print(_RepulsiveForce);
-			}
-
-		}
-
-		gravForce += _RepulsiveForce.normalized;
-
-	}
+//	void AntiAirBlock(int accuracy)
+//	{
+//
+//		Vector3 _origin = transform.position + (-Vector3.up * ((myController.bounds.extents.y/4f) *3f));
+//		float inclinaison = 360f/accuracy;
+//		Vector3 _direction = transform.forward;
+//		RaycastHit _rayHit;
+//
+//		Vector3 _RepulsiveForce = Vector3.zero;
+//
+//		for (int i = 0; i < accuracy; i++) {
+//
+//			_direction = Quaternion.AngleAxis(inclinaison * i, transform.up) * _direction;
+//
+//			Debug.DrawRay(_origin, _direction, Color.black);
+//			Debug.DrawLine(_origin, _origin + _direction.normalized, Color.blue);
+//
+//			if(Physics.Raycast(_origin, _direction, out _rayHit, 1f))
+//			{
+//				Vector3 _TempTang = Vector3.Cross(_rayHit.normal, Vector3.up);
+//				Vector3 _TangDownwards = Vector3.Cross(_rayHit.normal, _TempTang);
+//
+//				Debug.DrawRay(_rayHit.point, _TangDownwards, Color.red);
+//
+//				_RepulsiveForce += (TangDownwards) + (_direction);
+////				print(_RepulsiveForce);
+//			}
+//
+//		}
+//
+//		gravForce += _RepulsiveForce.normalized;
+//
+//	}
 
 	Vector3 gravForce = Vector3.zero;
 
