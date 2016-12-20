@@ -29,14 +29,21 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     public float distanceToFullyDisappear = 1.8f;
 
     [Header("Angle clamp")]
-    public float yAngleMin = -20.0f;
-    public float yAngleMax = 50.0f;
-    public float yAngleMinToYawn = -20f;
-    public float yawnAngle = 30f;
-    public float minDistanceAtYawn = 2f;
     public bool limitXAngle = false;
     public float xAngleMin = -50.0f;
     public float xAngleMax = 50.0f;
+    public float yAngleMin = -20.0f;
+    public float yAngleMax = 50.0f;
+
+    [Header("Pitch when Camera Down")]
+    public float yAngleMinToYawn = -20f;
+    public float pitchAngle = 45f;
+    public float minDistanceAtYawn = 1f;
+    public bool applyMovementWithYawn = true;
+    [Tooltip("0 = angleMin")]
+    public float startMovementAtAngle = 0f;
+    public float xYawnMovement = 0.5f;
+    public float yYawnMovement = 0.5f;
 
     [Header("Modificiations")]
     public float xModificationAngle = 0f;
@@ -79,7 +86,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     [SerializeField]
     private Renderer[] playerRenderers;
     [SerializeField]
-    float m_distanceToYawn; 
+    float m_distanceToYawn;
     private Quaternion m_rotation;
     private Vector3 m_dir;
     private bool m_playerColorChanged = false;
@@ -126,6 +133,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             Debug.LogError("playerTransform not assigned nor found for ThirdPersonCameraMovement");
         }
 
+        if (applyMovementWithYawn && startMovementAtAngle == 0) { startMovementAtAngle = yAngleMin; }
     }
 
 
@@ -172,13 +180,15 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         m_lerpedHeight = MappedLerp(Mathf.Max(currentY, yAngleMin), yAngleMin - minDistance, yAngleMax, maxDistance, 0f);
 
         m_distanceToYawn = (currentY > yAngleMin) ? 0f : MappedLerp(currentY, yAngleMin, yAngleMinToYawn, m_lerpedHeight, m_lerpedHeight + minDistanceAtYawn);
-        //m_lerpedHeight = (currentY > yAngleMin) ?
-        //    MappedLerp(Mathf.Max(currentY, yAngleMin), yAngleMin - minDistance, yAngleMax, maxDistance, 0f) :
-        //    MappedLerp(currentY, yAngleMinToYawn , yAngleMin - minDistance, 0f, 0f);
+
 
         //yawn behaviour when at min distance
-        pivotRotation.x = (currentY > yAngleMin) ? 0f : Mathf.Lerp(pivotRotation.x, -MappedLerp(currentY, yAngleMin, yAngleMinToYawn, 0f, yawnAngle), lerpVelocity);
-
+        pivotRotation.x = (currentY > yAngleMin) ? 0f : Mathf.Lerp(pivotRotation.x, -MappedLerp(currentY, yAngleMin, yAngleMinToYawn, 0f, pitchAngle), lerpVelocity);
+        if (applyMovementWithYawn)
+        {
+            pivotPosition.x = (currentY > startMovementAtAngle) ? 0f : Mathf.Lerp(pivotPosition.x, -MappedLerp(currentY, startMovementAtAngle, yAngleMinToYawn, 0f, xYawnMovement), lerpVelocity);
+            pivotPosition.y = (currentY > startMovementAtAngle) ? 0f : Mathf.Lerp(pivotPosition.y, -MappedLerp(currentY, startMovementAtAngle, yAngleMinToYawn, 0f, -yYawnMovement), lerpVelocity);
+        }
 
         //BEHAVIOUR Rotation by normal
         if (rotationByNormal) CameraRotationByNormal(ref pivotRotation, rotationIntensity, rotationLerp);
@@ -190,7 +200,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         if (!m_terrainRaycastEntered && !m_obstacleRaycastEntered)
         {
 
-            float _substraction = (currentY > yAngleMin) ? m_lerpedHeight : m_distanceToYawn; 
+            float _substraction = (currentY > yAngleMin) ? m_lerpedHeight : m_distanceToYawn;
 
             m_trueDistance = (Mathf.Abs(m_trueDistance - maxDistance) > 0.1f) ?
                 Mathf.Lerp(m_trueDistance, maxDistance - _substraction, Time.fixedDeltaTime * lerpVelocity) :
@@ -567,6 +577,5 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         float newRange = newMax - newMin;
         return (((valueToTransform - oldMin) * newRange) / oldRange) + newMin;
     }
-
 
 }
