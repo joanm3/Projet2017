@@ -501,23 +501,6 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
     }
 
-    private void CameraRotationByNormal(ref Vector3 rotation, float xIntensity, float yIntensity, float zIntensity, float lerpFactor)
-    {
-        if (player == null)
-            return;
-
-        if (player.surfaceNormal != null)
-        {
-            //Vector3 desiredRotation = new Vector3(player.surfaceNormal.x * xIntensity * m_rotation.x, player.surfaceNormal.y * yIntensity * m_rotation.y, player.surfaceNormal.z * zIntensity * m_rotation.z);
-            Vector3 desiredRotation = new Vector3((player.surfaceNormal.x - m_rotation.x) * xIntensity, (player.surfaceNormal.y - m_rotation.y) * yIntensity, (player.surfaceNormal.z - m_rotation.z) * zIntensity);
-
-            //Debug.Log("Normal: " + player.surfaceNormal.ToString());
-            //Debug.Log("Desired: " + desiredRotation.ToString());
-
-            rotation = Vector3.Lerp(rotation, desiredRotation, Time.deltaTime * lerpFactor);
-        }
-    }
-
     private void CameraRotationByNormal(ref Vector3 rotation, float intensity, float lerpFactor)
     {
         if (player == null)
