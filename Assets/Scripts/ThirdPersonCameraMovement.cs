@@ -31,6 +31,9 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     [Header("Angle clamp")]
     public float yAngleMin = -20.0f;
     public float yAngleMax = 50.0f;
+    public float yAngleMinToYawn = -20f;
+    public float yawnAngle = 30f;
+    public float minDistanceAtYawn = 2f;
     public bool limitXAngle = false;
     public float xAngleMin = -50.0f;
     public float xAngleMax = 50.0f;
@@ -75,7 +78,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     public List<Renderer> obstacleRenderers = new List<Renderer>();
     [SerializeField]
     private Renderer[] playerRenderers;
-
+    [SerializeField]
+    float m_distanceToYawn; 
     private Quaternion m_rotation;
     private Vector3 m_dir;
     private bool m_playerColorChanged = false;
@@ -147,7 +151,17 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         #endregion
 
         #region BLOCK X AND Y CAMERA ANGLES 
-        currentY = Mathf.Clamp(currentY, yAngleMin, yAngleMax);
+        if (Mathf.Abs(currentX) >= 360)
+        {
+            currentX = 0f;
+        }
+        if (Mathf.Abs(currentY) >= 360)
+        {
+            currentX = 0f;
+        }
+
+
+        currentY = Mathf.Clamp(currentY, yAngleMinToYawn, yAngleMax);
         if (limitXAngle)
             currentX = Mathf.Clamp(currentX, xAngleMin, xAngleMax);
         #endregion
@@ -155,17 +169,32 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         //CAMERA BEHAVIOURS
 
         //BEHAVIOUR Distance from ground
-        m_lerpedHeight = MappedLerp(currentY, yAngleMin - minDistance, yAngleMax, maxDistance, 0f);
+        m_lerpedHeight = MappedLerp(Mathf.Max(currentY, yAngleMin), yAngleMin - minDistance, yAngleMax, maxDistance, 0f);
+
+        m_distanceToYawn = (currentY > yAngleMin) ? 0f : MappedLerp(currentY, yAngleMin, yAngleMinToYawn, m_lerpedHeight, m_lerpedHeight + minDistanceAtYawn);
+        //m_lerpedHeight = (currentY > yAngleMin) ?
+        //    MappedLerp(Mathf.Max(currentY, yAngleMin), yAngleMin - minDistance, yAngleMax, maxDistance, 0f) :
+        //    MappedLerp(currentY, yAngleMinToYawn , yAngleMin - minDistance, 0f, 0f);
+
+        //yawn behaviour when at min distance
+        pivotRotation.x = (currentY > yAngleMin) ? 0f : Mathf.Lerp(pivotRotation.x, -MappedLerp(currentY, yAngleMin, yAngleMinToYawn, 0f, yawnAngle), lerpVelocity);
+
 
         //BEHAVIOUR Rotation by normal
         if (rotationByNormal) CameraRotationByNormal(ref pivotRotation, rotationIntensity, rotationLerp);
 
+
+
+
         //BEHAVIOUR Apply distance when no obstacle and with distance from ground
         if (!m_terrainRaycastEntered && !m_obstacleRaycastEntered)
         {
+
+            float _substraction = (currentY > yAngleMin) ? m_lerpedHeight : m_distanceToYawn; 
+
             m_trueDistance = (Mathf.Abs(m_trueDistance - maxDistance) > 0.1f) ?
-                Mathf.Lerp(m_trueDistance, maxDistance - m_lerpedHeight, Time.fixedDeltaTime * lerpVelocity) :
-                maxDistance - m_lerpedHeight;
+                Mathf.Lerp(m_trueDistance, maxDistance - _substraction, Time.fixedDeltaTime * lerpVelocity) :
+                maxDistance - _substraction;
         }
 
 
@@ -321,7 +350,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         if (m_obstacleRaycastEntered && m_colliderRend == null)
         {
             #region OBSTACLE EXIT
-            Debug.Log("entered exit obstacle");
+            //Debug.Log("entered exit obstacle");
             for (int i = 0; i < obstacleRenderers.Count; i++)
             {
                 if (obstacleRenderers[i].enabled)
@@ -435,7 +464,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         //APPLY MOVEMENT
         m_dir = new Vector3(0, 0, -m_trueDistance);
 
-        m_rotation = Quaternion.Euler(currentY + yModificationAngle, currentX + xModificationAngle, 0f);
+        m_rotation = Quaternion.Euler(Mathf.Max(currentY, yAngleMin) + yModificationAngle, currentX + xModificationAngle, 0f);
         //Debug.Log("rotation: " + m_rotation); 
         m_transform.position = playerTransform.position + m_rotation * m_dir;
 

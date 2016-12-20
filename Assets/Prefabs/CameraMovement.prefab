@@ -206,7 +206,7 @@ MonoBehaviour:
   player: {fileID: 0}
   useJoystick: 0
   maxDistance: 50
-  minDistance: 20
+  minDistance: 5
   cameraSpeed: 2
   sensitivityX: 5
   sensitivityY: 5
@@ -227,6 +227,9 @@ MonoBehaviour:
   distanceToFullyDisappear: 1.2
   yAngleMin: 0
   yAngleMax: 50
+  yAngleMinToYawn: -20
+  yawnAngle: 45
+  minDistanceAtYawn: 1
   limitXAngle: 0
   xAngleMin: -50
   xAngleMax: 50
@@ -245,6 +248,7 @@ MonoBehaviour:
   fadeRenderers: []
   obstacleRenderers: []
   playerRenderers: []
+  m_distanceToYawn: 0
 --- !u!114 &114886960839568128
 MonoBehaviour:
   m_ObjectHideFlags: 1
