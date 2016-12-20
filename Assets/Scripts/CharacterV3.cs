@@ -204,6 +204,7 @@ public class CharacterV3 : MonoBehaviour
         }
         else
         {
+            m_jumpVector = Vector3.zero; 
             m_fallVector = Vector3.zero;
         }
 
