@@ -208,6 +208,7 @@ public class CharacterV3 : MonoBehaviour
             m_fallVector = Vector3.zero;
         }
 
+
         //Quaternion normalRotation = UpdatePlayerRotationByNormal(surfaceNormal);
         //float playerRotation = transform.eulerAngles.y;
 
@@ -215,8 +216,22 @@ public class CharacterV3 : MonoBehaviour
         //finalRotation.y *= playerRotation;
         //Debug.Log(finalRotation); 
         //transform.eulerAngles = finalRotation;
-        inputVector = GetInputVector();  
-        transform.rotation = GetInputSpeedRot(inputVector); 
+        inputVector = GetInputVector();
+
+        //testing rotations...
+        Quaternion _standardRotation = GetInputSpeedRot(inputVector);
+        Quaternion _normalRotation = GetRotationByNormal(surfaceNormal);
+        Vector3 _standardEuler = _standardRotation.ToEulerAngles() * Mathf.Rad2Deg;
+        Vector3 _normalEuler = _normalRotation.ToEulerAngles() * Mathf.Rad2Deg;
+
+        Quaternion _finalRotation = _standardRotation;
+        transform.rotation = _finalRotation;
+        //Debug.Log("standard: " + _standardEuler);
+        //Debug.Log("normal: " + _normalEuler.normalized);
+        //Debug.Log("rotation: " + _finalRotation.ToEulerAngles() * Mathf.Rad2Deg);
+
+        //incorrect just for testing
+        //transform.eulerAngles = new Vector3(_normalEuler.x, _standardEuler.y, _normalEuler.z); 
 
         shouldSpeedDir = (InputSpeedDir * (inputGravityMultiplier)) + current_VelocitySpeedDir + m_fallVector;
 
@@ -262,14 +277,13 @@ public class CharacterV3 : MonoBehaviour
             _vectorToReturn = Vector3.MoveTowards(current_VelocitySpeedDir, surface_VelocitySpeedDir, velocityTransitionSpeed_decceleration * Time.deltaTime);
         }
 
-        return _vectorToReturn; 
+        return _vectorToReturn;
         //		print("Angle : " + Vector3.Angle (Vector3.up, surfaceNormal) + " / CG : " + fromCtoG + " / surfForce : " + surface_VelocitySpeedDir);
 
     }
 
     Vector3 GetInputSpeedDir(Vector3 inputVector)
     {
-
         Vector3 _vectorToReturn = Vector3.zero;
         Vector3 _vectorTolook = inputVector;        //Direction que le controler doit regarder
         if (inputVector.magnitude < 0.3)
@@ -277,9 +291,12 @@ public class CharacterV3 : MonoBehaviour
         //au cas ou on look nul part
         _vectorToReturn = transform.forward;
 
+        Debug.Log("forward: " + transform.forward); 
         //Translation Speed
         _vectorToReturn = transform.forward * GetCurrentSpeedByCurve(_vectorTolook.normalized * inputVector.magnitude);
-        Debug.Log(_vectorToReturn);
+        //Vector3 _projVector = Vector3.Project(_vectorToReturn, surfaceNormal);
+        //_vectorToReturn = _vectorToReturn - _projVector; 
+        Debug.Log("vector: " + _vectorToReturn);
         return _vectorToReturn;
     }
 
@@ -297,7 +314,7 @@ public class CharacterV3 : MonoBehaviour
         Quaternion _toRot = Quaternion.LookRotation(_vectorTolook, transform.up);
         Quaternion _rRot = Quaternion.RotateTowards(transform.rotation, _toRot, currentRotationSpeed * Time.deltaTime);
 
-        return _rRot; 
+        return _rRot;
     }
 
     Vector3 GetInputVector()
@@ -308,21 +325,29 @@ public class CharacterV3 : MonoBehaviour
         if (Vector3.Angle(Vector3.up, surfaceNormal) > Glide_angle)
             inputVector = Vector3.zero;
 
-        return inputVector; 
+        return inputVector;
     }
 
-    private Quaternion UpdatePlayerRotationByNormal(Vector3 surfaceNormal)
+    private Quaternion GetRotationByNormal()
     {
-        //RaycastHit hitInfo;
+        RaycastHit hitInfo;
 
-        //if (GetRaycastDownAtNewPosition(movementDirection, speed, out hitInfo))
-        //{
-        Quaternion targetRotation = Quaternion.FromToRotation(Vector3.up, surfaceNormal);
+        if (GetRaycastAtPosition(out hitInfo))
+        {
+            Quaternion targetRotation = Quaternion.FromToRotation(Vector3.up, hitInfo.normal);
+            Quaternion finalRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, float.PositiveInfinity);
+            return finalRotation;
+        }
+        return Quaternion.identity;
+    }
+
+    private Quaternion GetRotationByNormal(Vector3 normal)
+    {
+
+        Quaternion targetRotation = Quaternion.FromToRotation(Vector3.up, normal);
         Quaternion finalRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, float.PositiveInfinity);
         return finalRotation;
-        //transform.rotation = finalRotation;
-        //transform.position = hitInfo.point + hitInfo.normal * .5f;
-        //}
+
     }
 
     private bool GetRaycastDownAtNewPosition(Vector3 movementDirection, float speed, out RaycastHit hitInfo)
@@ -338,6 +363,18 @@ public class CharacterV3 : MonoBehaviour
         return false;
     }
 
+    private bool GetRaycastAtPosition(out RaycastHit hitInfo)
+    {
+        Vector3 newPosition = transform.position;
+        Ray ray = new Ray(transform.position, -transform.up);
+
+        if (Physics.Raycast(ray, out hitInfo, float.PositiveInfinity))
+        {
+            return true;
+        }
+
+        return false;
+    }
 
 
     /// <summary>
