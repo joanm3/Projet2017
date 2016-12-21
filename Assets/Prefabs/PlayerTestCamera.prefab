@@ -435,6 +435,7 @@ MonoBehaviour:
   inputVector: {x: 0, y: 0, z: 0}
   canUseInput: 1
   myCharaparenting: {fileID: 0}
+  myState: 0
 --- !u!135 &135506102903106972
 SphereCollider:
   m_ObjectHideFlags: 1

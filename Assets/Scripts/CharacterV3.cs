@@ -182,7 +182,7 @@ public class CharacterV3 : MonoBehaviour
 				tGrav += Time.deltaTime;
 
 				//Check air blocage
-				AntiAirBlock(8);
+//				AntiAirBlock(8);
 
 			}
 			else
