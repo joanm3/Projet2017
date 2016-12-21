@@ -144,7 +144,7 @@ public class CharacterV3 : MonoBehaviour
         //input dir + vel
         if (canUseInput && Vector3.Angle(rayHit.normal, Vector3.up) < Glide_angle)
         {
-            InputSpeedDir = GetInputSpeedDir();
+            InputSpeedDir = GetInputSpeedDir(inputVector);
         }
         else
         {
@@ -186,7 +186,7 @@ public class CharacterV3 : MonoBehaviour
         {
             grounded = false;
             //improve jump vector
-            m_jumpVector = (Vector3.up + (surfaceNormal * 0.5f)).normalized; 
+            m_jumpVector = (Vector3.up + (surfaceNormal * 0.5f)).normalized;
 
             Debug.Log("Jump Vector: " + m_jumpVector);
         }
@@ -204,11 +204,24 @@ public class CharacterV3 : MonoBehaviour
         }
         else
         {
-            m_jumpVector = Vector3.zero; 
+            m_jumpVector = Vector3.zero;
             m_fallVector = Vector3.zero;
         }
 
+        //Quaternion normalRotation = UpdatePlayerRotationByNormal(surfaceNormal);
+        //float playerRotation = transform.eulerAngles.y;
+
+        //Vector3 finalRotation = (Quaternion.ToEulerAngles(normalRotation) * Mathf.Rad2Deg);
+        //finalRotation.y *= playerRotation;
+        //Debug.Log(finalRotation); 
+        //transform.eulerAngles = finalRotation;
+        inputVector = GetInputVector();  
+        transform.rotation = GetInputSpeedRot(inputVector); 
+
         shouldSpeedDir = (InputSpeedDir * (inputGravityMultiplier)) + current_VelocitySpeedDir + m_fallVector;
+
+        //UpdatePlayerTransform(InputSpeedDir * (inputGravityMultiplier), current_VelocitySpeedDir + m_fallVector)
+
         controller.Move(shouldSpeedDir * _dt);
         //controller.Move(m_fallVector * Time.deltaTime);
 
@@ -253,22 +266,24 @@ public class CharacterV3 : MonoBehaviour
 
     }
 
-
-
-    /// <summary>
-    /// Vitesse et direction du joueur par Input
-    /// </summary>
-    Vector3 GetInputSpeedDir()
+    Vector3 GetInputSpeedDir(Vector3 inputVector)
     {
 
         Vector3 _vectorToReturn = Vector3.zero;
-        //Direction
-        inputVector = (cam.transform.forward * Input.GetAxis("Vertical")) + (cam.transform.right * Input.GetAxis("Horizontal"));
-        inputVector.y = 0f;
-        inputVector.Normalize();
+        Vector3 _vectorTolook = inputVector;        //Direction que le controler doit regarder
+        if (inputVector.magnitude < 0.3)
+            _vectorTolook = transform.forward;
+        //au cas ou on look nul part
+        _vectorToReturn = transform.forward;
 
-        if (Vector3.Angle(Vector3.up, surfaceNormal) > Glide_angle)
-            inputVector = Vector3.zero;
+        //Translation Speed
+        _vectorToReturn = transform.forward * GetCurrentSpeedByCurve(_vectorTolook.normalized * inputVector.magnitude);
+        Debug.Log(_vectorToReturn);
+        return _vectorToReturn;
+    }
+
+    Quaternion GetInputSpeedRot(Vector3 inputVector)
+    {
         Vector3 _vectorTolook = inputVector;        //Direction que le controler doit regarder
         if (inputVector.magnitude < 0.3)
             _vectorTolook = transform.forward;
@@ -277,21 +292,50 @@ public class CharacterV3 : MonoBehaviour
         currentRotationSpeed = ((max_RotationSpeed - min_RotationSpeed) * rotationBySpeed.Evaluate(_v_value)) + min_RotationSpeed;
 
         //Rotation
+        Quaternion _angleRotation = Quaternion.FromToRotation(Vector3.up, surfaceNormal);
         Quaternion _toRot = Quaternion.LookRotation(_vectorTolook, transform.up);
         Quaternion _rRot = Quaternion.RotateTowards(transform.rotation, _toRot, currentRotationSpeed * Time.deltaTime);
 
-        transform.rotation = _rRot;
-
-        //au cas ou on look nul part
-        _vectorToReturn = transform.forward;
-
-        //Translation Speed
-        _vectorToReturn = _vectorToReturn.normalized * GetCurrentSpeedByCurve(_vectorTolook.normalized * inputVector.magnitude);
-
-        return _vectorToReturn;
+        return _rRot; 
     }
 
+    Vector3 GetInputVector()
+    {
+        inputVector = (cam.transform.forward * Input.GetAxis("Vertical")) + (cam.transform.right * Input.GetAxis("Horizontal"));
+        inputVector.y = 0f;
+        inputVector.Normalize();
+        if (Vector3.Angle(Vector3.up, surfaceNormal) > Glide_angle)
+            inputVector = Vector3.zero;
 
+        return inputVector; 
+    }
+
+    private Quaternion UpdatePlayerRotationByNormal(Vector3 surfaceNormal)
+    {
+        //RaycastHit hitInfo;
+
+        //if (GetRaycastDownAtNewPosition(movementDirection, speed, out hitInfo))
+        //{
+        Quaternion targetRotation = Quaternion.FromToRotation(Vector3.up, surfaceNormal);
+        Quaternion finalRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, float.PositiveInfinity);
+        return finalRotation;
+        //transform.rotation = finalRotation;
+        //transform.position = hitInfo.point + hitInfo.normal * .5f;
+        //}
+    }
+
+    private bool GetRaycastDownAtNewPosition(Vector3 movementDirection, float speed, out RaycastHit hitInfo)
+    {
+        Vector3 newPosition = transform.position;
+        Ray ray = new Ray(transform.position + movementDirection * speed, -transform.up);
+
+        if (Physics.Raycast(ray, out hitInfo, float.PositiveInfinity))
+        {
+            return true;
+        }
+
+        return false;
+    }
 
 
 
@@ -322,7 +366,8 @@ public class CharacterV3 : MonoBehaviour
             _v_value = InputAcceleration.Evaluate(_t_time);
 
         }
-        else {
+        else
+        {
             //Le joueur a laché le stick : on deccelere
 
             if (currentCurveOfSpeed != CurvesOfSpeed.Deccelerate)
