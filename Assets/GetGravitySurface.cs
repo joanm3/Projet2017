@@ -14,7 +14,7 @@ public class GetGravitySurface : MonoBehaviour {
 	Rigidbody myRigid;
 
 	[HideInInspector]
-	Vector3 averageSurfaceNormal = Vector3.zero;	//Average surface normal
+	public Vector3 averageSurfaceNormal = Vector3.zero;	//Average surface normal
 
 	void Start()
 	{
