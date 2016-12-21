@@ -151,7 +151,7 @@ public class CharacterV3 : MonoBehaviour
             InputSpeedDir = Vector3.zero;
         }
 
-        SetVelocitySpeedDir();
+        current_VelocitySpeedDir = GetVelocitySpeedDir();
 
         //GRAV
         if (Physics.Raycast(transform.position, -Vector3.up, out rayHit, Mathf.Infinity))
@@ -231,7 +231,7 @@ public class CharacterV3 : MonoBehaviour
     /// <summary>
     /// Vitesse et direction du joueur par surface
     /// </summary>
-    void SetVelocitySpeedDir()
+    private Vector3 GetVelocitySpeedDir()
     {
 
         Vector3 _vectorToReturn = Vector3.zero;
@@ -254,14 +254,15 @@ public class CharacterV3 : MonoBehaviour
         //si accelere
         if (surface_VelocitySpeedDir.magnitude > current_VelocitySpeedDir.magnitude)
         {
-            current_VelocitySpeedDir = Vector3.MoveTowards(current_VelocitySpeedDir, surface_VelocitySpeedDir, velocityTransitionSpeed_acceleration * Time.deltaTime);
+            _vectorToReturn = Vector3.MoveTowards(current_VelocitySpeedDir, surface_VelocitySpeedDir, velocityTransitionSpeed_acceleration * Time.deltaTime);
         }
         //Si decelere
         else
         {
-            current_VelocitySpeedDir = Vector3.MoveTowards(current_VelocitySpeedDir, surface_VelocitySpeedDir, velocityTransitionSpeed_decceleration * Time.deltaTime);
+            _vectorToReturn = Vector3.MoveTowards(current_VelocitySpeedDir, surface_VelocitySpeedDir, velocityTransitionSpeed_decceleration * Time.deltaTime);
         }
 
+        return _vectorToReturn; 
         //		print("Angle : " + Vector3.Angle (Vector3.up, surfaceNormal) + " / CG : " + fromCtoG + " / surfForce : " + surface_VelocitySpeedDir);
 
     }
