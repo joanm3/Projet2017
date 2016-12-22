@@ -12,6 +12,7 @@ public class CharacterV4 : MonoBehaviour
     //input
     private Vector3 m_inputDirection;
     private float m_inputSpeed;
+    private float m_deltaHeadingInDeg;
     private Quaternion m_inputRotation;
 
 
@@ -25,7 +26,7 @@ public class CharacterV4 : MonoBehaviour
     }
     private Vector3 m_surfaceDirection;
     private Vector3 m_surfaceForce;
-    private Quaternion m_normalRotation; 
+    Quaternion m_normalRotation;
 
     //final avatar movement
     private Vector3 m_characterDirection;
@@ -113,16 +114,18 @@ public class CharacterV4 : MonoBehaviour
 
         //get input
         m_inputDirection = UpdateInputVector();
+        //delete this:
         m_inputRotation = UpdateInputRotation(m_inputDirection);
 
-        //get this angle straight and then you have the formula! 
-        //check what happens with the inputDirection and camera. 
-        Debug.Log(Vector3.Angle(m_inputDirection, m_cam.transform.forward)); 
-        
-        
+        //get the heading angle depending on camera
+        m_deltaHeadingInDeg = UpdateDeltaAngleInDeg(m_inputDirection, m_cam.transform); 
+
+        Debug.LogFormat("heading: {0}, realRot: {1} ", m_deltaHeadingInDeg, m_inputDirection);
+
         //get surface and normals
         m_surfaceNormal = UpdateSurfaceNormalByRaycast(out m_hitInfo);
         m_normalRotation = GetRotationByNormal2(m_surfaceNormal);
+
 
         //get rotation
         //transform.rotation = m_inputRotation * m_normalRotation;
@@ -192,6 +195,20 @@ public class CharacterV4 : MonoBehaviour
         return inputVector;
     }
 
+    private float UpdateDeltaAngleInDeg(Vector3 inputDirection, Transform cameraTransform)
+    {
+        Vector3 _lookingDirection = (inputDirection.magnitude >= 0.3f) ? inputDirection : transform.forward;
+
+        //get the angle
+        float _deltaHeadingInDeg = Vector3.Angle(_lookingDirection, cameraTransform.forward);
+
+        //when the angle is negative
+        Vector3 _cross = Vector3.Cross(_lookingDirection, m_cam.transform.forward);
+        if (_cross.y < 0) _deltaHeadingInDeg = -_deltaHeadingInDeg;
+
+        return _deltaHeadingInDeg; 
+    }
+
     private Quaternion GetRotationByNormal(Vector3 normal)
     {
         Quaternion targetRotation = Quaternion.FromToRotation(Vector3.up, normal) * transform.rotation;
@@ -236,9 +253,10 @@ public class CharacterV4 : MonoBehaviour
         //Quaternion _angleRotation = Quaternion.FromToRotation(Vector3.up, surfaceNormal);
         Quaternion _toRot = Quaternion.LookRotation(_vectorTolook, transform.up);
         Quaternion _rRot = Quaternion.RotateTowards(transform.rotation, _toRot, _currentRotationSpeed * Time.deltaTime);
-        
+
         return _rRot;
     }
+
 
     private Vector3 GetPositionByHitPoint(Vector3 point)
     {

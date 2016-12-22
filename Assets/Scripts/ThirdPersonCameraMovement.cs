@@ -526,9 +526,9 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
             Vector3 relNorm = Vector3.ProjectOnPlane(norm, Vector3.Cross(Vector3.up, vectorOnFacePlane));
 
-            float dot = Vector3.Dot(vectorOnFacePlane, relNorm);
-
             float desiredRotation = Vector3.Angle(relNorm, Vector3.up);
+
+            float dot = Vector3.Dot(vectorOnFacePlane, relNorm);
 
             if (dot > 0) desiredRotation = -desiredRotation;
 
