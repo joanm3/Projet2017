@@ -113,8 +113,13 @@ public class CharacterV4 : MonoBehaviour
 
         //get input
         m_inputDirection = UpdateInputVector();
-        m_inputRotation = UpdateInputRotation(m_inputDirection); 
+        m_inputRotation = UpdateInputRotation(m_inputDirection);
 
+        //get this angle straight and then you have the formula! 
+        //check what happens with the inputDirection and camera. 
+        Debug.Log(Vector3.Angle(m_inputDirection, m_cam.transform.forward)); 
+        
+        
         //get surface and normals
         m_surfaceNormal = UpdateSurfaceNormalByRaycast(out m_hitInfo);
         m_normalRotation = GetRotationByNormal2(m_surfaceNormal);
