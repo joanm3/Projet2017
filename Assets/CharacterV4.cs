@@ -12,21 +12,22 @@ public class CharacterV4 : MonoBehaviour
     //input
     private Vector3 m_inputDirection;
     private float m_inputSpeed;
+    private Quaternion m_inputRotation;
+
 
     //surface
     private Vector3 m_surfaceNormal;
-
     public Vector3 SurfaceNormal
     {
         get { return m_surfaceNormal; }
         private set { m_surfaceNormal = value; }
 
     }
-
     private Vector3 m_surfaceDirection;
     private Vector3 m_surfaceForce;
+    private Quaternion m_normalRotation; 
 
-    //movement
+    //final avatar movement
     private Vector3 m_characterDirection;
     private float m_characterSpeed;
 
@@ -55,7 +56,7 @@ public class CharacterV4 : MonoBehaviour
     [SerializeField]
     private float m_inputGravityMultiplier;
     private Vector3 m_gravForceVector = Vector3.zero;
-    private float m_tJumpCooldown = 0.1f;
+    private float m_tJumpCooldown = 0.05f;
 
 
     //speed
@@ -72,6 +73,22 @@ public class CharacterV4 : MonoBehaviour
     [Tooltip("La vitesse que donne le stick sur une surface plane")]
     [Range(5.0f, 40.0f)]
     public float maxInputSpeed = 15.0f;
+
+    [SerializeField]
+    private float m_rotationSpeed = 1f;
+
+    [SerializeField]
+    [Tooltip("Vitesse de rotation maximum (en angles par seconde)")]
+    [Range(5.0f, 1440.0f)]
+    private float m_maxRotSpeed = 200.0f;
+    [SerializeField]
+    [Tooltip("Vitesse de rotation minimum (en angles par seconde)")]
+    [Range(5.0f, 360.0f)]
+    private float m_minRotSpeed = 50.0f;
+    [SerializeField]
+    [Tooltip("Vitesse de rotation en fonction de la vitesse de deplacement input. De gauche à droite la vitesse de deplacement input, de haut en bas la vitesse de rotation. Interpolation entre min_RotationSpeed et max_RotationSpeed en fonction de la curve")]
+    private AnimationCurve m_rotationBySpeed = AnimationCurve.Linear(0.0f, 0.0f, 1.0f, 1.0f);
+
 
 
     private enum CurvesOfSpeed
@@ -95,22 +112,24 @@ public class CharacterV4 : MonoBehaviour
             _dt = 0.15f;
 
         //get input
-        m_inputDirection = GetInputVector();
-        //Debug.Log(m_inputDirection);
+        m_inputDirection = UpdateInputVector();
+        m_inputRotation = UpdateInputRotation(m_inputDirection); 
 
-        m_surfaceNormal = GetSurfaceNormalByRaycast(out m_hitInfo);
-        //assign if isGrounded or not. 
-        if (m_tGrav > m_tJumpCooldown)
-        {
-            m_tGrav = 0f;
-        }
+        //get surface and normals
+        m_surfaceNormal = UpdateSurfaceNormalByRaycast(out m_hitInfo);
+        m_normalRotation = GetRotationByNormal2(m_surfaceNormal);
 
-        m_isGrounded = (m_tGrav < m_tJumpCooldown) ? GetRaycastAtPosition(out m_hitInfo, 1f) : false;
-        m_isGrounded = GetRaycastAtPosition(out m_hitInfo, 1.1f);
+        //get rotation
+        //transform.rotation = m_inputRotation * m_normalRotation;
+        transform.rotation = m_inputRotation;
 
+        m_tGrav += _dt;
+        m_tGrav = Mathf.Max(m_tGrav, 10f);
+        //m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_hitInfo, 0.1f) : false;
+        m_isGrounded = GetRaycastAtPosition(out m_hitInfo, 0.1f);
 
+        //RotationWithNormalAndInput(m_surfaceNormal);
 
-        transform.rotation = GetRotationByNormal(m_surfaceNormal);
 
         if (Input.GetButtonDown("Jump") && m_isGrounded)
         {
@@ -122,13 +141,14 @@ public class CharacterV4 : MonoBehaviour
         {
             m_jumpVector = Vector3.zero;
             m_fallVector = Vector3.zero;
-            transform.rotation = Quaternion.FromToRotation(transform.up, m_surfaceNormal) * transform.rotation;
+            //transform.rotation = Quaternion.FromToRotation(transform.up, m_surfaceNormal) * transform.rotation;
         }
         else
         {
-            transform.rotation = Quaternion.identity;
+            //transform.rotation = Quaternion.identity;
             OnAir(_dt);
         }
+
 
 
         //INTEGRATE m_inputGravityMultiplier
@@ -150,14 +170,16 @@ public class CharacterV4 : MonoBehaviour
     private void OnAir(float deltaTime)
     {
         m_gravForceVector = m_gravVector * (-m_gravForce * m_gravForceOverTime.Evaluate(m_tGrav));
-        m_tGrav += Time.deltaTime;
+        //check this problem later for suming deltatime to tgrav. 
+        //m_tGrav += deltaTime;
+        //Debug.Log(m_tGrav);
 
         m_jumpVector += m_gravForceVector * -m_gravForce * deltaTime;
         m_fallVector += m_jumpVector * deltaTime;
         //Debug.Log(m_jumpVector);
     }
 
-    private Vector3 GetInputVector()
+    private Vector3 UpdateInputVector()
     {
         Vector3 inputVector = (m_cam.transform.forward * Input.GetAxis("Vertical")) + (m_cam.transform.right * Input.GetAxis("Horizontal"));
         inputVector.y = 0f;
@@ -167,9 +189,57 @@ public class CharacterV4 : MonoBehaviour
 
     private Quaternion GetRotationByNormal(Vector3 normal)
     {
-        Quaternion targetRotation = Quaternion.FromToRotation(Vector3.up, normal);
+        Quaternion targetRotation = Quaternion.FromToRotation(Vector3.up, normal) * transform.rotation;
         Quaternion finalRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, float.PositiveInfinity);
         return finalRotation;
+    }
+
+    private Quaternion GetRotationByNormal2(Vector3 normal)
+    {
+        return Quaternion.FromToRotation(Vector3.up, normal) * transform.rotation;
+
+    }
+
+    //just to have some info to how to do it. 
+    private void UpdateInputAndNormalRotation(Vector3 normal, float rotationSpeed)
+    {
+        //https://forum.unity3d.com/threads/character-align-to-surface-normal.33987/
+        //get the angle
+        //then do quaternion.angleaxis with transform.up to get the rotation
+        //then transform the quaternion with fromtorotation to follow the normal
+        // finally multiply with actual rotation? 
+
+
+        float headingDeltaAngle = Input.GetAxis("Horizontal") * Time.deltaTime * rotationSpeed;
+        Quaternion headingDelta = Quaternion.AngleAxis(headingDeltaAngle, transform.up);
+        //align with surface normal
+        transform.rotation = Quaternion.FromToRotation(transform.up, normal) * transform.rotation;
+        //apply heading rotation
+        transform.rotation = headingDelta * transform.rotation;
+    }
+
+    Quaternion UpdateInputRotation(Vector3 inputVector)
+    {
+        Vector3 _vectorTolook = inputVector;        //Direction que le controler doit regarder
+        if (inputVector.magnitude < 0.3)
+            _vectorTolook = transform.forward;
+
+        //Rotation speed
+        float _currentRotationSpeed = ((m_maxRotSpeed - m_minRotSpeed) * m_rotationBySpeed.Evaluate(_v_value)) + m_minRotSpeed;
+
+        //Rotation
+        //Quaternion _angleRotation = Quaternion.FromToRotation(Vector3.up, surfaceNormal);
+        Quaternion _toRot = Quaternion.LookRotation(_vectorTolook, transform.up);
+        Quaternion _rRot = Quaternion.RotateTowards(transform.rotation, _toRot, _currentRotationSpeed * Time.deltaTime);
+        
+        return _rRot;
+    }
+
+    private Vector3 GetPositionByHitPoint(Vector3 point)
+    {
+        //add code here
+
+        return point;
     }
 
     private Vector3 GetSurfaceNormalByRaycast()
@@ -184,7 +254,7 @@ public class CharacterV4 : MonoBehaviour
         return Vector3.zero;
     }
 
-    private Vector3 GetSurfaceNormalByRaycast(out RaycastHit hitInfo)
+    private Vector3 UpdateSurfaceNormalByRaycast(out RaycastHit hitInfo)
     {
 
         if (GetRaycastAtPosition(out hitInfo))
@@ -198,7 +268,7 @@ public class CharacterV4 : MonoBehaviour
     {
         float _floatToReturn = 0.0f;
 
-        Vector3 directionAndMagnitude = direction * magnitude; 
+        Vector3 directionAndMagnitude = direction * magnitude;
 
         if (directionAndMagnitude.magnitude > 0.2f)
         {
@@ -254,7 +324,7 @@ public class CharacterV4 : MonoBehaviour
     private bool GetRaycastAtPosition(out RaycastHit hitInfo)
     {
         Vector3 newPosition = transform.position;
-        Ray ray = new Ray(transform.position, -transform.up);
+        Ray ray = new Ray(transform.position + (-transform.up * (m_controller.bounds.extents.y - 0.1f)), -transform.up);
 
         if (Physics.Raycast(ray, out hitInfo, float.PositiveInfinity))
         {
@@ -267,8 +337,8 @@ public class CharacterV4 : MonoBehaviour
     private bool GetRaycastAtPosition(out RaycastHit hitInfo, float distance)
     {
         Vector3 newPosition = transform.position;
-        Ray ray = new Ray(transform.position, -transform.up);
-
+        Ray ray = new Ray(transform.position + (-transform.up * (m_controller.bounds.extents.y - 0.1f)), -transform.up);
+        Debug.DrawRay(ray.origin, ray.direction * distance, Color.red);
         if (Physics.Raycast(ray, out hitInfo, distance))
         {
             return true;

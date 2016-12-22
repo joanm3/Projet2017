@@ -1060,6 +1060,46 @@ Prefab:
       propertyPath: m_cam
       value: 
       objectReference: {fileID: 1241306270}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: m_gravForce
+      value: 9.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: m_rotationSpeed
+      value: 7.76
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: m_maxRotSpeed
+      value: 1440
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: m_minRotSpeed
+      value: 192
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: m_rotationBySpeed.m_Curve.Array.data[0].inSlope
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: m_rotationBySpeed.m_Curve.Array.data[0].outSlope
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: m_rotationBySpeed.m_Curve.Array.data[1].inSlope
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: m_rotationBySpeed.m_RotationOrder
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: f0e0cd9983e53234fb75040a13996473, type: 2}
   m_IsPrefabParent: 0
