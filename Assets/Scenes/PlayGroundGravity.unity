@@ -760,6 +760,11 @@ Prefab:
       propertyPath: player
       value: 
       objectReference: {fileID: 451273622}
+    - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
+        type: 2}
+      propertyPath: rotationByNormal
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: e326332f5efa2c141a0c57df35432282, type: 2}
   m_IsPrefabParent: 0
@@ -1073,12 +1078,12 @@ Prefab:
     - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
         type: 2}
       propertyPath: m_maxRotSpeed
-      value: 1440
+      value: 812
       objectReference: {fileID: 0}
     - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
         type: 2}
       propertyPath: m_minRotSpeed
-      value: 192
+      value: 98
       objectReference: {fileID: 0}
     - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
         type: 2}

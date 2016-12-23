@@ -12,7 +12,7 @@ public class CharacterV4 : MonoBehaviour
     //input
     private Vector3 m_inputDirection;
     private float m_inputSpeed;
-    private float m_deltaHeadingInDeg;
+    private float m_inputDeltaHeadingAngleInDeg;
     private Quaternion m_inputRotation;
 
 
@@ -31,6 +31,7 @@ public class CharacterV4 : MonoBehaviour
     //final avatar movement
     private Vector3 m_characterDirection;
     private float m_characterSpeed;
+    private Quaternion m_characterRotation;
 
     //references
     [SerializeField]
@@ -38,7 +39,7 @@ public class CharacterV4 : MonoBehaviour
     private CharacterController m_controller;
 
     //raycast
-    RaycastHit m_hitInfo;
+    RaycastHit m_surfaceHit;
 
     //gravity
     [SerializeField]
@@ -92,6 +93,10 @@ public class CharacterV4 : MonoBehaviour
 
 
 
+
+    private Vector3 m_normalPosition;
+    private Quaternion rotCur;
+
     private enum CurvesOfSpeed
     {
         Accelerate,
@@ -114,29 +119,33 @@ public class CharacterV4 : MonoBehaviour
 
         //get input
         m_inputDirection = UpdateInputVector();
-        //delete this:
-        m_inputRotation = UpdateInputRotation(m_inputDirection);
 
         //get the heading angle depending on camera
-        m_deltaHeadingInDeg = UpdateDeltaAngleInDeg(m_inputDirection, m_cam.transform); 
+        if (m_inputDirection.magnitude >= 0.3f)
+            m_inputDeltaHeadingAngleInDeg = UpdateDeltaAngleInDeg(m_inputDirection, Vector3.forward);
 
-        Debug.LogFormat("heading: {0}, realRot: {1} ", m_deltaHeadingInDeg, m_inputDirection);
+        m_inputRotation = UpdateInputRotation(m_inputDeltaHeadingAngleInDeg);
 
         //get surface and normals
-        m_surfaceNormal = UpdateSurfaceNormalByRaycast(out m_hitInfo);
+        m_surfaceNormal = (m_isGrounded) ? UpdateSurfaceNormalByRaycast(out m_surfaceHit) : Vector3.up;
         m_normalRotation = GetRotationByNormal2(m_surfaceNormal);
 
+        Debug.Log(m_surfaceNormal); 
+        //get character input + surface forces
+        m_characterRotation = UpdateRotationWithNormalAndHeading(m_surfaceNormal, m_inputDeltaHeadingAngleInDeg); 
 
-        //get rotation
-        //transform.rotation = m_inputRotation * m_normalRotation;
-        transform.rotation = m_inputRotation;
 
+        transform.rotation = m_characterRotation;
+
+        //gravity time
         m_tGrav += _dt;
         m_tGrav = Mathf.Max(m_tGrav, 10f);
+        //edit this to solve some problems. 
         //m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_hitInfo, 0.1f) : false;
-        m_isGrounded = GetRaycastAtPosition(out m_hitInfo, 0.1f);
+        //m_isGrounded = GetRaycastAtPosition(out m_surfaceHit, 0.1f);
 
-        //RotationWithNormalAndInput(m_surfaceNormal);
+        //temp to check
+        m_isGrounded = GetRaycastAtPosition(out m_surfaceHit, 5f);
 
 
         if (Input.GetButtonDown("Jump") && m_isGrounded)
@@ -144,11 +153,11 @@ public class CharacterV4 : MonoBehaviour
             Jump(m_surfaceNormal);
         }
 
-
         if (m_isGrounded)
         {
             m_jumpVector = Vector3.zero;
             m_fallVector = Vector3.zero;
+            m_normalPosition = GetPositionByHitPoint(m_surfaceHit.point);
             //transform.rotation = Quaternion.FromToRotation(transform.up, m_surfaceNormal) * transform.rotation;
         }
         else
@@ -195,18 +204,15 @@ public class CharacterV4 : MonoBehaviour
         return inputVector;
     }
 
-    private float UpdateDeltaAngleInDeg(Vector3 inputDirection, Transform cameraTransform)
+    private float UpdateDeltaAngleInDeg(Vector3 inputDirection, Vector3 forwardVector)
     {
-        Vector3 _lookingDirection = (inputDirection.magnitude >= 0.3f) ? inputDirection : transform.forward;
+        float _angle = 
+            Mathf.Atan2(Vector3.Dot(Vector3.up, Vector3.Cross(forwardVector, inputDirection)),
+            Vector3.Dot(forwardVector, inputDirection)) * Mathf.Rad2Deg; 
 
-        //get the angle
-        float _deltaHeadingInDeg = Vector3.Angle(_lookingDirection, cameraTransform.forward);
+        //Debug.Log(_angle);
 
-        //when the angle is negative
-        Vector3 _cross = Vector3.Cross(_lookingDirection, m_cam.transform.forward);
-        if (_cross.y < 0) _deltaHeadingInDeg = -_deltaHeadingInDeg;
-
-        return _deltaHeadingInDeg; 
+        return _angle;
     }
 
     private Quaternion GetRotationByNormal(Vector3 normal)
@@ -222,26 +228,57 @@ public class CharacterV4 : MonoBehaviour
 
     }
 
+    private Quaternion GetRotationByNormal2(Vector3 normal, Quaternion rotation)
+    {
+        return Quaternion.FromToRotation(Vector3.up, normal) * rotation;
+    }
+
+    private Quaternion UpdateCharacterRotation(Quaternion inputRotation, Quaternion normalRotation)
+    {
+        return inputRotation;
+    }
+
+
     //just to have some info to how to do it. 
-    private void UpdateInputAndNormalRotation(Vector3 normal, float rotationSpeed)
+    private Quaternion UpdateRotationWithNormalAndHeading(Vector3 normal, float headingDeltaAngle)
     {
         //https://forum.unity3d.com/threads/character-align-to-surface-normal.33987/
         //get the angle
         //then do quaternion.angleaxis with transform.up to get the rotation
         //then transform the quaternion with fromtorotation to follow the normal
         // finally multiply with actual rotation? 
+        Quaternion _normalRot = transform.rotation;
 
+        //correct apparently
+        Quaternion _headingDelta = Quaternion.AngleAxis(headingDeltaAngle, transform.up);
+        //later add this: 
+        //Quaternion _rRot = Quaternion.RotateTowards(transform.rotation, _headingDelta, currentRotationSpeed * Time.deltaTime);
 
-        float headingDeltaAngle = Input.GetAxis("Horizontal") * Time.deltaTime * rotationSpeed;
-        Quaternion headingDelta = Quaternion.AngleAxis(headingDeltaAngle, transform.up);
         //align with surface normal
-        transform.rotation = Quaternion.FromToRotation(transform.up, normal) * transform.rotation;
+        _normalRot = Quaternion.FromToRotation(Vector3.up, normal);
+
+        //y axis also moves, not correct exactly
+        //Debug.Log("normal: " + normal);
+
+        //Debug.Log("normalT: " + _normalRot.ToEuler() * Mathf.Rad2Deg);
+
+        //Debug.Log("headingT: " + _headingDelta.ToEuler() * Mathf.Rad2Deg);
+
+        //_rot = Quaternion.FromToRotation(transform.up, normal);
+
         //apply heading rotation
-        transform.rotation = headingDelta * transform.rotation;
+        //return _headingDelta; 
+        return _headingDelta * _normalRot;
+        return _headingDelta;
+
     }
 
-    Quaternion UpdateInputRotation(Vector3 inputVector)
+    //no longer needed
+    Quaternion OldUpdateInputRotation(Vector3 inputVector)
     {
+
+
+
         Vector3 _vectorTolook = inputVector;        //Direction que le controler doit regarder
         if (inputVector.magnitude < 0.3)
             _vectorTolook = transform.forward;
@@ -257,12 +294,20 @@ public class CharacterV4 : MonoBehaviour
         return _rRot;
     }
 
+    Quaternion UpdateInputRotation(float deltaAngleInDegrees)
+    {
+        float _currentRotationSpeed = ((m_maxRotSpeed - m_minRotSpeed) * m_rotationBySpeed.Evaluate(_v_value)) + m_minRotSpeed;
+        Quaternion _headingDelta = Quaternion.AngleAxis(deltaAngleInDegrees, transform.up);
+        Quaternion _rRot = Quaternion.RotateTowards(transform.rotation, _headingDelta, _currentRotationSpeed * Time.deltaTime);
+
+        return _rRot;
+        //return _headingDelta;
+    }
+
 
     private Vector3 GetPositionByHitPoint(Vector3 point)
     {
-        //add code here
-
-        return point;
+        return point + (-transform.up * (m_controller.bounds.extents.y - 0.1f));
     }
 
     private Vector3 GetSurfaceNormalByRaycast()
