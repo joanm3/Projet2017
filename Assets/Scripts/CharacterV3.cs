@@ -276,9 +276,7 @@ public class CharacterV3 : MonoBehaviour
         {
             _vectorToReturn = Vector3.MoveTowards(current_VelocitySpeedDir, surface_VelocitySpeedDir, velocityTransitionSpeed_decceleration * Time.deltaTime);
         }
-
         return _vectorToReturn;
-        //		print("Angle : " + Vector3.Angle (Vector3.up, surfaceNormal) + " / CG : " + fromCtoG + " / surfForce : " + surface_VelocitySpeedDir);
 
     }
 
