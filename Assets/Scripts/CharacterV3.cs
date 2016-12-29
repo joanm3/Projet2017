@@ -221,8 +221,8 @@ public class CharacterV3 : MonoBehaviour
         //testing rotations...
         Quaternion _standardRotation = GetInputSpeedRot(inputVector);
         Quaternion _normalRotation = GetRotationByNormal(surfaceNormal);
-        Vector3 _standardEuler = _standardRotation.ToEulerAngles() * Mathf.Rad2Deg;
-        Vector3 _normalEuler = _normalRotation.ToEulerAngles() * Mathf.Rad2Deg;
+        //Vector3 _standardEuler = _standardRotation.ToEulerAngles() * Mathf.Rad2Deg;
+        //Vector3 _normalEuler = _normalRotation.ToEulerAngles() * Mathf.Rad2Deg;
 
         Quaternion _finalRotation = _standardRotation;
         transform.rotation = _finalRotation;

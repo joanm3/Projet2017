@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using ProjectGiants.GFunctions;
 
 public class ThirdPersonCameraMovement : MonoBehaviour
 {
@@ -446,13 +447,12 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         if (_distanceToPlayer < minDistToStartFadeCharacter)
         {
             #region PLAYER FADE OUT
-            float _mappedFadePlayer = MappedLerp(_distanceToPlayer, distanceToFullyDisappear, minDistToStartFadeCharacter, 0, 1f);
-            Color _lerpedColor = new Color(_mappedFadePlayer, _mappedFadePlayer, _mappedFadePlayer, _mappedFadePlayer);
+            float _mappedFadePlayer = GFunctions.NormalizedRangeValue(_distanceToPlayer, distanceToFullyDisappear, minDistToStartFadeCharacter);
             foreach (Renderer renderer in playerRenderers)
             {
                 if (renderer.material.HasProperty("_Color"))
                 {
-                    renderer.material.color = _lerpedColor;
+                    renderer.material.color = new Color(renderer.material.color.r, renderer.material.color.g, renderer.material.color.b, _mappedFadePlayer);
                 }
             }
             m_playerColorChanged = true;
@@ -463,7 +463,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             {
                 if (renderer.material.HasProperty("_Color"))
                 {
-                    renderer.material.color = Color.white;
+                    renderer.material.color = new Color(renderer.material.color.r, renderer.material.color.g, renderer.material.color.b, 1f);
                 }
             }
             m_playerColorChanged = false;

@@ -85,7 +85,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1824494990970762}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1, z: 0}
+  m_LocalPosition: {x: 0, y: -0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4843157514617676}
@@ -114,7 +114,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1587390757168546}
   m_LocalRotation: {x: -0, y: -0, z: -6.5135044e-16, w: 1}
-  m_LocalPosition: {x: 0, y: 1.2330017, z: 0.46099854}
+  m_LocalPosition: {x: 0, y: 0.233002, z: 0.46099854}
   m_LocalScale: {x: 0.3436481, y: 0.3436481, z: 0.3436481}
   m_Children: []
   m_Father: {fileID: 4334838726239372}
@@ -127,7 +127,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1707076047147864}
   m_LocalRotation: {x: -0, y: -0, z: -6.5135044e-16, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4334838726239372}
@@ -262,21 +262,23 @@ MonoBehaviour:
     - serializedVersion: 2
       time: 0
       value: 0
-      inSlope: 2
-      outSlope: 2
+      inSlope: 0
+      outSlope: 0
       tangentMode: 0
     - serializedVersion: 2
       time: 1
       value: 1
-      inSlope: 0
-      outSlope: 0
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
-  m_inputTimeInSecondsToReachMaxSpeed: 1.5
-  m_inputMaxSpeed: 10
+  m_inputMaxSpeed: 20
+  m_inputTimeToReachMaxSpeed: 2
+  m_inputStopForce: 1
   m_cam: {fileID: 0}
+  m_characterRenderer: {fileID: 4334838726239372}
   m_isGrounded: 0
   m_gravForce: 9.8
   m_gravForceOverTime:
@@ -297,9 +299,10 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
-  m_jumpForce: 20
+  m_jumpForce: 24.28
   m_gravVector: {x: -0, y: -1, z: -0}
-  m_inputGravityMultiplier: 0
+  m_inputGravityMultiplier: 1
+  m_tJumpCooldown: 0.5
   _t_time: 0
   _v_value: 0
   InputAcceleration:
@@ -340,8 +343,8 @@ MonoBehaviour:
     m_RotationOrder: 4
   maxInputSpeed: 15
   m_rotationSpeed: 7.76
-  m_maxRotSpeed: 812
-  m_minRotSpeed: 98
+  m_maxRotSpeed: 1440
+  m_minRotSpeed: 120
   m_rotationBySpeed:
     serializedVersion: 2
     m_Curve:
@@ -352,14 +355,15 @@ MonoBehaviour:
       outSlope: 0
       tangentMode: 0
     - serializedVersion: 2
-      time: 1
-      value: 0.12500009
+      time: 0.99977696
+      value: -0.00095620006
       inSlope: -1.3636357
       outSlope: -1.3636357
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
+  characterState: 0
 --- !u!143 &143725867177485170
 CharacterController:
   m_ObjectHideFlags: 1

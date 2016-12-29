@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ProjectGiants.GFunctions;
 
 public class CharacterV4 : MonoBehaviour
 {
@@ -16,9 +17,14 @@ public class CharacterV4 : MonoBehaviour
     [SerializeField]
     private AnimationCurve m_inputAccelerationCurve;
     [SerializeField]
-    private float m_inputTimeInSecondsToReachMaxSpeed;
+    private float m_inputMaxSpeed = 5f;
     [SerializeField]
-    private float m_inputMaxSpeed;
+    private float m_inputTimeToReachMaxSpeed = 2f;
+    [SerializeField]
+    [Range(0, 3)]
+    private float m_inputStopForce = 0.5f;
+    private float m_tMove = 0f;
+
 
     //surface
     [Header("Surfaces")]
@@ -32,24 +38,29 @@ public class CharacterV4 : MonoBehaviour
     private Vector3 m_upSurfaceNormal;
     private Vector3 m_surfaceForce;
     private Quaternion m_normalRotation;
-    private Vector3 m_surfaceUp;
-    private float m_surfaceAngle;
+    private Vector3 m_tangDownwardsNormalized;
+
+
 
     //final avatar movement
     private Vector3 m_characterForward;
     private Vector3 m_characterUp;
     private float m_characterSpeed;
     private Quaternion m_characterRotation;
+    private float m_characterAngleInDegFromSurfaceTang;
+
 
     //references
     [SerializeField]
     private Camera m_cam;
     private CharacterController m_controller;
+    [SerializeField]
+    private Transform m_characterRenderer;
 
     //raycast
     private RaycastHit m_surfaceHit;
     private RaycastHit m_upHit;
-    private Vector3 m_surfaceHitPoint;
+    private Vector3 m_surfaceHitCharacterPosition;
     private Vector3 m_upHitPoint;
 
 
@@ -70,7 +81,8 @@ public class CharacterV4 : MonoBehaviour
     [SerializeField]
     private float m_inputGravityMultiplier;
     private Vector3 m_gravForceVector = Vector3.zero;
-    private float m_tJumpCooldown = 0.05f;
+    [SerializeField]
+    private float m_tJumpCooldown = 0.2f;
 
 
     //speed
@@ -104,7 +116,9 @@ public class CharacterV4 : MonoBehaviour
     private AnimationCurve m_rotationBySpeed = AnimationCurve.Linear(0.0f, 0.0f, 1.0f, 1.0f);
 
 
+    public enum CharacterState { Idle, Walking, Running, Falling, Jumping, GoingUp, GoingDown, Gliding };
 
+    public CharacterState characterState = CharacterV4.CharacterState.Idle;
 
 
 
@@ -138,19 +152,25 @@ public class CharacterV4 : MonoBehaviour
 
         m_inputRotation = UpdateInputRotation(m_inputDeltaHeadingAngleInDeg);
 
-        m_inputCurrentSpeed = 10f;
+        //speed
+        m_inputCurrentSpeed = UpdateInputSpeed(_dt);
+
+        //edit this to solve some problems. for the moment using the world up!!! change it but resolve porblems. 
+        m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, Vector3.up, 1f) : false;
+        //m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, m_characterUp, 1f) : false;
+
         #endregion
 
         #region GET CURRENT SURFACE VALUES
+        //we should calculate only when changing surface: lastsurface != currentSurface
         if (m_isGrounded)
         {
             m_surfaceNormal = UpdateSurfaceNormalByRaycast(out m_surfaceHit, transform.up, 10f);
         }
-        m_upSurfaceNormal = UpdateSurfaceNormalByRaycast(out m_upHit, Vector3.up, 10f);
-        //value is the multiplication by -1 in y when character is descending. 
-        m_normalRotation = GetRotationByNormal2(m_surfaceNormal);
 
-
+        m_upSurfaceNormal = UpdateSurfaceNormalByRaycast(out m_upHit, Vector3.up, 1f);
+        m_normalRotation = GetRotationByNormal2(m_inputRotation, m_surfaceNormal);
+        m_tangDownwardsNormalized = GetSurfaceTangentDownwards(m_surfaceNormal, m_surfaceHit.point);
         #endregion
 
         #region GET CHARACTER VALUES: INPUT + SURFACE
@@ -158,19 +178,14 @@ public class CharacterV4 : MonoBehaviour
         m_characterForward = m_characterRotation * Vector3.forward;
         m_characterUp = m_characterRotation * Vector3.up;
         m_characterSpeed = m_inputCurrentSpeed;
+        m_characterAngleInDegFromSurfaceTang = Vector3.Angle(m_characterForward, m_tangDownwardsNormalized);
+        //Debug.Log(m_characterAngleInDegFromSurfaceTang); 
         #endregion
 
-        transform.rotation = m_inputRotation;
 
         #region GRAVITY CALCULATION
         m_tGrav += _dt;
-        m_tGrav = Mathf.Max(m_tGrav, 10f);
-        //edit this to solve some problems. 
-        //m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_hitInfo, 0.1f) : false;
-        //m_isGrounded = GetRaycastAtPosition(out m_surfaceHit, 0.1f);
-
-        //temp to check
-        m_isGrounded = GetRaycastAtPosition(out m_surfaceHit, m_characterUp, 0.4f);
+        m_tGrav = Mathf.Min(m_tGrav, 2f);
         #endregion
 
 
@@ -179,17 +194,22 @@ public class CharacterV4 : MonoBehaviour
             #region ON GROUND BEHAVIOURS
             if (Input.GetButtonDown("Jump"))
             {
+                m_tGrav = 0f;
                 Jump(m_surfaceNormal);
             }
 
             //change this to when hitting ground to calculate once, not every frame. 
             m_inputGravityMultiplier = 1f;
-            m_jumpVector = Vector3.zero;
-            m_fallVector = Vector3.zero;
+            if (m_tGrav >= m_tJumpCooldown)
+            {
+                m_jumpVector = Vector3.zero;
+                m_fallVector = Vector3.zero;
+            }
 
-            m_surfaceHitPoint = GetSnapPositionByHitPoint(m_surfaceHit.point);
-            //donno how to make the snap work properly. ask marco. 
-            //transform.position = GetSnapPositionByHitPoint(m_upHit.point);
+            m_surfaceHitCharacterPosition = GetSnapPositionByHitPoint(m_surfaceHit.point);
+            m_upHitPoint = GetSnapPositionByHitPoint(m_upHit.point); 
+            //this bugs when the angle of the surface is big and the character doesnt snap properly!! (problem with upHitPoint). 
+            transform.position = m_upHitPoint; 
             #endregion
 
         }
@@ -197,18 +217,17 @@ public class CharacterV4 : MonoBehaviour
         {
             #region ON AIR BEHAVIOURS
             //transform.rotation = Quaternion.identity;
-            OnAir(_dt);
+            OnAirUpdate(_dt);
             #endregion
         }
 
+        transform.rotation = m_inputRotation;
 
         #region CHARACTER MOTION
         //INTEGRATE m_inputGravityMultiplier
-        //test
-        float _move = (m_inputDirection.magnitude <= 0.1f) ? 0 : 1;
-        //m_characterSpeed = Vector3.Dot((m_characterForward * m_characterSpeed), m_characterForward);
+        //test not done yet speed
 
-        Vector3 _characterMotion = ((m_characterForward * m_characterSpeed * _move) * m_inputGravityMultiplier) + m_fallVector;
+        Vector3 _characterMotion = ((m_characterForward * m_characterSpeed) * m_inputGravityMultiplier) + m_fallVector;
         m_controller.Move(_characterMotion * _dt);
         #endregion
 
@@ -216,12 +235,45 @@ public class CharacterV4 : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(m_surfaceHitPoint, 0.5f);
+        //Gizmos.color = Color.yellow;
+        //Gizmos.DrawWireSphere(m_surfaceHitPoint, 0.5f);
+        float _linesLenght = 2f;
         Gizmos.color = Color.blue;
-        Gizmos.DrawLine(transform.position, transform.position + (m_characterForward * 2f));
+        Gizmos.DrawLine(transform.position, transform.position + (m_characterForward * _linesLenght));
+        Gizmos.DrawSphere(m_surfaceHit.point, 0.5f); 
         Gizmos.color = Color.green;
-        Gizmos.DrawLine(m_surfaceHitPoint, m_surfaceHitPoint + (m_surfaceNormal * 2f));
+        Gizmos.DrawLine(m_surfaceHit.point, m_surfaceHit.point + (m_surfaceNormal * _linesLenght));
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(transform.position, transform.position + m_tangDownwardsNormalized * _linesLenght);
+        Gizmos.DrawCube(transform.position, Vector3.one * 0.5f); 
+    }
+
+    private float UpdateInputSpeed(float deltaTime)
+    {
+        if (m_inputDirection.magnitude >= 0.3f)
+        {
+            m_tMove += deltaTime;
+        }
+        else
+        {
+            m_tMove -= deltaTime * m_inputStopForce;
+        }
+        m_tMove = Mathf.Clamp(m_tMove, 0f, m_inputTimeToReachMaxSpeed);
+
+        float _currentVelocityNormalized = GFunctions.NormalizedRangeValue(m_tMove, 0f, m_inputTimeToReachMaxSpeed);
+        return m_inputAccelerationCurve.Evaluate(_currentVelocityNormalized) * m_inputMaxSpeed;
+    }
+
+    private float UpdateCharacterAngleFromSurface(Vector3 characterForward, Vector3 surfaceTangDownwards)
+    {
+        return Vector3.Angle(characterForward, surfaceTangDownwards);
+    }
+
+    private Vector3 GetSurfaceTangentDownwards(Vector3 normal, Vector3 point)
+    {
+        Vector3 _tangFirst = Vector3.Cross(normal, Vector3.up);
+        Vector3 _tangDownwards = Vector3.Cross(normal, _tangFirst);
+        return _tangDownwards.normalized;
     }
 
     private void Jump(Vector3 surfaceNormal)
@@ -231,7 +283,7 @@ public class CharacterV4 : MonoBehaviour
         Debug.Log("Jump Vector: " + m_jumpVector);
     }
 
-    private void OnAir(float deltaTime)
+    private void OnAirUpdate(float deltaTime)
     {
         m_gravForceVector = m_gravVector * (-m_gravForce * m_gravForceOverTime.Evaluate(m_tGrav));
         //check this problem later for suming deltatime to tgrav. 
@@ -251,29 +303,25 @@ public class CharacterV4 : MonoBehaviour
         return inputVector;
     }
 
-    private float UpdateAngleInDeg(Vector3 direction, Vector3 forwardVector)
+    private float UpdateAngleInDeg(Vector3 direction, Vector3 zeroVector)
     {
         float _angle =
-            Mathf.Atan2(Vector3.Dot(Vector3.up, Vector3.Cross(forwardVector, direction)),
-            Vector3.Dot(forwardVector, direction)) * Mathf.Rad2Deg;
+            Mathf.Atan2(Vector3.Dot(Vector3.up, Vector3.Cross(zeroVector, direction)),
+            Vector3.Dot(zeroVector, direction)) * Mathf.Rad2Deg;
 
         //Debug.Log(_angle);
 
         return _angle;
     }
 
-    private Quaternion GetRotationByNormal2(Vector3 normal)
+    private Quaternion GetRotationByNormal2(Quaternion rotation, Vector3 normal)
     {
 
-        Quaternion _normalRot = transform.rotation;
+        Quaternion _normalRot = rotation;
         _normalRot = Quaternion.FromToRotation(Vector3.up, normal);
 
         return _normalRot;
         //return Quaternion.FromToRotation(Vector3.up, normal) * transform.rotation;
-    }
-    private Quaternion GetRotationByNormal2(Vector3 normal, Quaternion rotation)
-    {
-        return Quaternion.FromToRotation(Vector3.up, normal) * rotation;
     }
 
     private Quaternion UpdateInputRotation(float deltaAngleInDegrees)
@@ -325,8 +373,7 @@ public class CharacterV4 : MonoBehaviour
 
     private bool GetRaycastAtPosition(out RaycastHit hitInfo, Vector3 upVector, float distance)
     {
-        Vector3 newPosition = transform.position;
-        Ray ray = new Ray(transform.position + (-upVector * (m_controller.bounds.extents.y - 0.1f)), -transform.up);
+        Ray ray = new Ray(transform.position + (-upVector * (m_controller.bounds.extents.y - 0.3f)), -upVector);
         Debug.DrawRay(ray.origin, ray.direction * distance, Color.red);
         if (Physics.Raycast(ray, out hitInfo, distance))
         {
