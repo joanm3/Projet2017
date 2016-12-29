@@ -49,8 +49,8 @@ public class CharacterV4 : MonoBehaviour
     private Vector3 m_tangDownwardsNormalized;
     private float m_surfaceAngle;
     private Vector3 m_surfaceForceVector;
-    public bool GlideForce = true;
-    public bool DecreaseSpeedForce = true;
+    public bool Glide = true;
+    public bool DecreaseSpeed = true;
     private AnimationCurve m_descreaseSpeedCurve = AnimationCurve.EaseInOut(0.0f, 0.0f, 1.0f, 1.0f);
     public float StartForcesAngle = 5f;
     public float StartFallingAngle = 20f;
@@ -115,7 +115,7 @@ public class CharacterV4 : MonoBehaviour
     private AnimationCurve m_rotationBySpeed = AnimationCurve.Linear(0.0f, 0.0f, 1.0f, 1.0f);
 
 
-    public enum CharacterState { Idle, Walking, Running, Falling, Jumping, GoingUp, GoingDown, Gliding };
+    public enum CharacterState { Idle, Walking, Running, Falling, Jumping, GoingUp, GoingDown, Gliding, Stopping };
 
     public CharacterState characterState = CharacterV4.CharacterState.Idle;
 
@@ -127,6 +127,7 @@ public class CharacterV4 : MonoBehaviour
     {
         m_controller = GetComponent<CharacterController>();
         m_lastSurfaceNormal = m_surfaceNormal;
+        m_surfaceAngle = -1f;
     }
 
     private void Update()
@@ -140,19 +141,12 @@ public class CharacterV4 : MonoBehaviour
 
         #region GET INPUT VALUES
         m_inputDirection = UpdateInputVector();
-
         if (m_inputDirection.magnitude >= 0.3f)
             m_inputDeltaHeadingAngleInDeg = UpdateAngleInDeg(m_inputDirection, Vector3.forward);
-
         m_inputRotation = UpdateInputRotation(m_inputDeltaHeadingAngleInDeg);
-
-        //speed
         m_inputCurrentSpeed = UpdateInputSpeed(_dt);
-
         //edit this to solve some problems. for the moment using the world up!!! change it but resolve porblems. 
         m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, Vector3.up, 1f) : false;
-        //m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, m_characterUp, 1f) : false;
-
         #endregion
 
         #region GET CURRENT SURFACE VALUES
@@ -162,20 +156,25 @@ public class CharacterV4 : MonoBehaviour
             m_surfaceNormal = UpdateSurfaceNormalByRaycast(out m_surfaceHit, transform.up, 10f);
             m_upSurfaceNormal = UpdateSurfaceNormalByRaycast(out m_upHit, Vector3.up, 1f);
         }
+        else
+        {
+            m_surfaceNormal = Vector3.up;
+        }
 
         m_normalRotation = GetRotationByNormal2(m_inputRotation, m_surfaceNormal);
 
         //calculate when changing surface
         if (m_lastSurfaceNormal != m_surfaceNormal)
         {
+            m_surfaceAngle = ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, Vector3.up) : 0f);
             m_tangDownwardsNormalized = GetSurfaceTangentDownwards(m_surfaceNormal, m_surfaceHit.point);
-            m_surfaceAngle = (Vector3.Angle(m_surfaceNormal, Vector3.up) > StartForcesAngle) ? ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, Vector3.up) : -1) : -1;
             //its always zero now. 
             m_surfaceForceVector = GetVelocitySurfaceSpeedDir(m_tangDownwardsNormalized, m_surfaceNormal);
             m_lastSurfaceNormal = m_surfaceNormal;
         }
-
         #endregion
+
+
 
         #region GET CHARACTER VALUES: INPUT + SURFACE
         m_characterRotation = m_normalRotation * m_inputRotation;
@@ -185,7 +184,63 @@ public class CharacterV4 : MonoBehaviour
         m_characterAngleInDegFromSurfaceTang = Vector3.Angle(m_characterForward, m_tangDownwardsNormalized);
         //Debug.Log(m_characterAngleInDegFromSurfaceTang); 
         #endregion
+        Debug.Log(m_characterAngleInDegFromSurfaceTang);
 
+
+        #region GET CHARACTER STATE
+        Debug.Log("surface Angle: " + m_surfaceAngle);
+        if (m_isGrounded)
+        {
+
+            if (m_surfaceAngle < StartForcesAngle)
+            {
+                characterState = (m_inputDirection.magnitude > 0.3f) ? CharacterState.Walking : ((m_characterSpeed > 0.05f) ? CharacterState.Stopping : CharacterState.Idle);
+            }
+            else if (m_surfaceAngle >= StartForcesAngle && m_surfaceAngle < StartFallingAngle)
+            {
+                if (m_characterAngleInDegFromSurfaceTang >= 0 && m_characterAngleInDegFromSurfaceTang < 90)
+                {
+                    if (m_inputDirection.magnitude > 0.3)
+                    {
+                        characterState = CharacterState.GoingDown;
+                    }
+                    else
+                    {
+                        characterState = (Glide) ? CharacterState.Gliding : ((m_characterSpeed > 0.05f) ? CharacterState.Stopping : CharacterState.Idle);
+                    }
+
+                }
+                else if (m_characterAngleInDegFromSurfaceTang >= 90)
+                {
+                    if (m_inputDirection.magnitude > 0.3)
+                    {
+                        characterState = CharacterState.GoingUp;
+                    }
+                    else
+                    {
+                        characterState = (Glide) ? CharacterState.Gliding : ((m_characterSpeed > 0.05f) ? CharacterState.Stopping : CharacterState.Idle);
+                    }
+                }
+                else if (characterState != CharacterState.Jumping)
+                {
+                    characterState = CharacterState.Falling;
+                }
+            }
+            else if (m_surfaceAngle >= StartFallingAngle && characterState != CharacterState.Jumping)
+            {
+                characterState = CharacterState.Falling;
+            }
+        }
+        //On Air
+        else
+        {
+            if (characterState != CharacterState.Jumping)
+                characterState = CharacterState.Falling;
+        }
+
+
+
+        #endregion
 
         #region GRAVITY CALCULATION
         m_tGrav += _dt;
@@ -199,6 +254,7 @@ public class CharacterV4 : MonoBehaviour
             if (Input.GetButtonDown("Jump"))
             {
                 m_tGrav = 0f;
+                characterState = CharacterState.Jumping;
                 Jump(m_surfaceNormal);
             }
 
@@ -243,7 +299,7 @@ public class CharacterV4 : MonoBehaviour
     {
 
         if (!Application.isPlaying)
-            return; 
+            return;
         //Gizmos.color = Color.yellow;
         //Gizmos.DrawWireSphere(m_surfaceHitPoint, 0.5f);
         float _linesLenght = 2f;
@@ -253,7 +309,7 @@ public class CharacterV4 : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawLine(m_surfaceHit.point, m_surfaceHit.point + (m_surfaceNormal * _linesLenght));
         Gizmos.color = Color.cyan;
-        Vector3 _groundPosition = new Vector3(transform.position.x, transform.position.y - m_controller.bounds.extents.y, transform.position.z); 
+        Vector3 _groundPosition = new Vector3(transform.position.x, transform.position.y - m_controller.bounds.extents.y, transform.position.z);
         Gizmos.DrawLine(_groundPosition, _groundPosition + m_tangDownwardsNormalized * _linesLenght);
         Gizmos.DrawCube(transform.position, Vector3.one * 0.5f);
     }
@@ -286,6 +342,9 @@ public class CharacterV4 : MonoBehaviour
 
     private float UpdateInputSpeed(float deltaTime)
     {
+        //if we want a decc curve just assign it to accCurve when magnitude is less than ... (start and end should be similar) 
+        AnimationCurve _accCurve = m_inputAccelerationCurve;
+
         if (m_inputDirection.magnitude >= 0.3f)
         {
             m_tMove += deltaTime;
@@ -297,7 +356,7 @@ public class CharacterV4 : MonoBehaviour
         m_tMove = Mathf.Clamp(m_tMove, 0f, m_inputTimeToReachMaxSpeed);
 
         float _currentVelocityNormalized = GFunctions.NormalizedRangeValue(m_tMove, 0f, m_inputTimeToReachMaxSpeed);
-        return m_inputAccelerationCurve.Evaluate(_currentVelocityNormalized) * m_inputMaxSpeed;
+        return _accCurve.Evaluate(_currentVelocityNormalized) * m_inputMaxSpeed;
     }
 
     private float UpdateCharacterAngleFromSurface(Vector3 characterForward, Vector3 surfaceTangDownwards)
