@@ -7,7 +7,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 {
 
     public Transform playerTransform;
-    public CharacterV4 player;
+    public CharacterV3 player;
     public bool useJoystick = false;
 
     [Header("Camera values")]
@@ -123,7 +123,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
 
         if (player == null)
-            player = GameObject.FindGameObjectWithTag("Player").GetComponent<CharacterV4>();
+            player = GameObject.FindGameObjectWithTag("Player").GetComponent<CharacterV3>();
 
         if (player != null)
         {
@@ -512,11 +512,11 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         if (player == null)
             return;
 
-        if (player.SurfaceNormal != null)
+        if (player.surfaceNormal != null)
         {
 
 
-            Vector3 norm = player.SurfaceNormal;
+            Vector3 norm = player.surfaceNormal;
             if (norm == Vector3.zero)
                 return;
 
