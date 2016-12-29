@@ -184,42 +184,32 @@ public class CharacterV4 : MonoBehaviour
         m_characterAngleInDegFromSurfaceTang = Vector3.Angle(m_characterForward, m_tangDownwardsNormalized);
         //Debug.Log(m_characterAngleInDegFromSurfaceTang); 
         #endregion
-        Debug.Log(m_characterAngleInDegFromSurfaceTang);
-
 
         #region GET CHARACTER STATE
-        Debug.Log("surface Angle: " + m_surfaceAngle);
         if (m_isGrounded)
         {
-
             if (m_surfaceAngle < StartForcesAngle)
             {
-                characterState = (m_inputDirection.magnitude > 0.3f) ? CharacterState.Walking : ((m_characterSpeed > 0.05f) ? CharacterState.Stopping : CharacterState.Idle);
+                characterState = (m_inputDirection.magnitude > 0.3f) ? CharacterState.Walking :
+                    ((m_characterSpeed > 0.05f) ? CharacterState.Stopping :
+                    CharacterState.Idle);
             }
             else if (m_surfaceAngle >= StartForcesAngle && m_surfaceAngle < StartFallingAngle)
             {
                 if (m_characterAngleInDegFromSurfaceTang >= 0 && m_characterAngleInDegFromSurfaceTang < 90)
                 {
-                    if (m_inputDirection.magnitude > 0.3)
-                    {
-                        characterState = CharacterState.GoingDown;
-                    }
-                    else
-                    {
-                        characterState = (Glide) ? CharacterState.Gliding : ((m_characterSpeed > 0.05f) ? CharacterState.Stopping : CharacterState.Idle);
-                    }
-
+                    characterState = (m_inputDirection.magnitude > 0.3) ? CharacterState.GoingDown :
+                                                        (Glide) ? CharacterState.Gliding :
+                        ((m_characterSpeed > 0.05f) ? CharacterState.Stopping :
+                        CharacterState.Idle);
                 }
                 else if (m_characterAngleInDegFromSurfaceTang >= 90)
                 {
-                    if (m_inputDirection.magnitude > 0.3)
-                    {
-                        characterState = CharacterState.GoingUp;
-                    }
-                    else
-                    {
-                        characterState = (Glide) ? CharacterState.Gliding : ((m_characterSpeed > 0.05f) ? CharacterState.Stopping : CharacterState.Idle);
-                    }
+                    characterState = (m_inputDirection.magnitude > 0.3) ? CharacterState.GoingUp :
+                                                    (Glide) ? CharacterState.Gliding :
+                        ((m_characterSpeed > 0.05f) ? CharacterState.Stopping :
+                        CharacterState.Idle);
+
                 }
                 else if (characterState != CharacterState.Jumping)
                 {
@@ -241,6 +231,7 @@ public class CharacterV4 : MonoBehaviour
 
 
         #endregion
+
 
         #region GRAVITY CALCULATION
         m_tGrav += _dt;
