@@ -6,7 +6,7 @@ using ProjectGiants.GFunctions;
 public class CharacterV4 : MonoBehaviour
 {
 
-
+    #region PARAMETERS
 
     public float MaxGlideSpeed;
     public float ConfortAngle;
@@ -24,7 +24,9 @@ public class CharacterV4 : MonoBehaviour
     [SerializeField]
     private AnimationCurve m_inputAccelerationCurve;
     [SerializeField]
-    private float m_inputMaxSpeed = 5f;
+    private float m_inputMaxSpeed = 20f;
+    [SerializeField]
+    private float m_startRunningSpeed = 10f;
     [SerializeField]
     private float m_inputTimeToReachMaxSpeed = 2f;
     [SerializeField]
@@ -63,6 +65,7 @@ public class CharacterV4 : MonoBehaviour
     private float m_characterSpeed;
     private Quaternion m_characterRotation;
     private float m_characterAngleInDegFromSurfaceTang;
+
 
 
     //references
@@ -115,13 +118,13 @@ public class CharacterV4 : MonoBehaviour
     private AnimationCurve m_rotationBySpeed = AnimationCurve.Linear(0.0f, 0.0f, 1.0f, 1.0f);
 
 
-    public enum CharacterState { Idle, Walking, Running, Falling, Jumping, GoingUp, GoingDown, Gliding, Stopping };
+    public enum CharacterState { Idle, Walking, Running, Falling, Jumping, GoingUp, GoingDown, Gliding, StrongGliding, Stopping };
 
     public CharacterState characterState = CharacterV4.CharacterState.Idle;
 
+    #endregion
 
-
-
+    #region UNITY FUNCTIONS
 
     private void Start()
     {
@@ -137,6 +140,12 @@ public class CharacterV4 : MonoBehaviour
         float _dt = Time.deltaTime;
         if (Time.deltaTime > 0.15f)
             _dt = 0.15f;
+        #endregion
+
+
+        #region GRAVITY CALCULATION
+        m_tGrav += _dt;
+        m_tGrav = Mathf.Min(m_tGrav, 2f);
         #endregion
 
         #region GET INPUT VALUES
@@ -188,91 +197,93 @@ public class CharacterV4 : MonoBehaviour
         #region GET CHARACTER STATE
         if (m_isGrounded)
         {
+            //When in standard surface
             if (m_surfaceAngle < StartForcesAngle)
             {
-                characterState = (m_inputDirection.magnitude > 0.3f) ? CharacterState.Walking :
+                characterState = (m_inputDirection.magnitude > 0.3f) ? ((m_characterSpeed >= m_startRunningSpeed) ? 
+                                                                    CharacterState.Running :
+                                                            CharacterState.Walking) :
                     ((m_characterSpeed > 0.05f) ? CharacterState.Stopping :
-                    CharacterState.Idle);
+                                            CharacterState.Idle);
             }
+            //when with "gliding" surface
             else if (m_surfaceAngle >= StartForcesAngle && m_surfaceAngle < StartFallingAngle)
             {
+                //going down
                 if (m_characterAngleInDegFromSurfaceTang >= 0 && m_characterAngleInDegFromSurfaceTang < 90)
                 {
                     characterState = (m_inputDirection.magnitude > 0.3) ? CharacterState.GoingDown :
                                                         (Glide) ? CharacterState.Gliding :
                         ((m_characterSpeed > 0.05f) ? CharacterState.Stopping :
-                        CharacterState.Idle);
+                                            CharacterState.Idle);
                 }
+                //going up
                 else if (m_characterAngleInDegFromSurfaceTang >= 90)
                 {
                     characterState = (m_inputDirection.magnitude > 0.3) ? CharacterState.GoingUp :
                                                     (Glide) ? CharacterState.Gliding :
                         ((m_characterSpeed > 0.05f) ? CharacterState.Stopping :
-                        CharacterState.Idle);
+                                        CharacterState.Idle);
 
                 }
+                //if angle goes outside scope
                 else if (characterState != CharacterState.Jumping)
                 {
                     characterState = CharacterState.Falling;
                 }
             }
+            //when in "falling" surface
             else if (m_surfaceAngle >= StartFallingAngle && characterState != CharacterState.Jumping)
             {
-                characterState = CharacterState.Falling;
+                characterState = CharacterState.StrongGliding;
             }
         }
         //On Air
         else
         {
-            if (characterState != CharacterState.Jumping)
+            //air
+            if (characterState != CharacterState.Jumping || m_fallVector.y < -0.1f)
                 characterState = CharacterState.Falling;
         }
 
 
-
         #endregion
 
 
-        #region GRAVITY CALCULATION
-        m_tGrav += _dt;
-        m_tGrav = Mathf.Min(m_tGrav, 2f);
-        #endregion
 
-
-        if (m_isGrounded)
+        switch (characterState)
         {
-            #region ON GROUND BEHAVIOURS
-            if (Input.GetButtonDown("Jump"))
-            {
-                m_tGrav = 0f;
-                characterState = CharacterState.Jumping;
-                Jump(m_surfaceNormal);
-            }
-
-            //change this to when hitting ground to calculate once, not every frame. 
-            m_inputGravityMultiplier = 1f;
-            if (m_tGrav >= m_tJumpCooldown)
-            {
-                m_jumpVector = Vector3.zero;
-                m_fallVector = Vector3.zero;
-            }
-
-            m_surfaceHitCharacterPosition = GetSnapPositionByHitPoint(m_surfaceHit.point);
-            m_upHitPoint = GetSnapPositionByHitPoint(m_upHit.point);
-            //this bugs when the angle of the surface is big and the character doesnt snap properly!! (problem with upHitPoint). 
-            //transform.position = m_upHitPoint; 
-            //try maybe with the renderer, but then the collider needs to be reposition and this causes problems. 
-            m_characterRenderer.position = m_upHitPoint;
-            #endregion
-
+            case CharacterState.Idle:
+            case CharacterState.Walking:
+            case CharacterState.Running:
+                {
+                    OnGroundUpdate();
+                    break;
+                }
+            case CharacterState.Falling:
+            case CharacterState.Jumping:
+                {
+                    OnAirUpdate(_dt);
+                    break;
+                }
+            case CharacterState.GoingUp:
+                {
+                    OnGroundUpdate();
+                    break;
+                }
+            case CharacterState.GoingDown:
+                {
+                    OnGroundUpdate();
+                    break;
+                }
+            case CharacterState.Gliding:
+            case CharacterState.StrongGliding:
+                {
+                    OnGroundUpdate();
+                    break;
+                }
         }
-        else
-        {
-            #region ON AIR BEHAVIOURS
-            //transform.rotation = Quaternion.identity;
-            OnAirUpdate(_dt);
-            #endregion
-        }
+
 
         transform.rotation = m_inputRotation;
 
@@ -304,6 +315,57 @@ public class CharacterV4 : MonoBehaviour
         Gizmos.DrawLine(_groundPosition, _groundPosition + m_tangDownwardsNormalized * _linesLenght);
         Gizmos.DrawCube(transform.position, Vector3.one * 0.5f);
     }
+
+    #endregion
+
+    #region BEHAVIOURS
+
+    private void OnGroundUpdate()
+    {
+        if (Input.GetButtonDown("Jump"))
+        {
+            m_tGrav = 0f;
+            characterState = CharacterState.Jumping;
+            Jump(m_surfaceNormal);
+        }
+
+        //change this to when hitting ground to calculate once, not every frame. 
+        m_inputGravityMultiplier = 1f;
+        if (m_tGrav >= m_tJumpCooldown)
+        {
+            m_jumpVector = Vector3.zero;
+            m_fallVector = Vector3.zero;
+        }
+
+        m_surfaceHitCharacterPosition = GetSnapPositionByHitPoint(m_surfaceHit.point);
+        m_upHitPoint = GetSnapPositionByHitPoint(m_upHit.point);
+        //this bugs when the angle of the surface is big and the character doesnt snap properly!! (problem with upHitPoint). 
+        //transform.position = m_upHitPoint; 
+        //try maybe with the renderer, but then the collider needs to be reposition and this causes problems. 
+        m_characterRenderer.position = m_upHitPoint;
+    }
+
+    private void OnAirUpdate(float deltaTime)
+    {
+        m_gravForceVector = m_gravVector * (-m_gravForce * m_gravForceOverTime.Evaluate(m_tGrav));
+        //check this problem later for suming deltatime to tgrav. 
+        //m_tGrav += deltaTime;
+        //Debug.Log(m_tGrav);
+
+        m_jumpVector += m_gravForceVector * -m_gravForce * deltaTime;
+        m_fallVector += m_jumpVector * deltaTime;
+        //Debug.Log(m_jumpVector);
+    }
+
+    private void Jump(Vector3 surfaceNormal)
+    {
+        m_isGrounded = false;
+        m_jumpVector = (Vector3.up + (surfaceNormal * 0.5f)).normalized * m_jumpForce;
+        Debug.Log("Jump Vector: " + m_jumpVector);
+    }
+    #endregion
+
+    #region FUNCTIONS TO GET VALUES
 
     private Vector3 GetVelocitySurfaceSpeedDir(Vector3 TangDownwards, Vector3 surfaceNormal)
     {
@@ -360,25 +422,6 @@ public class CharacterV4 : MonoBehaviour
         Vector3 _tangFirst = Vector3.Cross(normal, Vector3.up);
         Vector3 _tangDownwards = Vector3.Cross(normal, _tangFirst);
         return _tangDownwards.normalized;
-    }
-
-    private void Jump(Vector3 surfaceNormal)
-    {
-        m_isGrounded = false;
-        m_jumpVector = (Vector3.up + (surfaceNormal * 0.5f)).normalized * m_jumpForce;
-        Debug.Log("Jump Vector: " + m_jumpVector);
-    }
-
-    private void OnAirUpdate(float deltaTime)
-    {
-        m_gravForceVector = m_gravVector * (-m_gravForce * m_gravForceOverTime.Evaluate(m_tGrav));
-        //check this problem later for suming deltatime to tgrav. 
-        //m_tGrav += deltaTime;
-        //Debug.Log(m_tGrav);
-
-        m_jumpVector += m_gravForceVector * -m_gravForce * deltaTime;
-        m_fallVector += m_jumpVector * deltaTime;
-        //Debug.Log(m_jumpVector);
     }
 
     private Vector3 UpdateInputVector()
@@ -491,9 +534,9 @@ public class CharacterV4 : MonoBehaviour
         return false;
     }
 
+    #endregion
 
-
-
+    #region OLD
     //old, save until it works to check them, then delete. 
     private Vector3 GetSurfaceNormalByRaycast()
     {
@@ -548,4 +591,5 @@ public class CharacterV4 : MonoBehaviour
 
         return _rRot;
     }
+    #endregion
 }

@@ -1028,6 +1028,11 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: velocityGlideAcceleration.m_Curve.Array.size
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4687418695196700, guid: f0e0cd9983e53234fb75040a13996473, type: 2}
       propertyPath: m_LocalPosition.x
       value: 4.79
@@ -1094,6 +1099,51 @@ Prefab:
         type: 2}
       propertyPath: StartFallingAngle
       value: 80
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: velocityGlideAcceleration.m_Curve.Array.data[0].inSlope
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: velocityGlideAcceleration.m_Curve.Array.data[0].outSlope
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: velocityGlideAcceleration.m_Curve.Array.data[0].tangentMode
+      value: 34
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: velocityGlideAcceleration.m_Curve.Array.data[1].time
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: velocityGlideAcceleration.m_Curve.Array.data[1].value
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: velocityGlideAcceleration.m_Curve.Array.data[1].inSlope
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: velocityGlideAcceleration.m_Curve.Array.data[1].outSlope
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: velocityGlideAcceleration.m_Curve.Array.data[1].tangentMode
+      value: 34
+      objectReference: {fileID: 0}
+    - target: {fileID: 114700898628871958, guid: f0e0cd9983e53234fb75040a13996473,
+        type: 2}
+      propertyPath: velocityGlideAcceleration.m_RotationOrder
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: f0e0cd9983e53234fb75040a13996473, type: 2}
