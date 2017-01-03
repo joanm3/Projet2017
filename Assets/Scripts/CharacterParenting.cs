@@ -22,8 +22,11 @@ public class CharacterParenting : MonoBehaviour {
 	public void SetPlayerParent (Transform characterTransform, RaycastHit rayhit)
 	{
 
-        if (rayhit.collider == null)
+		if (rayhit.collider == null)
+		{
+//			characterTransform.parent = null;
             return; 
+		}
 
 		//Compare le collider sur lequel on a les pieds avec tous les colliders de la liste
 		for (int i = 0; i < links.Length; i++)
@@ -39,6 +42,7 @@ public class CharacterParenting : MonoBehaviour {
 			}
 		}
 	
+		//TODO faire que ça marche
 		if(resetPlayerVerticality)
 		{
 			characterTransform.rotation = Quaternion.LookRotation(characterTransform.forward, Vector3.up);

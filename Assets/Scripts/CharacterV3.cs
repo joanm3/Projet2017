@@ -127,7 +127,7 @@ public class CharacterV3 : MonoBehaviour
 
 	void Update ()
 	{
-		float _rayDistance = 1f; 
+		float _rayDistance = 5f; 
 		Vector3 _rayDirection = -Vector3.up; 
 
 		//Cast a Ray to get basic surface data
@@ -138,6 +138,11 @@ public class CharacterV3 : MonoBehaviour
 			if(myCharaparenting != null)
 				myCharaparenting.SetPlayerParent (transform, rayHit);
 		}
+//		else
+//		{
+//			if(myCharaparenting != null)
+//				myCharaparenting.SetPlayerParent (transform, rayHit);
+//		}
 
 		//Recup la normale de la surface
 		surfaceNormal = gravSurfaceData.averageSurfaceNormal;
@@ -174,6 +179,7 @@ public class CharacterV3 : MonoBehaviour
 
 		shouldSpeedDir = InputSpeedDir + current_VelocitySpeedDir + gravForce;
 //		print("Total : " + shouldSpeedDir + " / input : " + InputSpeedDir + " / velocity : " + current_VelocitySpeedDir + " / gravForce : " + gravForce);
+		Debug.DrawLine(transform.position, transform.position + (shouldSpeedDir - gravForce), Color.green);
 		myController.Move (shouldSpeedDir * Time.deltaTime);
 
     }
@@ -212,8 +218,8 @@ public class CharacterV3 : MonoBehaviour
 
 		//Direction
 
-		FirstTang = Vector3.Cross (rayHit.normal, Vector3.up);
-		TangDownwards = Vector3.Cross (rayHit.normal, FirstTang);
+		FirstTang = Vector3.Cross (surfaceNormal, Vector3.up);
+		TangDownwards = Vector3.Cross (surfaceNormal, FirstTang);
 
 		Debug.DrawLine (rayHit.point, rayHit.point + TangDownwards * 5f, Color.black);
 
@@ -249,15 +255,40 @@ public class CharacterV3 : MonoBehaviour
 		inputVector = (cam.transform.forward * Input.GetAxis ("Vertical")) + (cam.transform.right * Input.GetAxis ("Horizontal"));
 		inputVector.y = 0f;
 		inputVector.Normalize ();
-		//TODO ici, réorienter inputVector le long de la surface
+		//Réoriente inputVector le long de la surface
+		Vector3 _firstTang = Vector3.Cross(surfaceNormal, inputVector);
+		Vector3 _tang = Vector3.Cross(surfaceNormal, _firstTang);
+		Vector3 _inputTang = -_tang.normalized;
 
 		//Si nous sommes en fall, alors on ne prend plus en compte les input
 //		if (Vector3.Angle (Vector3.up, surfaceNormal) > Glide_angle)
 //			inputVector = Vector3.zero;
-		
+		//TODO Si nous sommes en Fall, alors ne plus prendre en compte l'input pour monter
+		if(myState == StabilityState.Falling)
+		{
+			//TODO clamper l'input comme sur le tableau avec Mourdjen
+//			float dotInput = Vector3.Dot(_inputTang, 
+
+//			if(_inputTang.y > 0f)
+//			{
+//				_inputTang.y = 0f;
+//			}
+//			_inputTang = Vector3.zero;
+
+		}
+//		print(_inputTang);
+
+		Debug.DrawLine(transform.position, transform.position + (_firstTang * 4f), Color.cyan);
+		Debug.DrawLine(transform.position, transform.position + (_tang * 4f), Color.green);
+		Debug.DrawLine(transform.position, transform.position + (_inputTang * 4f), Color.red);
+
 		Vector3 _vectorTolook = inputVector;		//Direction que le controler doit regarder
 		if (inputVector.magnitude < 0.3)
 			_vectorTolook = transform.forward;
+
+		Vector3 _vectorToMove = _inputTang;			//Direction dans laquelle le controller doit se déplacer
+		if(_inputTang.magnitude < 0.3)
+			_vectorToMove = transform.forward;
 
 		//Rotation speed
 		currentRotationSpeed = ((max_RotationSpeed - min_RotationSpeed) * rotationBySpeed.Evaluate (_v_value)) + min_RotationSpeed;
@@ -272,7 +303,8 @@ public class CharacterV3 : MonoBehaviour
 		_vectorToReturn = transform.forward;
 
 		//Translation Speed
-		_vectorToReturn = _vectorToReturn.normalized * GetCurrentSpeedByCurve (_vectorTolook.normalized * inputVector.magnitude);
+//		_vectorToReturn = _vectorToReturn.normalized * GetCurrentSpeedByCurve (_vectorTolook.normalized * inputVector.magnitude);
+		_vectorToReturn = _vectorToReturn.normalized * GetCurrentSpeedByCurve (_vectorToMove.normalized * inputVector.magnitude);
 
 		return _vectorToReturn;
 	}
