@@ -105,6 +105,7 @@ public class CharacterV3 : MonoBehaviour
 		myController = GetComponent<CharacterController> ();
 		myController.slopeLimit = Glide_angle;
 		cam = Camera.main;
+		gravSurfaceData = transform.FindChild("SphereSurfCol").GetComponent<GetGravitySurface>();
 
         if (myCharaparenting == null)
         {
@@ -112,8 +113,6 @@ public class CharacterV3 : MonoBehaviour
         }
 
 	}
-
-    float inputGravityMultiplier = 1f; 
 
 	public StabilityState myState = StabilityState.Stable;
 	public enum StabilityState
@@ -123,49 +122,33 @@ public class CharacterV3 : MonoBehaviour
 		Falling
 	}
 
+	GetGravitySurface gravSurfaceData;
+
+
 	void Update ()
 	{
 		float _rayDistance = 1f; 
 		Vector3 _rayDirection = -Vector3.up; 
 
-
+		//Cast a Ray to get basic surface data
 		if (Physics.Raycast (transform.position + (-Vector3.up * (myController.bounds.extents.y - 0.1f)), _rayDirection, out rayHit, _rayDistance)) {
-			surfaceNormal = rayHit.normal;
+			//surfaceNormal = rayHit.normal;
 
 			//CETTE LIGNE SERT A CE QUE LE JOUEUR BOUGE EN MEME TEMPS QUE SA PLATE FORME
-            if(myCharaparenting != null)
-			myCharaparenting.SetPlayerParent (transform, rayHit);
+			if(myCharaparenting != null)
+				myCharaparenting.SetPlayerParent (transform, rayHit);
 		}
 
-		if(Vector3.Angle(rayHit.normal, Vector3.up) > Glide_angle || Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.5f)
-		{
-			myState = StabilityState.Falling;
-		}
-		else if(Vector3.Angle(rayHit.normal, Vector3.up) < Glide_angle)
-		{
-			if(Vector3.Angle(rayHit.normal, Vector3.up) < Confort_angle)
-			{
-				myState = StabilityState.Stable;
-			}
-			else
-			{
-				myState = StabilityState.Unstable;
-			}
-		}
+		//Recup la normale de la surface
+		surfaceNormal = gravSurfaceData.averageSurfaceNormal;
+
+		//Maj State en fonction de surface normal
+		myState = UpdateCurrentSurfaceState(surfaceNormal);
+
 
 
         //Input dir + vel
-		if (canUseInput && myState != StabilityState.Falling)
-		{
-//			print("je toooooombe pas !!! " + Vector3.Angle(rayHit.normal, Vector3.up));
-//			print("Grounded");
-            InputSpeedDir = GetInputSpeedDir();
-		}
-		else
-		{
-//			print("je toooooombe !!! " + Vector3.Angle(rayHit.normal, Vector3.up));
-            InputSpeedDir = Vector3.zero; 
-		}
+		InputSpeedDir = GetInputSpeedDir();
 
         //Surface dir + velocity
 		SetVelocitySpeedDir ();
@@ -177,63 +160,45 @@ public class CharacterV3 : MonoBehaviour
 
 			if(Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.5f || myState == StabilityState.Falling)
 			{
-				
 				gravForce = Vector3.up * (-maxGravForce * gravForceOverTime.Evaluate(tGrav));
 				tGrav += Time.deltaTime;
-
-				//Check air blocage
-//				AntiAirBlock(8);
-
 			}
 			else
 			{
 				tGrav = 0f;
 				gravForce = -Vector3.up * 10f;
-
 			}
 
 
 		}
 
-		shouldSpeedDir = (InputSpeedDir * (inputGravityMultiplier)) + current_VelocitySpeedDir + gravForce;
+		shouldSpeedDir = InputSpeedDir + current_VelocitySpeedDir + gravForce;
 //		print("Total : " + shouldSpeedDir + " / input : " + InputSpeedDir + " / velocity : " + current_VelocitySpeedDir + " / gravForce : " + gravForce);
 		myController.Move (shouldSpeedDir * Time.deltaTime);
 
     }
 
-//	void AntiAirBlock(int accuracy)
-//	{
-//
-//		Vector3 _origin = transform.position + (-Vector3.up * ((myController.bounds.extents.y/4f) *3f));
-//		float inclinaison = 360f/accuracy;
-//		Vector3 _direction = transform.forward;
-//		RaycastHit _rayHit;
-//
-//		Vector3 _RepulsiveForce = Vector3.zero;
-//
-//		for (int i = 0; i < accuracy; i++) {
-//
-//			_direction = Quaternion.AngleAxis(inclinaison * i, transform.up) * _direction;
-//
-//			Debug.DrawRay(_origin, _direction, Color.black);
-//			Debug.DrawLine(_origin, _origin + _direction.normalized, Color.blue);
-//
-//			if(Physics.Raycast(_origin, _direction, out _rayHit, 1f))
-//			{
-//				Vector3 _TempTang = Vector3.Cross(_rayHit.normal, Vector3.up);
-//				Vector3 _TangDownwards = Vector3.Cross(_rayHit.normal, _TempTang);
-//
-//				Debug.DrawRay(_rayHit.point, _TangDownwards, Color.red);
-//
-//				_RepulsiveForce += (TangDownwards) + (_direction);
-////				print(_RepulsiveForce);
-//			}
-//
-//		}
-//
-//		gravForce += _RepulsiveForce.normalized;
-//
-//	}
+
+	StabilityState UpdateCurrentSurfaceState(Vector3 theNormal)
+	{
+		if(Vector3.Angle(theNormal, Vector3.up) > Glide_angle || Vector3.Distance(transform.position - (Vector3.up * myController.bounds.extents.y), rayHit.point) > 0.5f)
+		{
+			return StabilityState.Falling;
+		}
+		else if(Vector3.Angle(theNormal, Vector3.up) < Glide_angle)
+		{
+			if(Vector3.Angle(theNormal, Vector3.up) < Confort_angle)
+			{
+				return StabilityState.Stable;
+			}
+			else
+			{
+				return StabilityState.Unstable;
+			}
+		}
+
+		return StabilityState.Stable;
+	}
 
 	Vector3 gravForce = Vector3.zero;
 
@@ -256,23 +221,19 @@ public class CharacterV3 : MonoBehaviour
 		fromCtoG = Mathf.Clamp (fromCtoG, 0f, 1f);
 		surface_VelocitySpeedDir = TangDownwards.normalized * (maxGlideSpeed * velocityGlideAcceleration.Evaluate (fromCtoG));
 
-//		print(velocityGlideAcceleration.Evaluate(fromCtoG));
-
 		//lerp de current à surface
 
-		//si accelere
-		if (surface_VelocitySpeedDir.magnitude > current_VelocitySpeedDir.magnitude)
-		{
-			current_VelocitySpeedDir = Vector3.MoveTowards (current_VelocitySpeedDir, surface_VelocitySpeedDir, velocityTransitionSpeed_acceleration * Time.deltaTime);
-		}
-		//Si decelere
-		else
-		{
-			current_VelocitySpeedDir = Vector3.MoveTowards (current_VelocitySpeedDir, surface_VelocitySpeedDir, velocityTransitionSpeed_decceleration * Time.deltaTime);
-		}
-
-//		print("Angle : " + Vector3.Angle (Vector3.up, surfaceNormal) + " / CG : " + fromCtoG + " / surfForce : " + surface_VelocitySpeedDir);
-			
+			//si accelere
+			if (surface_VelocitySpeedDir.magnitude > current_VelocitySpeedDir.magnitude)
+			{
+				current_VelocitySpeedDir = Vector3.MoveTowards (current_VelocitySpeedDir, surface_VelocitySpeedDir, velocityTransitionSpeed_acceleration * Time.deltaTime);
+			}
+			//Si decelere
+			else
+			{
+				current_VelocitySpeedDir = Vector3.MoveTowards (current_VelocitySpeedDir, surface_VelocitySpeedDir, velocityTransitionSpeed_decceleration * Time.deltaTime);
+			}
+		//TODO cette partie là doit avoir un algorythme de transition plus effeicace (pour éviter le probleme du personnage qui subit une force pas logique car la transition est trop lente)		
 	}
 
 
@@ -285,12 +246,15 @@ public class CharacterV3 : MonoBehaviour
 
 		Vector3 _vectorToReturn = Vector3.zero;
 		//Direction
-		 inputVector = (cam.transform.forward * Input.GetAxis ("Vertical")) + (cam.transform.right * Input.GetAxis ("Horizontal"));
+		inputVector = (cam.transform.forward * Input.GetAxis ("Vertical")) + (cam.transform.right * Input.GetAxis ("Horizontal"));
 		inputVector.y = 0f;
 		inputVector.Normalize ();
+		//TODO ici, réorienter inputVector le long de la surface
 
-		if (Vector3.Angle (Vector3.up, surfaceNormal) > Glide_angle)
-			inputVector = Vector3.zero;
+		//Si nous sommes en fall, alors on ne prend plus en compte les input
+//		if (Vector3.Angle (Vector3.up, surfaceNormal) > Glide_angle)
+//			inputVector = Vector3.zero;
+		
 		Vector3 _vectorTolook = inputVector;		//Direction que le controler doit regarder
 		if (inputVector.magnitude < 0.3)
 			_vectorTolook = transform.forward;
@@ -323,7 +287,6 @@ public class CharacterV3 : MonoBehaviour
 	float GetCurrentSpeedByCurve (Vector3 directionAndMagnitude)
 	{
 		float _floatToReturn = 0.0f;
-//		float _t_time;		TODO trouver comment passer par l'init qu'une fois
 
 		if (directionAndMagnitude.magnitude > 0.2f) {
 			//Le joueur utilise le stick : on accelere

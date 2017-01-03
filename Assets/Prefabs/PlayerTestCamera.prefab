@@ -268,6 +268,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4d0eb1f3d4edbe48a6d8cc65828f586, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  averageSurfaceNormal: {x: 0, y: 0, z: 0}
 --- !u!114 &114240109599462678
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -288,7 +289,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1812814023594600}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 79a1ffe31584ea549bff9ad1af3fa4a2, type: 3}
   m_Name: 

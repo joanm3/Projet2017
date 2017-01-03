@@ -38,6 +38,8 @@ public class GetGravitySurface : MonoBehaviour {
 		//Get the average
 		_average /= col.contacts.Length;
 
+		averageSurfaceNormal = _average;
+
 		Debug.DrawRay(transform.position, _average, Color.magenta);
 	}
 		
