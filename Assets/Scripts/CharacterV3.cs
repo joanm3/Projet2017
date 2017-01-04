@@ -179,7 +179,7 @@ public class CharacterV3 : MonoBehaviour
 
 		shouldSpeedDir = InputSpeedDir + current_VelocitySpeedDir + gravForce;
 //		print("Total : " + shouldSpeedDir + " / input : " + InputSpeedDir + " / velocity : " + current_VelocitySpeedDir + " / gravForce : " + gravForce);
-		Debug.DrawLine(transform.position, transform.position + (shouldSpeedDir - gravForce), Color.green);
+//		Debug.DrawLine(transform.position, transform.position + (shouldSpeedDir - gravForce), Color.green);
 		myController.Move (shouldSpeedDir * Time.deltaTime);
 
     }
@@ -264,18 +264,16 @@ public class CharacterV3 : MonoBehaviour
 //		if (Vector3.Angle (Vector3.up, surfaceNormal) > Glide_angle)
 //			inputVector = Vector3.zero;
 		//TODO Si nous sommes en Fall, alors ne plus prendre en compte l'input pour monter
-		if(myState == StabilityState.Falling)
-		{
-			//TODO clamper l'input comme sur le tableau avec Mourdjen
+//		if(myState == StabilityState.Falling)
+//		{
+			//TODO clamper l'input comme sur le tableau avec Mourdjen + tester si à zero ca marche bien
 //			float dotInput = Vector3.Dot(_inputTang, 
-
 //			if(_inputTang.y > 0f)
 //			{
 //				_inputTang.y = 0f;
 //			}
-//			_inputTang = Vector3.zero;
-
-		}
+			//_inputTang = Vector3.zero;
+//		}
 //		print(_inputTang);
 
 		Debug.DrawLine(transform.position, transform.position + (_firstTang * 4f), Color.cyan);
@@ -302,9 +300,25 @@ public class CharacterV3 : MonoBehaviour
 		//au cas ou on look nul part
 		_vectorToReturn = transform.forward;
 
+		if(myState == StabilityState.Falling)
+		{
+			//Clamp le vecteur à la chute
+
+//			_vectorToMove = Vector3.zero;
+		
+			float fallDot = Vector3.Dot(TangDownwards, _vectorToMove);
+			fallDot = Mathf.Clamp(fallDot, 0f, 1f);
+			//Normaliser fallDot avant de l'appliquer à _vectorMove si tu veux que la direction latérale ne soit pas ralentie
+
+			_vectorToMove *= fallDot;
+
+		}
+
 		//Translation Speed
 //		_vectorToReturn = _vectorToReturn.normalized * GetCurrentSpeedByCurve (_vectorTolook.normalized * inputVector.magnitude);
 		_vectorToReturn = _vectorToReturn.normalized * GetCurrentSpeedByCurve (_vectorToMove.normalized * inputVector.magnitude);
+
+//		print(_vectorToMove);
 
 		return _vectorToReturn;
 	}
