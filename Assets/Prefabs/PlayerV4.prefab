@@ -397,8 +397,9 @@ MonoBehaviour:
     m_RotationOrder: 0
   Glide: 1
   DecreaseSpeed: 1
-  StartForcesAngle: 5
+  StartForcesAngle: 37.4
   StartFallingAngle: 90
+  m_characterDirection: {x: 0, y: 0, z: 0}
   m_cam: {fileID: 0}
   m_characterRenderer: {fileID: 4687418695196700}
   m_isGrounded: 0
@@ -426,12 +427,16 @@ MonoBehaviour:
   m_inputGravityMultiplier: 1
   m_tJumpCooldown: 0.2
   characterState: 0
-  m_inputCurrentForce: 0
-  maxForce: 1
   massPlayer: 1
-  friction: 0.5
-  angleGravityForce: 1
+  friction: 0.264
   velMax: 20
+  inflectionAngle: 45.95
+  gravForce: 1
+  maxForce: 0
+  m_inputCurrentForce: 0
+  m_surfaceCurrentDescentForce: 0
+  m_currentTotalForce: 0
+  m_stopThreshold: 0.9
 --- !u!143 &143725867177485170
 CharacterController:
   m_ObjectHideFlags: 1

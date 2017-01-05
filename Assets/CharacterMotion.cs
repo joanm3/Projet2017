@@ -48,7 +48,7 @@ public class CharacterMotion : MonoBehaviour
     private Vector3 m_upSurfaceNormal;
 
     private Quaternion m_normalRotation;
-    private Vector3 m_tangDownwardsNormalized;
+    private Vector3 m_surfaceTangDownwardsNormalized;
     private float m_surfaceAngle;
     public bool Glide = true;
     public bool DecreaseSpeed = true;
@@ -58,6 +58,8 @@ public class CharacterMotion : MonoBehaviour
 
     //final avatar movement
     private Vector3 m_characterForward;
+    [SerializeField]
+    private Vector3 m_characterDirection;
     private Vector3 m_characterUp;
     private float m_characterSpeed;
     private Quaternion m_characterRotation;
@@ -110,11 +112,6 @@ public class CharacterMotion : MonoBehaviour
     public CharacterState characterState = CharacterMotion.CharacterState.Idle;
 
 
-    //marco
-    [SerializeField]
-    float m_inputCurrentForce = 0.0f;
-    [SerializeField]
-    float maxForce = 1.0f;
     [SerializeField]
     [Range(0.1f, 3f)]
     float massPlayer = 1;
@@ -122,13 +119,17 @@ public class CharacterMotion : MonoBehaviour
     [Range(0, 1)]
     float friction = 1;
     [SerializeField]
-    float gravForce = 1f;
+    float velMax = 0f;
     [SerializeField]
     float inflectionAngle = 45;
     [SerializeField]
-    float velMax = 0f;
+    float gravForce = 1f;
     [SerializeField]
-    float m_currentDescentForce = 0f;
+    float maxForce = 1.0f;
+    [SerializeField]
+    float m_inputCurrentForce = 0.0f;
+    [SerializeField]
+    float m_surfaceCurrentDescentForce = 0f;
     [SerializeField]
     float m_currentTotalForce = 0f;
 
@@ -138,8 +139,6 @@ public class CharacterMotion : MonoBehaviour
     private float m_stopThreshold = 0.9f;
     // velocity max when forceInput == forceFriction => forceInput == frictionConstant * velmax  => velmax == forceInput / frictionConstant
     // velmax == sqrt ( mass * maxForce / frictionConstant )
-    [SerializeField]
-    private float m_finalForce;
     #endregion
 
     #region UNITY FUNCTIONS
@@ -149,6 +148,7 @@ public class CharacterMotion : MonoBehaviour
         m_controller = GetComponent<CharacterController>();
         m_lastSurfaceNormal = m_surfaceNormal;
         m_surfaceAngle = 0f;
+        m_characterDirection = m_characterForward;
     }
 
     private void Update()
@@ -193,11 +193,9 @@ public class CharacterMotion : MonoBehaviour
         if (m_lastSurfaceNormal != m_surfaceNormal)
         {
             m_surfaceAngle = ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, Vector3.up) : 0f);
-            m_tangDownwardsNormalized = GetSurfaceTangentDownwards(m_surfaceNormal, m_surfaceHit.point);
+            m_surfaceTangDownwardsNormalized = GetSurfaceTangentDownwards(m_surfaceNormal, m_surfaceHit.point);
             m_lastSurfaceNormal = m_surfaceNormal;
         }
-        //Debug.Log(m_surfaceAngle); 
-
         #endregion
 
 
@@ -206,30 +204,21 @@ public class CharacterMotion : MonoBehaviour
         m_characterRotation = m_normalRotation * m_inputRotation;
         m_characterForward = (m_characterRotation * Vector3.forward).normalized;
         m_characterUp = m_characterRotation * Vector3.up;
-
-        Vector3 vectorOnFacePlane = Vector3.ProjectOnPlane(m_characterForward, Vector3.up);
-        float absAngle = Vector3.Angle(m_characterForward, vectorOnFacePlane);
-        float dot = Vector3.Dot(Vector3.up, m_characterForward);
-        m_characterCurrentForwardAngle = dot < 0 ? -absAngle : absAngle;
-
+        m_characterCurrentForwardAngle = GetCharacterForwardAngleFromGroundZero(m_characterForward);
         m_characterSpeed = m_inputCurrentSpeed;
-        m_characterAngleInDegFromSurfaceTang = Vector3.Angle(m_characterForward, m_tangDownwardsNormalized);
+        m_characterAngleInDegFromSurfaceTang = Vector3.Angle(m_characterForward, m_surfaceTangDownwardsNormalized);
 
-        // marco
         //velMax = VelMax(massPlayer, maxForce, friction);
         maxForce = GetMaxForce(friction, velMax, massPlayer);
         gravForce = GetGravityFromInflectionAngle(inflectionAngle, maxForce, massPlayer);
-        m_currentDescentForce = GetAngleForce(gravForce, m_characterCurrentForwardAngle, massPlayer);
+        m_surfaceCurrentDescentForce = GetAngleForce(gravForce, m_characterCurrentForwardAngle, massPlayer);
         m_inputCurrentForce = UpdateInputForce(maxForce, _dt);
-        //m_inputCurrentForce = UpdateInputForce(maxForce, _dt);
-        // m_inputCurrentSpeed = UpdateInputSpeed(m_inputCurrentSpeed, _dt);
-        m_inputCurrentSpeed += CalculateDeltaVel(_dt);
-        //Debug.Log("Direction: " + m_characterForward); 
+        //m_inputCurrentSpeed += CalculateDeltaVel(out m_currentTotalForce, _dt);
+        m_inputCurrentSpeed = UpdateInputSpeed(ref m_currentTotalForce, m_inputCurrentSpeed, _dt);
 
 
         #endregion
 
-        // Debug.Log(m_characterAngleInDegFromSurfaceTang); 
 
         #region GET CHARACTER STATE
         if (m_isGrounded)
@@ -317,13 +306,12 @@ public class CharacterMotion : MonoBehaviour
         }
 
         #endregion
-
-
+        UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
 
         #region CHARACTER MOTION
         //INTEGRATE m_inputGravityMultiplier
         transform.rotation = m_inputRotation;
-        Vector3 _characterMotion = ((m_characterForward * m_characterSpeed)) + m_fallVector;
+        Vector3 _characterMotion = ((m_characterDirection * m_characterSpeed)) + m_fallVector;
         m_controller.Move(_characterMotion * _dt);
         #endregion
 
@@ -345,7 +333,7 @@ public class CharacterMotion : MonoBehaviour
         Gizmos.DrawLine(m_surfaceHit.point, m_surfaceHit.point + (m_surfaceNormal * _linesLenght));
         Gizmos.color = Color.cyan;
         Vector3 _groundPosition = new Vector3(transform.position.x, transform.position.y - m_controller.bounds.extents.y, transform.position.z);
-        Gizmos.DrawLine(_groundPosition, _groundPosition + m_tangDownwardsNormalized * _linesLenght);
+        Gizmos.DrawLine(_groundPosition, _groundPosition + m_surfaceTangDownwardsNormalized * _linesLenght);
         Gizmos.DrawCube(transform.position, Vector3.one * 0.5f);
     }
 
@@ -400,7 +388,13 @@ public class CharacterMotion : MonoBehaviour
 
     #region FUNCTIONS TO GET VALUES
 
-
+    private float GetCharacterForwardAngleFromGroundZero(Vector3 characterForward)
+    {
+        Vector3 vectorOnFacePlane = Vector3.ProjectOnPlane(characterForward, Vector3.up);
+        float absAngle = Vector3.Angle(characterForward, vectorOnFacePlane);
+        float dot = Vector3.Dot(Vector3.up, characterForward);
+        return dot < 0 ? -absAngle : absAngle;
+    }
 
     //apply to get force of surface. 
     private static float GetAngleForce(float gravityForce, float surfaceAngleInDeg, float mass)
@@ -421,33 +415,32 @@ public class CharacterMotion : MonoBehaviour
 
     }
 
-
-    //marco
     private float UpdateInputForce(float maxForce, float deltaTime)
     {
         // magnitude between 0 and 1
         return maxForce * m_inputVector.magnitude;
     }
 
-    private float CalculateDeltaVel(float deltaTime)
+    private float CalculateDeltaVel(ref float currentTotalForce, float deltaTime)
     {
         float signVel = Mathf.Sign(m_inputCurrentSpeed);
 
         //if we want to glide more make friction force smaller when speed is negative or when not pushing the buttons, etc...
         //test stuff now its too strong. 
-        float frictionForce = (signVel < 0) ? 0 : -signVel * m_inputCurrentSpeed * m_inputCurrentSpeed * friction;
+        //float frictionForce = (signVel < 0) ? 0 : -signVel * m_inputCurrentSpeed * m_inputCurrentSpeed * friction;
+        float frictionForce = -signVel * m_inputCurrentSpeed * m_inputCurrentSpeed * friction;
 
-        m_currentTotalForce = m_inputCurrentForce + frictionForce + (m_currentDescentForce);
-        //forza = mass * acc
-        float acc = m_currentTotalForce / massPlayer;
+        //is angle is smaller than start forces, dont apply surfacedescentforce
+        currentTotalForce = (StartForcesAngle < m_surfaceAngle) ? m_inputCurrentForce + frictionForce + (m_surfaceCurrentDescentForce) : m_inputCurrentForce + frictionForce;
+
+        //force = mass * acc
+        float acc = currentTotalForce / massPlayer;
         float deltavel = acc * deltaTime;
-        Debug.Log("input:" + m_inputCurrentSpeed);
-        Debug.Log("angle:" + (m_characterCurrentForwardAngle));
-        Debug.Log("total:" + m_currentTotalForce);
-        Debug.Log("sign:" + signVel);
-        Debug.LogFormat("inputCuF: {0}, frictForce: {1}, descForce: {2}, signVel: {3}", m_inputCurrentForce, frictionForce, m_currentDescentForce, signVel);
-
-        //Debug.LogFormat("angle: {0}, inflectionAngle: {1}", m_surfaceAngle, inflectionAngle); 
+        //Debug.Log("angle:" + (m_characterCurrentForwardAngle));
+        //Debug.Log("total:" + m_currentTotalForce);
+        //Debug.Log("sign:" + signVel);
+        //Debug.LogFormat("inputCuF: {0}, frictForce: {1}, descForce: {2}, signVel: {3}", m_inputCurrentForce, frictionForce, m_currentDescentForce, signVel);
+        //Debug.LogFormat("SurfaceAngle: {0}, StartForces: {1}, isBigger: {2}", m_surfaceAngle, StartForcesAngle, StartForcesAngle < m_surfaceAngle); 
         return deltavel;
     }
 
@@ -455,29 +448,39 @@ public class CharacterMotion : MonoBehaviour
     {
         return fMax / (mass * Mathf.Sin(angleInDeg * Mathf.Deg2Rad));
     }
-    // end marco
 
+    private void UpdateCharacterDirection(ref Vector3 directionVector, float deltaTime)
+    {
+        if (m_inputCurrentForce < Mathf.Abs(m_surfaceCurrentDescentForce))
+        {
+            //directionVector = m_surfaceTangDownwardsNormalized;
 
-    private float UpdateInputSpeed(float inputCurrentSpeed, float deltaTime)
+            //directionVector = Vector3.MoveTowards(directionVector, -m_surfaceTangDownwardsNormalized, deltaTime);
+        }
+        else
+        {
+            //directionVector = Vector3.MoveTowards(directionVector, m_characterForward, deltaTime);
+            //directionVector = m_characterForward;
+        }
+        directionVector = m_characterForward;
+
+    }
+
+    private float UpdateInputSpeed(ref float currentTotalForce, float inputCurrentSpeed, float deltaTime)
     {
         float _inputCurrentSpeed = inputCurrentSpeed;
 
-        //if ((velMax - m_inputCurrentSpeed) <= 0.2f && m_inputDirection.magnitude >= 0.1f)
-        //{
-        //    _inputCurrentSpeed = velMax;
-        //}
-        //else if (m_inputCurrentSpeed <= m_stopThreshold && m_inputDirection.magnitude <= 0.1f)
-        //{
-        //    _inputCurrentSpeed = 0f;
-        //}
-        //else
-        //{
-        //    _inputCurrentSpeed += CalculateDeltaVel(deltaTime);
-        //}
-
-        _inputCurrentSpeed += CalculateDeltaVel(deltaTime);
-
+        ////you should improve this because it stops sometimes when it shouldnt. 
+        if ((_inputCurrentSpeed < m_stopThreshold) && (_inputCurrentSpeed > -m_stopThreshold) && m_inputVector.magnitude < 0.2f && m_surfaceAngle < StartForcesAngle)
+        {
+            _inputCurrentSpeed = 0f;
+        }
+        else
+        {
+            _inputCurrentSpeed += CalculateDeltaVel(ref currentTotalForce, deltaTime);
+        }
         return _inputCurrentSpeed;
+
     }
 
     private Vector3 GetSurfaceTangentDownwards(Vector3 normal, Vector3 point)
