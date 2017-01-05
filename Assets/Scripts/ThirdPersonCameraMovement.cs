@@ -13,7 +13,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     [Header("Camera values")]
     public float maxDistance = 40f;
     public float minDistance = 10f;
-    public float cameraSpeed = 2f;
+    public float joystickSpeed = 2f;
     public float sensitivityX = 4.0f;
     public float sensitivityY = 1.0f;
     public float lerpVelocity = 5f;
@@ -146,11 +146,14 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         #region GET INPUT
         if (useJoystick)
         {
-            float inputXStick = (Input.GetAxis("360_R_Stick_X") > 0.15f || Input.GetAxis("360_R_Stick_X") < -0.15f) ? Input.GetAxis("360_R_Stick_X") : 0f;
-            float inputYStick = (Input.GetAxis("360_R_Stick_Y") > 0.15f || Input.GetAxis("360_R_Stick_Y") < -0.15f) ? Input.GetAxis("360_R_Stick_Y") : 0f;
+            float inputXStick = (Input.GetAxis("360_R_Stick_X") > 0.35f || Input.GetAxis("360_R_Stick_X") < -0.35f) ? Input.GetAxis("360_R_Stick_X") : 0f;
+            float inputYStick = (Input.GetAxis("360_R_Stick_Y") > 0.35f || Input.GetAxis("360_R_Stick_Y") < -0.35f) ? Input.GetAxis("360_R_Stick_Y") : 0f;
 
-            currentX += inputXStick * cameraSpeed;
-            currentY += inputYStick * cameraSpeed;
+            //Debug.LogFormat("Bool: {0}, stick: {1}", (Input.GetAxis("360_R_Stick_X") > 0.2f || Input.GetAxis("360_R_Stick_X") < -0.2f), inputXStick); 
+
+            currentX += inputXStick * joystickSpeed;
+            currentY += inputYStick * joystickSpeed;
+
         }
         else
         {

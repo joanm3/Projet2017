@@ -3,38 +3,36 @@ using System.Collections.Generic;
 using UnityEngine;
 using ProjectGiants.GFunctions;
 
-public class CharacterV4 : MonoBehaviour
+public class CharacterMotion : MonoBehaviour
 {
 
     #region PARAMETERS
 
-    public float MaxGlideSpeed;
-    public float ConfortAngle;
-    public float GlideAngle;
-    [SerializeField]
-    private AnimationCurve velocityGlideAcceleration;
 
 
     //input
     [Header("Input")]
-    private Vector3 m_inputDirection;
+    private Vector3 m_inputVector;
     [SerializeField]
     private float m_inputCurrentSpeed;
     private float m_inputDeltaHeadingAngleInDeg;
     private Quaternion m_inputRotation;
-    [SerializeField]
-    private AnimationCurve m_inputAccelerationCurve;
-    [SerializeField]
-    private float m_inputTargetSpeed = 20f;
+
     [SerializeField]
     private float m_startRunningSpeed = 10f;
-    [SerializeField]
-    private float m_inputTimeToReachMaxSpeed = 2f;
-    [SerializeField]
-    [Range(0, 3)]
-    private float m_inputStopForce = 0.5f;
+    //CHECK THIS!!!
     private float m_tMove = 0f;
-
+    [SerializeField]
+    [Tooltip("Vitesse de rotation maximum (en angles par seconde)")]
+    [Range(5.0f, 1440.0f)]
+    private float m_maxRotSpeed = 200.0f;
+    [SerializeField]
+    [Tooltip("Vitesse de rotation minimum (en angles par seconde)")]
+    [Range(5.0f, 360.0f)]
+    private float m_minRotSpeed = 50.0f;
+    [SerializeField]
+    [Tooltip("Vitesse de rotation en fonction de la vitesse de deplacement input. De gauche à droite la vitesse de deplacement input, de haut en bas la vitesse de rotation. Interpolation entre min_RotationSpeed et max_RotationSpeed en fonction de la curve")]
+    private AnimationCurve m_rotationBySpeed = AnimationCurve.Linear(0.0f, 0.0f, 1.0f, 1.0f);
 
     //surface
     [Header("Surfaces")]
@@ -45,39 +43,26 @@ public class CharacterV4 : MonoBehaviour
         private set { m_surfaceNormal = value; }
 
     }
+
     private Vector3 m_lastSurfaceNormal;
     private Vector3 m_upSurfaceNormal;
-    private float m_surfaceForceSpeed;
+
     private Quaternion m_normalRotation;
     private Vector3 m_tangDownwardsNormalized;
     private float m_surfaceAngle;
-    private Vector3 m_surfaceForceVector;
     public bool Glide = true;
     public bool DecreaseSpeed = true;
-    private AnimationCurve m_descreaseSpeedCurve = AnimationCurve.EaseInOut(0.0f, 0.0f, 1.0f, 1.0f);
     public float StartForcesAngle = 5f;
     public float StartFallingAngle = 20f;
-    [SerializeField]
-    private float m_surfaceMaxSpeed;
-    [SerializeField]
-    private float velocityTransitionSpeed_acceleration;
-    [SerializeField]
-    private float velocityTransitionSpeed_decceleration;
 
-
-    private float m_tGlide;
-    [SerializeField]
-    private float m_surfaceTimeToReachMaxForce = 2f;
-    [SerializeField]
-    private float m_surfaceStopForce = 1.5f;
 
     //final avatar movement
     private Vector3 m_characterForward;
     private Vector3 m_characterUp;
     private float m_characterSpeed;
-    private Vector3 m_charMovement;
     private Quaternion m_characterRotation;
     private float m_characterAngleInDegFromSurfaceTang;
+    private float m_characterCurrentForwardAngle;
 
 
 
@@ -118,22 +103,11 @@ public class CharacterV4 : MonoBehaviour
 
 
 
-    [SerializeField]
-    [Tooltip("Vitesse de rotation maximum (en angles par seconde)")]
-    [Range(5.0f, 1440.0f)]
-    private float m_maxRotSpeed = 200.0f;
-    [SerializeField]
-    [Tooltip("Vitesse de rotation minimum (en angles par seconde)")]
-    [Range(5.0f, 360.0f)]
-    private float m_minRotSpeed = 50.0f;
-    [SerializeField]
-    [Tooltip("Vitesse de rotation en fonction de la vitesse de deplacement input. De gauche à droite la vitesse de deplacement input, de haut en bas la vitesse de rotation. Interpolation entre min_RotationSpeed et max_RotationSpeed en fonction de la curve")]
-    private AnimationCurve m_rotationBySpeed = AnimationCurve.Linear(0.0f, 0.0f, 1.0f, 1.0f);
 
 
     public enum CharacterState { Idle, Walking, Running, Falling, Jumping, GoingUp, GoingDown, Gliding, StrongGliding, Stopping };
 
-    public CharacterState characterState = CharacterV4.CharacterState.Idle;
+    public CharacterState characterState = CharacterMotion.CharacterState.Idle;
 
 
     //marco
@@ -142,17 +116,30 @@ public class CharacterV4 : MonoBehaviour
     [SerializeField]
     float maxForce = 1.0f;
     [SerializeField]
+    [Range(0.1f, 3f)]
     float massPlayer = 1;
     [SerializeField]
     [Range(0, 1)]
     float friction = 1;
     [SerializeField]
-    float angleGravityForce = 1f;
+    float gravForce = 1f;
+    [SerializeField]
+    float inflectionAngle = 45;
     [SerializeField]
     float velMax = 0f;
+    [SerializeField]
+    float m_currentDescentForce = 0f;
+    [SerializeField]
+    float m_currentTotalForce = 0f;
+
+
+    [SerializeField]
+    [Tooltip("The Character will completely stop when currentVel. is smaller than this number")]
+    private float m_stopThreshold = 0.9f;
     // velocity max when forceInput == forceFriction => forceInput == frictionConstant * velmax  => velmax == forceInput / frictionConstant
     // velmax == sqrt ( mass * maxForce / frictionConstant )
-
+    [SerializeField]
+    private float m_finalForce;
     #endregion
 
     #region UNITY FUNCTIONS
@@ -161,7 +148,7 @@ public class CharacterV4 : MonoBehaviour
     {
         m_controller = GetComponent<CharacterController>();
         m_lastSurfaceNormal = m_surfaceNormal;
-        m_surfaceAngle = -1f;
+        m_surfaceAngle = 0f;
     }
 
     private void Update()
@@ -179,25 +166,11 @@ public class CharacterV4 : MonoBehaviour
         #endregion
 
         #region GET INPUT VALUES
-        m_inputDirection = UpdateInputVector();
-        if (m_inputDirection.magnitude >= 0.1f)
-            m_inputDeltaHeadingAngleInDeg = UpdateAngleInDeg(m_inputDirection, Vector3.forward);
+        m_inputVector = UpdateInputVector();
+        if (m_inputVector.magnitude >= 0.1f)
+            m_inputDeltaHeadingAngleInDeg = UpdateAngleInDeg(m_inputVector, Vector3.forward);
 
         m_inputRotation = UpdateInputRotation(m_inputDeltaHeadingAngleInDeg);
-
-        // old
-        //m_inputCurrentSpeed = UpdateInputSpeed(_dt);
-
-        // marco
-        maxForce = GetMaxForce(friction, velMax, massPlayer);
-        float _trueAngleForce = Mathf.Abs(GetAngleForce(angleGravityForce, m_surfaceAngle));
-        float _force = (m_characterAngleInDegFromSurfaceTang >= 90) ? maxForce - _trueAngleForce : maxForce + _trueAngleForce;
-        Debug.Log(_force);
-
-
-        m_inputCurrentForce = UpdateInputForce(_force, _dt);
-        m_inputCurrentSpeed = UpdateInputSpeed(m_inputCurrentSpeed, _dt);
-        //velMax = VelMax(massPlayer, maxForce, friction);
         //edit this to solve some problems. for the moment using the world up!!! change it but resolve porblems. 
         m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, Vector3.up, 1f) : false;
         #endregion
@@ -223,8 +196,7 @@ public class CharacterV4 : MonoBehaviour
             m_tangDownwardsNormalized = GetSurfaceTangentDownwards(m_surfaceNormal, m_surfaceHit.point);
             m_lastSurfaceNormal = m_surfaceNormal;
         }
-        m_surfaceForceSpeed = GetVelocitySurfaceSpeed(MaxGlideSpeed, m_surfaceNormal, m_surfaceAngle, _dt);
-        m_surfaceForceVector = m_tangDownwardsNormalized * m_surfaceForceSpeed;
+        //Debug.Log(m_surfaceAngle); 
 
         #endregion
 
@@ -232,14 +204,32 @@ public class CharacterV4 : MonoBehaviour
 
         #region GET CHARACTER VALUES: INPUT + SURFACE
         m_characterRotation = m_normalRotation * m_inputRotation;
-        m_characterForward = m_characterRotation * Vector3.forward;
+        m_characterForward = (m_characterRotation * Vector3.forward).normalized;
         m_characterUp = m_characterRotation * Vector3.up;
+
+        Vector3 vectorOnFacePlane = Vector3.ProjectOnPlane(m_characterForward, Vector3.up);
+        float absAngle = Vector3.Angle(m_characterForward, vectorOnFacePlane);
+        float dot = Vector3.Dot(Vector3.up, m_characterForward);
+        m_characterCurrentForwardAngle = dot < 0 ? -absAngle : absAngle;
+
         m_characterSpeed = m_inputCurrentSpeed;
         m_characterAngleInDegFromSurfaceTang = Vector3.Angle(m_characterForward, m_tangDownwardsNormalized);
-        m_charMovement = m_characterForward * m_characterSpeed;
-        //Debug.Log("calculation: " + GetCharacterMotionVector());
-        //Debug.Log("motion: " + m_characterForward * m_characterSpeed);  
+
+        // marco
+        //velMax = VelMax(massPlayer, maxForce, friction);
+        maxForce = GetMaxForce(friction, velMax, massPlayer);
+        gravForce = GetGravityFromInflectionAngle(inflectionAngle, maxForce, massPlayer);
+        m_currentDescentForce = GetAngleForce(gravForce, m_characterCurrentForwardAngle, massPlayer);
+        m_inputCurrentForce = UpdateInputForce(maxForce, _dt);
+        //m_inputCurrentForce = UpdateInputForce(maxForce, _dt);
+        // m_inputCurrentSpeed = UpdateInputSpeed(m_inputCurrentSpeed, _dt);
+        m_inputCurrentSpeed += CalculateDeltaVel(_dt);
+        //Debug.Log("Direction: " + m_characterForward); 
+
+
         #endregion
+
+        // Debug.Log(m_characterAngleInDegFromSurfaceTang); 
 
         #region GET CHARACTER STATE
         if (m_isGrounded)
@@ -247,7 +237,7 @@ public class CharacterV4 : MonoBehaviour
             //When in standard surface
             if (m_surfaceAngle < StartForcesAngle)
             {
-                characterState = (m_inputDirection.magnitude > 0.3f) ? ((m_characterSpeed >= m_startRunningSpeed) ?
+                characterState = (m_inputVector.magnitude > 0.3f) ? ((m_characterSpeed >= m_startRunningSpeed) ?
                                                                     CharacterState.Running :
                                                             CharacterState.Walking) :
                     ((m_characterSpeed > 0.05f) ? CharacterState.Stopping :
@@ -259,7 +249,7 @@ public class CharacterV4 : MonoBehaviour
                 //going down
                 if (m_characterAngleInDegFromSurfaceTang >= 0 && m_characterAngleInDegFromSurfaceTang < 90)
                 {
-                    characterState = (m_inputDirection.magnitude > 0.3) ? CharacterState.GoingDown :
+                    characterState = (m_inputVector.magnitude > 0.3) ? CharacterState.GoingDown :
                                                         (Glide) ? CharacterState.Gliding :
                         ((m_characterSpeed > 0.05f) ? CharacterState.Stopping :
                                             CharacterState.Idle);
@@ -267,7 +257,7 @@ public class CharacterV4 : MonoBehaviour
                 //going up
                 else if (m_characterAngleInDegFromSurfaceTang >= 90)
                 {
-                    characterState = (m_inputDirection.magnitude > 0.3) ? CharacterState.GoingUp :
+                    characterState = (m_inputVector.magnitude > 0.3) ? CharacterState.GoingUp :
                                                     (Glide) ? CharacterState.Gliding :
                         ((m_characterSpeed > 0.05f) ? CharacterState.Stopping :
                                         CharacterState.Idle);
@@ -292,11 +282,6 @@ public class CharacterV4 : MonoBehaviour
             if (characterState != CharacterState.Jumping || m_fallVector.y < -0.1f)
                 characterState = CharacterState.Falling;
         }
-
-
-        #endregion
-
-
 
         switch (characterState)
         {
@@ -331,11 +316,13 @@ public class CharacterV4 : MonoBehaviour
                 }
         }
 
+        #endregion
 
-        transform.rotation = m_inputRotation;
+
 
         #region CHARACTER MOTION
         //INTEGRATE m_inputGravityMultiplier
+        transform.rotation = m_inputRotation;
         Vector3 _characterMotion = ((m_characterForward * m_characterSpeed)) + m_fallVector;
         m_controller.Move(_characterMotion * _dt);
         #endregion
@@ -357,8 +344,8 @@ public class CharacterV4 : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawLine(m_surfaceHit.point, m_surfaceHit.point + (m_surfaceNormal * _linesLenght));
         Gizmos.color = Color.cyan;
-        //Vector3 _groundPosition = new Vector3(transform.position.x, transform.position.y - m_controller.bounds.extents.y, transform.position.z);
-        //Gizmos.DrawLine(_groundPosition, _groundPosition + m_tangDownwardsNormalized * _linesLenght);
+        Vector3 _groundPosition = new Vector3(transform.position.x, transform.position.y - m_controller.bounds.extents.y, transform.position.z);
+        Gizmos.DrawLine(_groundPosition, _groundPosition + m_tangDownwardsNormalized * _linesLenght);
         Gizmos.DrawCube(transform.position, Vector3.one * 0.5f);
     }
 
@@ -388,7 +375,7 @@ public class CharacterV4 : MonoBehaviour
         //this bugs when the angle of the surface is big and the character doesnt snap properly!! (problem with upHitPoint). 
         //transform.position = m_upHitPoint; 
         //try maybe with the renderer, but then the collider needs to be reposition and this causes problems. 
-        m_characterRenderer.position = m_upHitPoint;
+        //m_characterRenderer.position = m_upHitPoint;
     }
 
     private void OnAirUpdate(float deltaTime)
@@ -416,9 +403,10 @@ public class CharacterV4 : MonoBehaviour
 
 
     //apply to get force of surface. 
-    private static float GetAngleForce(float gravityForce, float surfaceAngle)
+    private static float GetAngleForce(float gravityForce, float surfaceAngleInDeg, float mass)
     {
-        return gravityForce * Mathf.Sin(surfaceAngle * Mathf.Deg2Rad);
+
+        return -gravityForce * Mathf.Sin(surfaceAngleInDeg * Mathf.Deg2Rad) * mass;
     }
 
     private static float VelMax(float mass, float maxForce, float friction)
@@ -429,75 +417,56 @@ public class CharacterV4 : MonoBehaviour
     private static float GetMaxForce(float frictionConst, float maxSpeed, float mass)
     {
 
-        return frictionConst * maxSpeed * maxSpeed / mass;
+        return frictionConst * maxSpeed * maxSpeed;
 
     }
 
-    private Vector3 GetCharacterMotionVector()
-    {
-        Vector3 _vectorToReturn = Vector3.zero;
-        float fromCtoG = ((Vector3.Angle(Vector3.up, m_surfaceNormal) - ConfortAngle)) / (GlideAngle - ConfortAngle);
-        fromCtoG = Mathf.Clamp(fromCtoG, 0f, 1f);
-        Vector3 m_surfaceVelocityVector = m_tangDownwardsNormalized * (m_surfaceMaxSpeed * velocityGlideAcceleration.Evaluate(fromCtoG));
-        Vector3 _inputVector = (m_characterForward * m_characterSpeed);
-        //si accelere
-        _vectorToReturn = (m_surfaceVelocityVector.magnitude > _inputVector.magnitude) ?
-            Vector3.MoveTowards(_inputVector, m_surfaceVelocityVector, velocityTransitionSpeed_acceleration * Time.deltaTime) : //accelerate
-            Vector3.MoveTowards(_inputVector, m_surfaceVelocityVector, velocityTransitionSpeed_decceleration * Time.deltaTime); //deccelerate
-        return _vectorToReturn;
-    }
-
-    private Vector3 GetVelocitySurfaceSpeedDir(float maxGlideSpeed, Vector3 surfaceNormal, float surfaceAngle, float deltaTime)
-    {
-        return m_tangDownwardsNormalized * GetVelocitySurfaceSpeed(maxGlideSpeed, surfaceNormal, surfaceAngle, deltaTime);
-    }
-
-    private float GetVelocitySurfaceSpeed(float maxGlideSpeed, Vector3 surfaceNormal, float surfaceAngle, float deltaTime)
-    {
-        if (surfaceAngle >= StartForcesAngle)
-        {
-            m_tGlide += deltaTime;
-        }
-        else
-        {
-            m_tGlide -= deltaTime * m_surfaceStopForce;
-        }
-        m_tGlide = Mathf.Clamp(m_tGlide, 0f, m_surfaceTimeToReachMaxForce);
-
-        return maxGlideSpeed * velocityGlideAcceleration.Evaluate(m_tGlide);
-    }
 
     //marco
     private float UpdateInputForce(float maxForce, float deltaTime)
     {
         // magnitude between 0 and 1
-        return maxForce * m_inputDirection.magnitude;
+        return maxForce * m_inputVector.magnitude;
     }
 
     private float CalculateDeltaVel(float deltaTime)
     {
-        float frictionForce = -m_inputCurrentSpeed * m_inputCurrentSpeed * friction;
-        float currentForce = m_inputCurrentForce + frictionForce;
-        //forza = mass * acc
-        float acc = currentForce / massPlayer;
-        float deltavel = acc * deltaTime;
-        //Debug.Log(deltavel); 
+        float signVel = Mathf.Sign(m_inputCurrentSpeed);
 
+        //if we want to glide more make friction force smaller when speed is negative or when not pushing the buttons, etc...
+        //test stuff now its too strong. 
+        float frictionForce = (signVel < 0) ? 0 : -signVel * m_inputCurrentSpeed * m_inputCurrentSpeed * friction;
+
+        m_currentTotalForce = m_inputCurrentForce + frictionForce + (m_currentDescentForce);
+        //forza = mass * acc
+        float acc = m_currentTotalForce / massPlayer;
+        float deltavel = acc * deltaTime;
+        Debug.Log("input:" + m_inputCurrentSpeed);
+        Debug.Log("angle:" + (m_characterCurrentForwardAngle));
+        Debug.Log("total:" + m_currentTotalForce);
+        Debug.Log("sign:" + signVel);
+        Debug.LogFormat("inputCuF: {0}, frictForce: {1}, descForce: {2}, signVel: {3}", m_inputCurrentForce, frictionForce, m_currentDescentForce, signVel);
+
+        //Debug.LogFormat("angle: {0}, inflectionAngle: {1}", m_surfaceAngle, inflectionAngle); 
         return deltavel;
     }
+
+    private static float GetGravityFromInflectionAngle(float angleInDeg, float fMax, float mass)
+    {
+        return fMax / (mass * Mathf.Sin(angleInDeg * Mathf.Deg2Rad));
+    }
     // end marco
+
 
     private float UpdateInputSpeed(float inputCurrentSpeed, float deltaTime)
     {
         float _inputCurrentSpeed = inputCurrentSpeed;
 
-        ////if ((velMax - m_inputCurrentSpeed) <= 0.1f && m_inputDirection.magnitude >= 0.1f)
-        //if ((maxForce - m_inputCurrentSpeed) <= 0.1f && m_inputDirection.magnitude >= 0.1f)
+        //if ((velMax - m_inputCurrentSpeed) <= 0.2f && m_inputDirection.magnitude >= 0.1f)
         //{
-        //    _inputCurrentSpeed = maxForce;
-        //    // _inputCurrentSpeed = velMax;
+        //    _inputCurrentSpeed = velMax;
         //}
-        //else if (m_inputCurrentSpeed <= 0.35f && m_inputDirection.magnitude <= 0.1f)
+        //else if (m_inputCurrentSpeed <= m_stopThreshold && m_inputDirection.magnitude <= 0.1f)
         //{
         //    _inputCurrentSpeed = 0f;
         //}
@@ -505,33 +474,10 @@ public class CharacterV4 : MonoBehaviour
         //{
         //    _inputCurrentSpeed += CalculateDeltaVel(deltaTime);
         //}
+
         _inputCurrentSpeed += CalculateDeltaVel(deltaTime);
 
         return _inputCurrentSpeed;
-    }
-
-    private float UpdateInputSpeedOld(float deltaTime)
-    {
-        //if we want a decc curve just assign it to accCurve when magnitude is less than ... (start and end should be similar) 
-        AnimationCurve _accCurve = m_inputAccelerationCurve;
-
-        if (m_inputDirection.magnitude >= 0.3f)
-        {
-            m_tMove += deltaTime;
-        }
-        else
-        {
-            m_tMove -= deltaTime * m_inputStopForce;
-        }
-        m_tMove = Mathf.Clamp(m_tMove, 0f, m_inputTimeToReachMaxSpeed);
-
-        float _currentVelocityNormalized = GFunctions.NormalizedRangeValue(m_tMove, 0f, m_inputTimeToReachMaxSpeed);
-        return _accCurve.Evaluate(_currentVelocityNormalized) * m_inputTargetSpeed;
-    }
-
-    private float UpdateCharacterAngleFromSurface(Vector3 characterForward, Vector3 surfaceTangDownwards)
-    {
-        return Vector3.Angle(characterForward, surfaceTangDownwards);
     }
 
     private Vector3 GetSurfaceTangentDownwards(Vector3 normal, Vector3 point)
@@ -582,40 +528,9 @@ public class CharacterV4 : MonoBehaviour
         return _rRot;
     }
 
-    private static float SetTimeToEquivalent(AnimationCurve curveToCheck, float value, int accuracy)
-    {
-        value = Mathf.Clamp(value, 0f, curveToCheck.keys[curveToCheck.keys.Length - 1].time);
-        float accuracyNormalized = (Vector2.up * accuracy).normalized.magnitude;
-        float _step = curveToCheck.keys[curveToCheck.keys.Length - 1].time / accuracy;
-        float _v_hypotetic = 0.0f;
-        float difference = Mathf.Infinity;
-        float nearest = 0.0f;
-
-        for (float t_hypotetic = 0f; t_hypotetic < accuracyNormalized; t_hypotetic += _step)
-        {
-            _v_hypotetic = curveToCheck.Evaluate(t_hypotetic);
-            if (Mathf.Abs(_v_hypotetic - value) < difference)
-            {
-                difference = Mathf.Abs(_v_hypotetic - value);
-                nearest = t_hypotetic;
-            }
-        }
-        return nearest;
-    }
-
     private Vector3 GetSnapPositionByHitPoint(Vector3 point)
     {
         return point - (-transform.up * (m_controller.bounds.extents.y));
-    }
-
-    private Vector3 UpdateSurfaceNormalByRaycast(out RaycastHit hitInfo, Vector3 upVector)
-    {
-
-        if (GetRaycastAtPosition(out hitInfo, upVector, float.PositiveInfinity))
-        {
-            return hitInfo.normal;
-        }
-        return Vector3.zero;
     }
 
     private Vector3 UpdateSurfaceNormalByRaycast(out RaycastHit hitInfo, Vector3 upVector, float distance)
@@ -653,62 +568,5 @@ public class CharacterV4 : MonoBehaviour
         return false;
     }
 
-    #endregion
-
-    #region OLD
-    //old, save until it works to check them, then delete. 
-    private Vector3 GetSurfaceNormalByRaycast()
-    {
-
-        RaycastHit hitInfo;
-
-        if (GetRaycastAtPosition(out hitInfo))
-        {
-            return hitInfo.normal;
-        }
-        return Vector3.zero;
-    }
-    private Quaternion GetRotationByNormal(Vector3 normal)
-    {
-        Quaternion targetRotation = Quaternion.FromToRotation(Vector3.up, normal) * transform.rotation;
-        Quaternion finalRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, float.PositiveInfinity);
-        return finalRotation;
-    }
-    private Quaternion UpdateRotationWithNormalAndHeading(Vector3 normal, float headingDeltaAngle)
-    {
-        //https://forum.unity3d.com/threads/character-align-to-surface-normal.33987/
-        Quaternion _normalRot = transform.rotation;
-        Quaternion _headingDelta = Quaternion.AngleAxis(headingDeltaAngle, transform.up);
-        _normalRot = Quaternion.FromToRotation(Vector3.up, normal);
-        return _headingDelta * _normalRot;
-
-    }
-    private Quaternion UpdateCharacterRotation(Quaternion inputRotation, Vector3 normal)
-    {
-        //https://forum.unity3d.com/threads/character-align-to-surface-normal.33987/
-        Quaternion _normalRot = transform.rotation;
-        _normalRot = Quaternion.FromToRotation(Vector3.up, normal);
-        return inputRotation * _normalRot;
-
-    }
-    private Quaternion OldUpdateInputRotation(Vector3 inputVector)
-    {
-
-
-
-        Vector3 _vectorTolook = inputVector;        //Direction que le controler doit regarder
-        if (inputVector.magnitude < 0.3)
-            _vectorTolook = transform.forward;
-
-        //Rotation speed
-        float _currentRotationSpeed = ((m_maxRotSpeed - m_minRotSpeed) * m_rotationBySpeed.Evaluate(m_tMove)) + m_minRotSpeed;
-
-        //Rotation
-        //Quaternion _angleRotation = Quaternion.FromToRotation(Vector3.up, surfaceNormal);
-        Quaternion _toRot = Quaternion.LookRotation(_vectorTolook, transform.up);
-        Quaternion _rRot = Quaternion.RotateTowards(transform.rotation, _toRot, _currentRotationSpeed * Time.deltaTime);
-
-        return _rRot;
-    }
     #endregion
 }

@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 143725867177485170}
   - component: {fileID: 114127771338480362}
   - component: {fileID: 114700898628871958}
+  - component: {fileID: 114750747172138394}
   m_Layer: 8
   m_Name: PlayerV4
   m_TagString: Player
@@ -250,12 +251,33 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1043053349769534}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 264d78f633ec49541888a8ff260f166d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  glideAngle: 0
+  MaxGlideSpeed: 65.5
+  ConfortAngle: 11.91
+  GlideAngle: 19.18
+  velocityGlideAcceleration:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+    - serializedVersion: 2
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  m_inputCurrentSpeed: 0
   m_inputAccelerationCurve:
     serializedVersion: 2
     m_Curve:
@@ -274,9 +296,19 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
-  m_inputMaxSpeed: 20
+  m_inputTargetSpeed: 20
+  m_startRunningSpeed: 10
   m_inputTimeToReachMaxSpeed: 2
   m_inputStopForce: 1
+  Glide: 1
+  DecreaseSpeed: 1
+  StartForcesAngle: 10
+  StartFallingAngle: 90
+  m_surfaceMaxSpeed: 50
+  velocityTransitionSpeed_acceleration: 13
+  velocityTransitionSpeed_decceleration: 8
+  m_surfaceTimeToReachMaxForce: 2
+  m_surfaceStopForce: 1.5
   m_cam: {fileID: 0}
   m_characterRenderer: {fileID: 4334838726239372}
   m_isGrounded: 0
@@ -303,48 +335,8 @@ MonoBehaviour:
   m_gravVector: {x: -0, y: -1, z: -0}
   m_inputGravityMultiplier: 1
   m_tJumpCooldown: 0.5
-  _t_time: 0
-  _v_value: 0
-  InputAcceleration:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 2
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-    - serializedVersion: 2
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  InputDecceleration:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 2
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: -2
-      tangentMode: 0
-    - serializedVersion: 2
-      time: 0.5
-      value: 0
-      inSlope: -2
-      outSlope: 0
-      tangentMode: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  maxInputSpeed: 15
-  m_rotationSpeed: 7.76
   m_maxRotSpeed: 1440
-  m_minRotSpeed: 120
+  m_minRotSpeed: 360
   m_rotationBySpeed:
     serializedVersion: 2
     m_Curve:
@@ -364,6 +356,82 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 0
   characterState: 0
+  m_inputCurrentForce: 0
+  maxForce: 0
+  massPlayer: 1
+  friction: 0.02
+  angleGravityForce: 1
+  velMax: 20
+--- !u!114 &114750747172138394
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1043053349769534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f12d936136019114194995d939fc63a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_inputCurrentSpeed: 0
+  m_startRunningSpeed: 10
+  m_maxRotSpeed: 1440
+  m_minRotSpeed: 360
+  m_rotationBySpeed:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 1.0032467
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - serializedVersion: 2
+      time: 1.0014398
+      value: 0.04212365
+      inSlope: -1.6698577
+      outSlope: -1.6698577
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  Glide: 1
+  DecreaseSpeed: 1
+  StartForcesAngle: 5
+  StartFallingAngle: 90
+  m_cam: {fileID: 0}
+  m_characterRenderer: {fileID: 4687418695196700}
+  m_isGrounded: 0
+  m_gravForce: 9.8
+  m_gravForceOverTime:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+    - serializedVersion: 2
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  m_jumpForce: 25
+  m_gravVector: {x: -0, y: -1, z: -0}
+  m_inputGravityMultiplier: 1
+  m_tJumpCooldown: 0.2
+  characterState: 0
+  m_inputCurrentForce: 0
+  maxForce: 1
+  massPlayer: 1
+  friction: 0.5
+  angleGravityForce: 1
+  velMax: 20
 --- !u!143 &143725867177485170
 CharacterController:
   m_ObjectHideFlags: 1
