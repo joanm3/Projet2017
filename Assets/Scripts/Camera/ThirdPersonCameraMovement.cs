@@ -5,6 +5,10 @@ using ProjectGiants.GFunctions;
 
 public class ThirdPersonCameraMovement : MonoBehaviour
 {
+    public enum CameraMode { Free, Rail, Static, Cinematic };
+
+    public CameraMode cameraMode = CameraMode.Free; 
+
 
     public Transform playerTransform;
     public CharacterV4 player;
@@ -56,6 +60,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     [Header("Pivot local transform")]
     public Transform cameraPivotTransform;
     public Vector3 pivotPosition;
+    [Header("Rotation by normal")]
     public bool rotationByNormal = true;
     public float rotationIntensity = 1f;
     public float rotationLerp = 3f;
