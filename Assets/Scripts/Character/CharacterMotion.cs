@@ -16,8 +16,12 @@ public class CharacterMotion : MonoBehaviour
     private Transform m_characterRenderer;
 
     //input
+    public enum CharacterMovementType { Free, Blocked };
+    public CharacterMovementType characterMovementType = CharacterMovementType.Free;
+
     [Header("Input")]
     private Vector3 m_inputVector;
+    private float m_inputMagnitude;
     private float m_inputDeltaHeadingAngleInDeg;
     private Quaternion m_inputRotation;
     [SerializeField]
@@ -43,7 +47,6 @@ public class CharacterMotion : MonoBehaviour
     {
         get { return m_surfaceNormal; }
         private set { m_surfaceNormal = value; }
-
     }
     private Vector3 m_lastSurfaceNormal;
     private Vector3 m_upSurfaceNormal;
@@ -82,6 +85,8 @@ public class CharacterMotion : MonoBehaviour
     public CharacterState characterState = CharacterMotion.CharacterState.Idle;
 
     //avatar movement
+    public Vector3 CharacterForward { get { return m_characterForward; } }
+    public Vector3 CharacterUp { get { return m_characterUp; } }
     private Vector3 m_characterForward;
     [SerializeField]
     private Vector3 m_characterDirection;
@@ -89,7 +94,7 @@ public class CharacterMotion : MonoBehaviour
     private float m_characterSpeed;
     private Quaternion m_characterRotation;
     private float m_characterAngleInDegFromSurfaceTang;
-    private float m_characterCurrentForwardAngle;
+    private float m_characterCurrentForwardAngleFromGroundZero;
     [SerializeField]
     private float m_characterCurrentSpeed;
 
@@ -144,10 +149,35 @@ public class CharacterMotion : MonoBehaviour
         #endregion
 
         #region GET INPUT VALUES
-        m_inputVector = UpdateInputVector();
-        if (m_inputVector.magnitude >= 0.1f)
-            m_inputDeltaHeadingAngleInDeg = UpdateAngleInDeg(m_inputVector, Vector3.forward);
+        switch (characterMovementType)
+        {
+            case CharacterMovementType.Free:
+                m_inputVector = UpdateInputVectorWithAllAxis();
+                m_inputMagnitude = GetInputMagnitude();
+                break;
+            //case CharacterMovementType.RotateAroundCamera:
+            //    //m_inputVector = UpdateInputVectorOnlyForward();
+            //    m_inputVector = UpdateInputVectorWithAllAxis();
+            //    m_inputMagnitude = GetInputMagnitude();
 
+            //    break;
+            case CharacterMovementType.Blocked:
+                if (m_inputVector != Vector3.zero)
+                {
+                    m_inputVector = Vector3.zero;
+                    m_inputMagnitude = 0f;
+                }
+                break;
+
+        }
+
+        Vector3 circleRotationInputVector = (m_cam.transform.right * Input.GetAxis("Horizontal"));
+
+
+        if (m_inputMagnitude >= 0.1f)
+        {
+            m_inputDeltaHeadingAngleInDeg = UpdateAngleInDeg(m_inputVector, Vector3.forward);
+        }
         m_inputRotation = UpdateInputRotation(m_inputDeltaHeadingAngleInDeg);
         //edit this to solve some problems. for the moment using the world up!!! change it but resolve porblems. 
         m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, Vector3.up, 1f) : false;
@@ -177,20 +207,20 @@ public class CharacterMotion : MonoBehaviour
         #endregion
 
 
-
         #region GET CHARACTER VALUES: INPUT + SURFACE
         m_characterRotation = m_normalRotation * m_inputRotation;
         m_characterForward = (m_characterRotation * Vector3.forward).normalized;
         m_characterUp = m_characterRotation * Vector3.up;
-        m_characterCurrentForwardAngle = GetCharacterForwardAngleFromGroundZero(m_characterForward);
+        m_characterCurrentForwardAngleFromGroundZero = GetCharacterForwardAngleFromGroundZero(m_characterForward);
+        //Debug.Log(m_characterCurrentForwardAngleFromGroundZero); 
         m_characterSpeed = m_characterCurrentSpeed;
         m_characterAngleInDegFromSurfaceTang = Vector3.Angle(m_characterForward, m_surfaceTangDownwardsNormalized);
 
         //velMax = VelMax(massPlayer, maxForce, friction);
         m_maxForce = GetMaxForce(friction, velMax, massPlayer);
         m_gravForce = GetGravityFromInflectionAngle(FallInflectionAngle, m_maxForce, massPlayer);
-        m_surfaceCurrentDescentForce = GetAngleForce(m_gravForce, m_characterCurrentForwardAngle, massPlayer);
-        m_inputCurrentForce = UpdateInputForce(m_maxForce, _dt);
+        m_surfaceCurrentDescentForce = GetAngleForce(m_gravForce, m_characterCurrentForwardAngleFromGroundZero, massPlayer);
+        m_inputCurrentForce = UpdateInputForce(m_maxForce, m_inputMagnitude);
         //m_inputCurrentSpeed += CalculateDeltaVel(out m_currentTotalForce, _dt);
         m_characterCurrentSpeed = UpdateInputSpeed(ref m_currentTotalForce, m_characterCurrentSpeed, _dt);
 
@@ -286,13 +316,36 @@ public class CharacterMotion : MonoBehaviour
         #endregion
 
 
+
         #region CHARACTER MOTION
-        //INTEGRATE m_inputGravityMultiplier
-        //not applied yet
-        UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
-        transform.rotation = m_inputRotation;
-        Vector3 _characterMotion = ((m_characterDirection * m_characterSpeed)) + m_fallVector;
-        m_controller.Move(_characterMotion * _dt);
+
+        switch (characterMovementType)
+        {
+            case CharacterMovementType.Free:
+                transform.rotation = m_inputRotation;
+
+                UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
+                Vector3 _characterMotionA = ((m_characterDirection * m_characterSpeed)) + m_fallVector;
+                m_controller.Move(_characterMotionA * _dt);
+                break;
+            //case CharacterMovementType.RotateAroundCamera:
+            //    //Vector3 relPosToCam = transform.position - m_cam.transform.position;
+            //    //Vector3 relPosAfterRot = Quaternion.Euler(0, _dt * 100 * Input.GetAxis("Horizontal"), 0) * relPosToCam;
+            //    //m_characterDirection = m_characterForward + (relPosAfterRot - relPosToCam);
+            //    //m_characterDirection.Normalize();
+            //    transform.rotation = m_inputRotation;
+            //    UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
+            //    Vector3 _characterMotionB = ((m_characterDirection * m_characterSpeed)) + m_fallVector;
+            //    m_controller.Move(_characterMotionB * _dt);
+            //    break;
+            case CharacterMovementType.Blocked:
+                break;
+
+
+        }
+
+
+
         #endregion
 
     }
@@ -435,10 +488,10 @@ public class CharacterMotion : MonoBehaviour
 
     }
 
-    private float UpdateInputForce(float maxForce, float deltaTime)
+    private float UpdateInputForce(float maxForce, float forceMagnitude)
     {
         // magnitude between 0 and 1
-        return maxForce * m_inputVector.magnitude;
+        return maxForce * forceMagnitude;
     }
 
     private static float GetGravityFromInflectionAngle(float angleInDeg, float fMax, float mass)
@@ -471,9 +524,10 @@ public class CharacterMotion : MonoBehaviour
         return _tangDownwards.normalized;
     }
 
-    private Vector3 UpdateInputVector()
+    private Vector3 UpdateInputVectorWithAllAxis()
     {
-        Vector3 inputVector = (m_cam.transform.forward * Input.GetAxis("Vertical")) + (m_cam.transform.right * Input.GetAxis("Horizontal"));
+        Vector3 inputVector = (m_cam.transform.forward * Input.GetAxis("Vertical"))
+        + (m_cam.transform.right * Input.GetAxis("Horizontal"));
         inputVector.y = 0f;
         if (inputVector.magnitude >= 0.99f)
             inputVector.Normalize();
@@ -481,11 +535,28 @@ public class CharacterMotion : MonoBehaviour
         return inputVector;
     }
 
-    private float UpdateAngleInDeg(Vector3 direction, Vector3 zeroVector)
+    private Vector3 UpdateInputVectorOnlyForward()
+    {
+        Vector3 inputVector = (m_cam.transform.forward * Input.GetAxis("Vertical"));
+        inputVector.y = 0f;
+        if (inputVector.magnitude >= 0.99f)
+            inputVector.Normalize();
+        //Debug.Log(inputVector.magnitude);
+        return inputVector;
+    }
+
+    private float GetInputMagnitude()
+    {
+        Vector3 inputVector = (Vector3.forward * Input.GetAxis("Vertical"))
+        + (Vector3.right * Input.GetAxis("Horizontal"));
+        return inputVector.magnitude;
+    }
+
+    private float UpdateAngleInDeg(Vector3 direction, Vector3 worldVector)
     {
         float _angle =
-            Mathf.Atan2(Vector3.Dot(Vector3.up, Vector3.Cross(zeroVector, direction)),
-            Vector3.Dot(zeroVector, direction)) * Mathf.Rad2Deg;
+            Mathf.Atan2(Vector3.Dot(Vector3.up, Vector3.Cross(worldVector, direction)),
+            Vector3.Dot(worldVector, direction)) * Mathf.Rad2Deg;
 
         //Debug.Log(_angle);
 

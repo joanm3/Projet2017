@@ -5,13 +5,13 @@ using ProjectGiants.GFunctions;
 
 public class ThirdPersonCameraMovement : MonoBehaviour
 {
-    public enum CameraMode { Free, Rail, Static, Cinematic };
+    public enum CameraMode { Follow, CharacterRotation, Rail, Static, Cinematic };
 
-    public CameraMode cameraMode = CameraMode.Free; 
+    public CameraMode cameraMode = CameraMode.Follow;
 
 
     public Transform playerTransform;
-    public CharacterV4 player;
+    public CharacterMotion player;
     public bool useJoystick = false;
 
     [Header("Camera values")]
@@ -61,11 +61,14 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     public Transform cameraPivotTransform;
     public Vector3 pivotPosition;
     [Header("Rotation by normal")]
-    public bool rotationByNormal = true;
+    public bool rotationAxisDependsOnCameraSurface = true;
+    public bool rotateCameraWithNormal = true;
     public float rotationIntensity = 1f;
     public float rotationLerp = 3f;
     public Vector3 pivotRotation;
 
+    [Header("Static Camera Values")]
+    public Transform staticTransformPosition;
 
     private Transform m_transform;
     private Camera m_cam;
@@ -97,6 +100,12 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     private Vector3 m_dir;
     private bool m_playerColorChanged = false;
 
+    private Quaternion m_normalRotation;
+    private Vector3 m_cameraForwardOnSurface;
+    private Quaternion m_cameraRotationOnSurface;
+    private float m_surfaceCameraAngle;
+    private Quaternion m_rotationWithNormals;
+
 #if UNITY_EDITOR
 
     Vector3 gizmoPoint;
@@ -123,32 +132,120 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         m_transform = transform;
         m_cam = Camera.main;
         m_trueDistance = maxDistance;
+        m_rotationWithNormals = m_rotation;
 
         if (playerTransform == null)
             playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
 
         if (player == null)
-            player = GameObject.FindGameObjectWithTag("Player").GetComponent<CharacterV4>();
+            player = playerTransform != null ? playerTransform.GetComponent<CharacterMotion>() : GameObject.FindGameObjectWithTag("Player").GetComponent<CharacterMotion>();
 
         if (player != null)
         {
-            playerRenderers = playerTransform.GetComponentsInChildren<Renderer>();
+            playerRenderers = player.GetComponentsInChildren<Renderer>();
         }
-        else
+
+        if (!player || !playerTransform || playerRenderers.Length <= 0)
         {
-            Debug.LogError("playerTransform not assigned nor found for ThirdPersonCameraMovement");
+            Debug.LogError("error assigning references for camera");
         }
+
 
         if (applyMovementWithYawn && startMovementAtAngle == 0) { startMovementAtAngle = yAngleMin; }
     }
 
-
-
     void Update()
     {
 
+        UpdateInput();
 
-        #region GET INPUT
+
+        //CAMERA BEHAVIOURS
+
+        //BEHAVIOUR Block Axis
+        BlockXAndYAxis();
+
+        //BEHAVIOUR Distance from ground
+        FreeCameraUpdate();
+
+        //BEHAVIOUR Surface Normal
+        if (rotationAxisDependsOnCameraSurface) SurfaceNormalBehaviour();
+
+        //BEHAVIOUR Rotation by normal
+        if (cameraMode == CameraMode.CharacterRotation || cameraMode == CameraMode.Follow)
+            if (rotateCameraWithNormal) CameraRotationByNormal(ref pivotRotation, rotationIntensity, rotationLerp);
+
+        //BEHAVIOUR Obstacles raycasting
+        ObstacleBehaviours();
+
+        //BEHAVIOUR Player too close to the camera
+        PlayerFadeOutWhenTooClose();
+
+    }
+
+
+    void LateUpdate()
+    {
+
+        switch (cameraMode)
+        {
+            case CameraMode.Follow:
+                {
+                    //APPLY MOVEMENT
+                    m_dir = new Vector3(0, 0, -m_trueDistance);
+                    m_rotation = Quaternion.Euler(Mathf.Max(currentY, yAngleMin) + yModificationAngle, currentX + xModificationAngle, 0f);
+                    Vector3 _rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals);
+
+                    m_transform.position = playerTransform.position + _rotDirection;
+                    m_transform.LookAt(playerTransform.position);
+
+                    cameraPivotTransform.localPosition = pivotPosition;
+                    cameraPivotTransform.localRotation = Quaternion.Euler(pivotRotation);
+                    break;
+                }
+            case CameraMode.CharacterRotation:
+                {
+                    //APPLY MOVEMENT
+                    m_dir = new Vector3(0, 0, -m_trueDistance);
+                    m_rotation = Quaternion.Euler(Mathf.Max(currentY, yAngleMin) + yModificationAngle, currentX + xModificationAngle, 0f);
+                    Vector3 _rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals);
+
+                    m_transform.position = playerTransform.position + _rotDirection;
+                    m_transform.LookAt(playerTransform.position);
+
+                    cameraPivotTransform.localPosition = pivotPosition;
+                    cameraPivotTransform.localRotation = Quaternion.Euler(pivotRotation);
+                    break;
+                }
+
+            case CameraMode.Static:
+                {
+                    //do a lerp also here. 
+
+                    if (staticTransformPosition != null) m_transform.position = staticTransformPosition.position;
+                    m_transform.LookAt(playerTransform.position);
+                    cameraPivotTransform.localPosition = pivotPosition;
+                    cameraPivotTransform.localRotation = Quaternion.Euler(pivotRotation);
+                    break;
+                }
+        }
+
+    }
+
+    private Vector3 RotateCameraWithSurfaceAxis(ref Quaternion rotationWithNormals)
+    {
+        if (rotationAxisDependsOnCameraSurface)
+        {
+            rotationWithNormals = Quaternion.Slerp(rotationWithNormals, m_normalRotation * m_rotation, Time.deltaTime * 5f);
+            //Debug.Log("rotation: " + m_rotation); 
+            //Vector3 _rotDirection = m_rotation * m_dir;
+        }
+        Vector3 _rotDirection = (rotationAxisDependsOnCameraSurface) ? rotationWithNormals * m_dir : m_rotation * m_dir;
+        return _rotDirection;
+    }
+
+    private void UpdateInput()
+    {
         if (useJoystick)
         {
             float inputXStick = (Input.GetAxis("360_R_Stick_X") > 0.35f || Input.GetAxis("360_R_Stick_X") < -0.35f) ? Input.GetAxis("360_R_Stick_X") : 0f;
@@ -165,27 +262,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             currentX += Input.GetAxis("Mouse X");
             currentY += Input.GetAxis("Mouse Y");
         }
-        #endregion
+    }
 
-        #region BLOCK X AND Y CAMERA ANGLES 
-        if (Mathf.Abs(currentX) >= 360)
-        {
-            currentX = 0f;
-        }
-        if (Mathf.Abs(currentY) >= 360)
-        {
-            currentX = 0f;
-        }
-
-
-        currentY = Mathf.Clamp(currentY, yAngleMinToYawn, yAngleMax);
-        if (limitXAngle)
-            currentX = Mathf.Clamp(currentX, xAngleMin, xAngleMax);
-        #endregion
-
-        //CAMERA BEHAVIOURS
-
-        //BEHAVIOUR Distance from ground
+    private void FreeCameraUpdate()
+    {
         m_lerpedHeight = MappedLerp(Mathf.Max(currentY, yAngleMin), yAngleMin - minDistance, yAngleMax, maxDistance, 0f);
 
         m_distanceToYawn = (currentY > yAngleMin) ? 0f : MappedLerp(currentY, yAngleMin, yAngleMinToYawn, m_lerpedHeight, m_lerpedHeight + minDistanceAtYawn);
@@ -199,13 +279,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             pivotPosition.y = (currentY > startMovementAtAngle) ? 0f : Mathf.Lerp(pivotPosition.y, -MappedLerp(currentY, startMovementAtAngle, yAngleMinToYawn, 0f, -yYawnMovement), lerpVelocity);
         }
 
-        //BEHAVIOUR Rotation by normal
-        if (rotationByNormal) CameraRotationByNormal(ref pivotRotation, rotationIntensity, rotationLerp);
-
-
-
-
         //BEHAVIOUR Apply distance when no obstacle and with distance from ground
+        //check this out for possible errors!
         if (!m_terrainRaycastEntered && !m_obstacleRaycastEntered)
         {
 
@@ -215,9 +290,27 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 Mathf.Lerp(m_trueDistance, maxDistance - _substraction, Time.fixedDeltaTime * lerpVelocity) :
                 maxDistance - _substraction;
         }
+    }
+
+    private void BlockXAndYAxis()
+    {
+        if (Mathf.Abs(currentX) >= 360)
+        {
+            currentX = 0f;
+        }
+        if (Mathf.Abs(currentY) >= 360)
+        {
+            currentX = 0f;
+        }
 
 
-        //BEHAVIOUR Obstacles raycasting
+        currentY = Mathf.Clamp(currentY, yAngleMinToYawn, yAngleMax);
+        if (limitXAngle)
+            currentX = Mathf.Clamp(currentX, xAngleMin, xAngleMax);
+    }
+
+    private void ObstacleBehaviours()
+    {
         #region RAYCAST PARAMETERS
         Vector3 _rayDirection = cameraPivotTransform.position - playerTransform.position;
         Vector3 _rayOrigin = playerTransform.position;
@@ -448,8 +541,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             m_terrainRaycastEntered = false;
             #endregion
         }
+    }
 
-
+    private void PlayerFadeOutWhenTooClose()
+    {
         //BEHAVIOUR Player too close to the camera
         float _distanceToPlayer = Vector3.Distance(playerTransform.position, m_cam.transform.position);
         if (_distanceToPlayer < minDistToStartFadeCharacter)
@@ -477,24 +572,62 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             m_playerColorChanged = false;
             #endregion
         }
-
     }
 
-
-    void LateUpdate()
+    private void SurfaceNormalBehaviour()
     {
-        //APPLY MOVEMENT
-        m_dir = new Vector3(0, 0, -m_trueDistance);
+        RaycastHit _info;
+        //Vector3 _surfaceNormal = UpdateSurfaceNormalByRaycast(out _info, player.CharacterUp, 100f);
+        Vector3 _surfaceNormal = UpdateSurfaceNormalByRaycast(out _info, Vector3.up, maxDistance);
+        //Vector3 _surfaceNormal = player.SurfaceNormal; 
 
-        m_rotation = Quaternion.Euler(Mathf.Max(currentY, yAngleMin) + yModificationAngle, currentX + xModificationAngle, 0f);
-        //Debug.Log("rotation: " + m_rotation); 
-        m_transform.position = playerTransform.position + m_rotation * m_dir;
 
-        m_transform.LookAt(playerTransform.position);
-
-        cameraPivotTransform.localPosition = pivotPosition;
-        cameraPivotTransform.localRotation = Quaternion.Euler(pivotRotation);
+        m_normalRotation = GetRotationByNormal2(transform.rotation, _surfaceNormal);
+        m_cameraRotationOnSurface = m_normalRotation * transform.rotation;
     }
+
+    //repeated from character so that is not so good...
+    private float GetForwardAngleFromGroundZero(Vector3 forward)
+    {
+        Vector3 vectorOnFacePlane = Vector3.ProjectOnPlane(forward, Vector3.up);
+        float absAngle = Vector3.Angle(forward, vectorOnFacePlane);
+        float dot = Vector3.Dot(Vector3.up, forward);
+        return dot < 0 ? -absAngle : absAngle;
+    }
+
+    private Quaternion GetRotationByNormal2(Quaternion rotation, Vector3 normal)
+    {
+
+        Quaternion _normalRot = rotation;
+        _normalRot = Quaternion.FromToRotation(Vector3.up, normal);
+
+        return _normalRot;
+        //return Quaternion.FromToRotation(Vector3.up, normal) * transform.rotation;
+    }
+
+    private Vector3 UpdateSurfaceNormalByRaycast(out RaycastHit hitInfo, Vector3 upVector, float distance)
+    {
+
+        if (GetRaycastAtPosition(out hitInfo, upVector, distance))
+        {
+            return hitInfo.normal;
+        }
+        return Vector3.up;
+    }
+
+    private bool GetRaycastAtPosition(out RaycastHit hitInfo, Vector3 upVector, float distance)
+    {
+        Ray ray = new Ray(transform.position + (-upVector), -upVector);
+        Debug.DrawRay(ray.origin, ray.direction * distance, Color.red);
+        if (Physics.Raycast(ray, out hitInfo, distance))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    //...until here
+
 
     private void OnDrawGizmos()
     {

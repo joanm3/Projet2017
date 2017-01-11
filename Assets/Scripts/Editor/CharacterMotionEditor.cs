@@ -13,6 +13,7 @@ public class CharacterMotionEditor : Editor
 
     //character
     private readonly CProperty CHAR_STATE = new CProperty("characterState", "Character State");
+    private readonly CProperty CHAR_MOV_TYPE = new CProperty("characterMovementType", "Movement Type"); 
 
     //references
     private readonly CProperty CAM = new CProperty("m_cam", "Camera");
@@ -102,6 +103,7 @@ public class CharacterMotionEditor : Editor
         _showMovement = EditorGUILayout.Foldout(_showMovement, "Movement");
         if (_showMovement)
         {
+            p.DisplayField(CHAR_MOV_TYPE); 
             p.DisplayField(CURVE_ROT_SPEED);
             p.DisplayField(START_RUNNING);
             p.DisplayField(MAX_ROT_SPEED);
