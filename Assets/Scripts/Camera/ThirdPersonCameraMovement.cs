@@ -205,14 +205,17 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 }
             case CameraMode.CharacterRotation:
                 {
-                    //APPLY MOVEMENT
                     m_dir = new Vector3(0, 0, -m_trueDistance);
                     m_rotation = Quaternion.Euler(Mathf.Max(currentY, yAngleMin) + yModificationAngle, currentX + xModificationAngle, 0f);
                     Vector3 _rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals);
 
-                    m_transform.position = playerTransform.position + _rotDirection;
-                    m_transform.LookAt(playerTransform.position);
+                    Vector3 _finalPos = transform.forward - _rotDirection;
+                    _finalPos.z = -m_trueDistance; 
 
+                    Debug.Log(transform.forward - _rotDirection);
+                    //m_transform.position = playerTransform.position + _rotDirection;
+                    m_transform.LookAt(playerTransform.position);
+                    m_transform.position = playerTransform.position + (transform.forward * -m_trueDistance);
                     cameraPivotTransform.localPosition = pivotPosition;
                     cameraPivotTransform.localRotation = Quaternion.Euler(pivotRotation);
                     break;

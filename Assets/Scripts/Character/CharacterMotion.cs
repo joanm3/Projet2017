@@ -16,14 +16,15 @@ public class CharacterMotion : MonoBehaviour
     private Transform m_characterRenderer;
 
     //input
-    public enum CharacterMovementType { Free, Blocked };
-    public CharacterMovementType characterMovementType = CharacterMovementType.Free;
+    public enum CharacterMovementType { Absolute, Relative, NoInput, NoMovement };
+    public CharacterMovementType characterMovementType = CharacterMovementType.Absolute;
 
     [Header("Input")]
     private Vector3 m_inputVector;
     private float m_inputMagnitude;
     private float m_inputDeltaHeadingAngleInDeg;
     private Quaternion m_inputRotation;
+    public Quaternion Rotation { get { return m_inputRotation; } set { m_inputRotation = value; } }
     [SerializeField]
     private float m_startRunningSpeed = 10f;
     //CHECK THIS!!!
@@ -85,13 +86,17 @@ public class CharacterMotion : MonoBehaviour
     public CharacterState characterState = CharacterMotion.CharacterState.Idle;
 
     //avatar movement
-    public Vector3 CharacterForward { get { return m_characterForward; } }
-    public Vector3 CharacterUp { get { return m_characterUp; } }
+    public Vector3 Forward { get { return m_characterForward; } }
+    public Vector3 Up { get { return m_characterUp; } }
     private Vector3 m_characterForward;
     [SerializeField]
     private Vector3 m_characterDirection;
     private Vector3 m_characterUp;
     private float m_characterSpeed;
+    public float Speed
+    {
+        get { return m_characterSpeed; }
+    }
     private Quaternion m_characterRotation;
     private float m_characterAngleInDegFromSurfaceTang;
     private float m_characterCurrentForwardAngleFromGroundZero;
@@ -132,6 +137,7 @@ public class CharacterMotion : MonoBehaviour
         m_lastSurfaceNormal = m_surfaceNormal;
         m_surfaceAngle = 0f;
         m_characterDirection = m_characterForward;
+        m_inputRotation = transform.rotation;
     }
 
     private void Update()
@@ -151,17 +157,16 @@ public class CharacterMotion : MonoBehaviour
         #region GET INPUT VALUES
         switch (characterMovementType)
         {
-            case CharacterMovementType.Free:
-                m_inputVector = UpdateInputVectorWithAllAxis();
+            case CharacterMovementType.Relative:
+                m_inputVector = UpdateInputVectorRelativeToCamera();
                 m_inputMagnitude = GetInputMagnitude();
                 break;
-            //case CharacterMovementType.RotateAroundCamera:
-            //    //m_inputVector = UpdateInputVectorOnlyForward();
-            //    m_inputVector = UpdateInputVectorWithAllAxis();
-            //    m_inputMagnitude = GetInputMagnitude();
-
-            //    break;
-            case CharacterMovementType.Blocked:
+            case CharacterMovementType.Absolute:
+                m_inputVector = UpdateInputVectorRelativeToCamera();
+                m_inputMagnitude = GetInputMagnitude();
+                break;
+            case CharacterMovementType.NoMovement:
+            case CharacterMovementType.NoInput:
                 if (m_inputVector != Vector3.zero)
                 {
                     m_inputVector = Vector3.zero;
@@ -178,7 +183,8 @@ public class CharacterMotion : MonoBehaviour
         {
             m_inputDeltaHeadingAngleInDeg = UpdateAngleInDeg(m_inputVector, Vector3.forward);
         }
-        m_inputRotation = UpdateInputRotation(m_inputDeltaHeadingAngleInDeg);
+        // if(characterMovementType == CharacterMovementType.Relative)
+        m_inputRotation = UpdateInputRotation(m_inputRotation, m_inputDeltaHeadingAngleInDeg);
         //edit this to solve some problems. for the moment using the world up!!! change it but resolve porblems. 
         m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, Vector3.up, 1f) : false;
         #endregion
@@ -321,24 +327,17 @@ public class CharacterMotion : MonoBehaviour
 
         switch (characterMovementType)
         {
-            case CharacterMovementType.Free:
-                transform.rotation = m_inputRotation;
+            case CharacterMovementType.Relative:
+            case CharacterMovementType.Absolute:
+            case CharacterMovementType.NoInput:
+                if (characterMovementType == CharacterMovementType.Relative)
+                    transform.rotation = m_inputRotation;
 
                 UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
                 Vector3 _characterMotionA = ((m_characterDirection * m_characterSpeed)) + m_fallVector;
                 m_controller.Move(_characterMotionA * _dt);
                 break;
-            //case CharacterMovementType.RotateAroundCamera:
-            //    //Vector3 relPosToCam = transform.position - m_cam.transform.position;
-            //    //Vector3 relPosAfterRot = Quaternion.Euler(0, _dt * 100 * Input.GetAxis("Horizontal"), 0) * relPosToCam;
-            //    //m_characterDirection = m_characterForward + (relPosAfterRot - relPosToCam);
-            //    //m_characterDirection.Normalize();
-            //    transform.rotation = m_inputRotation;
-            //    UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
-            //    Vector3 _characterMotionB = ((m_characterDirection * m_characterSpeed)) + m_fallVector;
-            //    m_controller.Move(_characterMotionB * _dt);
-            //    break;
-            case CharacterMovementType.Blocked:
+            case CharacterMovementType.NoMovement:
                 break;
 
 
@@ -524,10 +523,21 @@ public class CharacterMotion : MonoBehaviour
         return _tangDownwards.normalized;
     }
 
-    private Vector3 UpdateInputVectorWithAllAxis()
+    private Vector3 UpdateInputVectorRelativeToCamera()
     {
         Vector3 inputVector = (m_cam.transform.forward * Input.GetAxis("Vertical"))
         + (m_cam.transform.right * Input.GetAxis("Horizontal"));
+        inputVector.y = 0f;
+        if (inputVector.magnitude >= 0.99f)
+            inputVector.Normalize();
+        //Debug.Log(inputVector.magnitude);
+        return inputVector;
+    }
+
+    private Vector3 UpdateInputVectorAbsolute()
+    {
+        Vector3 inputVector = (Vector3.forward * Input.GetAxis("Vertical"))
+        + (Vector3.right * Input.GetAxis("Horizontal"));
         inputVector.y = 0f;
         if (inputVector.magnitude >= 0.99f)
             inputVector.Normalize();
@@ -573,12 +583,12 @@ public class CharacterMotion : MonoBehaviour
         //return Quaternion.FromToRotation(Vector3.up, normal) * transform.rotation;
     }
 
-    private Quaternion UpdateInputRotation(float deltaAngleInDegrees)
+    private Quaternion UpdateInputRotation(Quaternion rotation, float deltaAngleInDegrees)
     {
 
         float _currentRotationSpeed = ((m_maxRotSpeed - m_minRotSpeed) * m_rotationBySpeed.Evaluate(m_tMove)) + m_minRotSpeed;
         Quaternion _headingDelta = Quaternion.AngleAxis(deltaAngleInDegrees, transform.up);
-        Quaternion _rRot = Quaternion.RotateTowards(transform.rotation, _headingDelta, _currentRotationSpeed * Time.deltaTime);
+        Quaternion _rRot = Quaternion.RotateTowards(rotation, _headingDelta, _currentRotationSpeed * Time.deltaTime);
 
         return _rRot;
     }
