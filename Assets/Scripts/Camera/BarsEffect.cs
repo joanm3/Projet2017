@@ -15,7 +15,6 @@ public class BarsEffect : ImageEffectBase
 
     void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        Debug.Log("entered here"); 
         material.SetTexture("_BarTex", barTexture);
         material.SetFloat("_Coverage", Mathf.Lerp(NO_COVERAGE, FULL_COVERAGE, coverage));
         Graphics.Blit(source, destination, material);

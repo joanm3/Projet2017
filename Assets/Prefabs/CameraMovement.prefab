@@ -20,8 +20,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4892790338838798}
   - component: {fileID: 114817659037358224}
-  - component: {fileID: 114487235921704192}
-  - component: {fileID: 114809142050701902}
   m_Layer: 0
   m_Name: CameraMovement
   m_TagString: Untagged
@@ -58,6 +56,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4832717959196630}
+  - component: {fileID: 114329522706936888}
   m_Layer: 0
   m_Name: CameraPivot
   m_TagString: Untagged
@@ -222,12 +221,12 @@ MonoBehaviour:
   separableBlurShader: {fileID: 4800000, guid: e97c14fbb5ea04c3a902cc533d7fc5d1, type: 3}
   chromAberrationShader: {fileID: 4800000, guid: 2b4f29398d9484ccfa9fd220449f5eee,
     type: 3}
---- !u!114 &114487235921704192
+--- !u!114 &114329522706936888
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1573390960575860}
+  m_GameObject: {fileID: 1762149443730198}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f6d6f4c5bcb33c43be96426053199ad, type: 3}
@@ -246,20 +245,16 @@ MonoBehaviour:
   firstPersonThreshold: 0.3
   fpLookSpeed: 1
   fpsXYminAndMaxClampAngles: {x: -45, y: 45, z: 45, w: -20}
---- !u!114 &114809142050701902
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1573390960575860}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9cc1ab6374277e4abcdd1a01a2870f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  shader: {fileID: 4800000, guid: 787736d3e1c524f46a1ddb298e8d6dac, type: 3}
-  coverage: 1.35
-  barTexture: {fileID: 2800000, guid: 546a4e62c34f9fe469e2975289af55ea, type: 3}
+  staticCameraPosition: {fileID: 0}
+  movementThreshold: 5
+  lookDirDampTime: 0.5
+  lookDirFactorRotation: 1
+  distanceAwayMultiplier: 1.5
+  distanceUpMultiplier: 5
+  freeThreshold: 0.3
+  camMinDistFromChar: {x: 1, y: -0.5}
+  rightStickThreshold: 0.3
+  parentRig: {fileID: 4892790338838798}
 --- !u!114 &114817659037358224
 MonoBehaviour:
   m_ObjectHideFlags: 1
