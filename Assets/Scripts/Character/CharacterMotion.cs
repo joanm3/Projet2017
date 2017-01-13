@@ -335,7 +335,7 @@ public class CharacterMotion : MonoBehaviour
             case CharacterMovementType.Relative:
             case CharacterMovementType.Absolute:
             case CharacterMovementType.NoInput:
-               // if (characterMovementType == CharacterMovementType.Relative)
+                if (characterMovementType == CharacterMovementType.Relative)
                     transform.rotation = m_inputRotation;
 
                 UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);

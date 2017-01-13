@@ -258,8 +258,6 @@ public class ThirdPersonCamera : MonoBehaviour
                 targetPosition = characterOffset + character.up * distanceUp - Vector3.Normalize(curLookDir) * distanceAway;
                 Vector2 rotatedAngle = RotateVectorWithAngle(characterForward.x, characterForward.z, angleTest);
                 Vector3 finalAngle = new Vector3(rotatedAngle.x, 0f, rotatedAngle.y);
-                Debug.Log(curLookDir); 
-
                 Debug.DrawRay(characterMotion.transform.position, curLookDir * 10f, Color.red);
                 Debug.DrawRay(characterMotion.transform.position, finalAngle * 10f, Color.magenta);
 

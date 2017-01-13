@@ -5,7 +5,7 @@ using ProjectGiants.GFunctions;
 
 public class ThirdPersonCameraMovement : MonoBehaviour
 {
-    public enum CameraMode { Follow, Orbit, Rail, Static, Cinematic };
+    public enum CameraMode { Follow, Orbit, Target, Static, Rail, Cinematic };
 
     public CameraMode cameraMode = CameraMode.Follow;
 
@@ -117,7 +117,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     private float m_distanceUp;
     [SerializeField]
     private float m_distanceAway;
-
+    [SerializeField]
+    private float m_startingAngleFromPlayer = 0f; 
 #if UNITY_EDITOR
 
     Vector3 gizmoPoint;
@@ -144,13 +145,18 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     [SerializeField]
     private float lookDirFactorRotation = 1;
     [SerializeField]
-    private float lookDirDampTime = 1;
+    private float lookDirDampTime = 0.5f;
     [SerializeField]
-    private float movementLookDirectionThreshold = 5f; 
+    private float movementLookDirectionThreshold = 5f;
 
     private Vector3 characterUp;
     private Vector3 characterForward;
     private Vector3 lookDir;
+
+    [SerializeField]
+    private float m_targetXDistance = 10f;
+    [SerializeField]
+    private float m_targetYDistance = 3f;
 
 #endif
 
@@ -189,6 +195,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
         if (applyMovementWithYawn && startMovementAtAngle == 0) { startMovementAtAngle = yAngleMin; }
         lookAtPosition = playerTransform.position;
+        currentX = m_startingAngleFromPlayer; 
     }
 
 
@@ -243,6 +250,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                     //check later the characterMotion.Up if its the best value. or better to use vector3.up 
                     targetPosition = playerTransform.position + Vector3.up * m_currentYDis - _rotDirection * m_currentXDis;
                     //lookAtPosition = playerTransform.position;
+                    characterForward = characterMotion.Forward;
+                    characterUp = characterMotion.Up;
                     break;
                 }
             #endregion
@@ -298,19 +307,32 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                     lookAtPosition = playerTransform.position;
                     break;
                 }
+            #endregion
+
+            #region Target
+            case CameraMode.Target:
+                {
+                    characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Absolute;
+                    lookDir = playerTransform.forward;
+                    curLookDir = playerTransform.forward;
+
+                    // targetPosition = characterOffset + characterUp * distanceUp - characterForward * distanceAway;
+
+                    targetPosition = playerTransform.position + characterUp * m_targetYDistance - characterForward * m_targetXDistance;
+
+                    //targetPosition = characterOffset + characterUp * distanceUp - rigToGoalDirection * distanceAway;
+                }
+                break;
                 #endregion
         }
 
+        if (cameraMode != CameraMode.Target)
+            characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Relative;
 
         m_transform.position = Vector3.SmoothDamp(m_transform.position, targetPosition, ref m_velocityCamSmooth, m_camSmoothDampTime);
         m_transform.LookAt(lookAtPosition);
         cameraPivotTransform.localPosition = pivotPosition;
-        //Vector3.SmoothDamp(cameraPivotTransform.localPosition, pivotPosition, ref m_velocityCamSmooth, m_camSmoothDampTime);
         cameraPivotTransform.localRotation = Quaternion.Slerp(cameraPivotTransform.localRotation, Quaternion.Euler(pivotRotation), lerpVelocity * Time.deltaTime);
-        //Quaternion.FromToRotation(cameraQuaternion.Slerp(cameraPivotTransform.localRotation, Quaternion.Euler(pivotRotation), lerpVelocity * Time.deltaTime);PivotTransform.localEulerAngles, pivotRotation); 
-        //Quaternion.Slerp(cameraPivotTransform.localRotation, Quaternion.Euler(pivotRotation), lerpVelocity * Time.deltaTime); 
-        //=Quaternion.Euler(pivotRotation);
-        //m_transform.position =  targetPosition;
 
     }
     private void OnDrawGizmos()
@@ -370,6 +392,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         m_tLerpDistance = GFunctions.NormalizedRangeValue(currentY, minY, maxY);
         m_currentXDis = minDistancePosition.x + m_tLerpDistance * maxDistancePosition.x;
         m_currentYDis = minDistancePosition.y + heightPositionByDistance.Evaluate(m_tLerpDistance) * maxDistancePosition.y;
+
+        m_currentXDis = Mathf.Clamp(m_currentXDis, minDistancePosition.x, maxDistancePosition.x);
+        m_currentYDis = Mathf.Clamp(m_currentYDis, minDistancePosition.y, maxDistancePosition.y);
+
     }
 
     private void FreeCameraUpdate()
