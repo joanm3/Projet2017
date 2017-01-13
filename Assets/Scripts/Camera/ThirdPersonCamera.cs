@@ -111,6 +111,7 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private const float TARGETING_THRESHOLD = 0.1f;
 
+    public float angleTest = 10f;
 
     #region Properites (Public)
     public enum CamMode
@@ -150,65 +151,100 @@ public class ThirdPersonCamera : MonoBehaviour
 
         Vector3 _offset = new Vector3(0f, distanceUp, 0f);
         Vector3 characterOffset = character.position + _offset;
-        gizmoPosition = characterOffset - this.transform.position;
         Vector3 lookAt = characterOffset;
+        gizmoPosition = characterOffset;
         Vector3 targetPosition = Vector3.zero;
 
-        if (Input.GetAxis("Target") > TARGETING_THRESHOLD)
+        bool test = true;
+        if (!test)
         {
-            if (barEffect != null) barEffect.coverage = Mathf.SmoothStep(barEffect.coverage, widescreen, targetingTime);
-            cameraMode = CamMode.Target;
+            #region Assign Camera
+            if (Input.GetAxis("Target") > TARGETING_THRESHOLD)
+            {
+                if (barEffect != null) barEffect.coverage = Mathf.SmoothStep(barEffect.coverage, widescreen, targetingTime);
+                cameraMode = CamMode.Target;
+            }
+            else
+            {
+                if (barEffect != null) barEffect.coverage = Mathf.SmoothStep(barEffect.coverage, 0f, targetingTime);
+
+                //first person case
+                if (leftArrowY > firstPersonThreshold && cameraMode != CamMode.Free)// && characterMotion.Speed < 0.2f)
+                {
+                    if (cameraMode != CamMode.FirstPerson)
+                    {
+                        fpStartingXRot = UpdateAngleInDeg(firstPersonCameraPosition.forward, Vector3.forward);
+                        //fpXRot = fpStartingXRot;
+                        fpXRot = 0f;
+                        distanceStartWhenGoingToFPS = Vector3.Distance(this.transform.position, firstPersonCamPos.XForm.position);
+                        fpYRot = 0f;
+                        cameraMode = CamMode.FirstPerson;
+                    }
+                }
+
+                //free camera case
+
+
+                if ((Mathf.Abs(rightY) > freeThreshold || Mathf.Abs(rightX) > freeThreshold) && cameraMode != CamMode.FirstPerson) // && System.Math.Round(characterMotion.Speed, 2) == 0)
+                {
+                    cameraMode = CamMode.Free;
+                    savedRigToGoal = Vector3.zero;
+                }
+
+
+
+                if ((cameraMode == CamMode.FirstPerson && Input.GetButton("ExitFPV")) ||
+                    (cameraMode == CamMode.FirstPerson && Mathf.Abs(Input.GetAxis("360_L_Stick_X")) >= TARGETING_THRESHOLD) ||
+                    (cameraMode == CamMode.FirstPerson && Mathf.Abs(Input.GetAxis("360_L_Stick_Y")) >= TARGETING_THRESHOLD) ||
+                    (cameraMode == CamMode.Target && Input.GetAxis("Target") <= TARGETING_THRESHOLD))
+                {
+                    if (cameraMode != CamMode.Orbit)
+                    {
+                        cameraMode = CamMode.Orbit;
+                        characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Relative;
+                    }
+                }
+            }
+            #endregion
         }
         else
         {
-            if (barEffect != null) barEffect.coverage = Mathf.SmoothStep(barEffect.coverage, 0f, targetingTime);
+            //if (Input.GetAxis("Target") > TARGETING_THRESHOLD)
+            //{
 
-            //first person case
-            if (leftArrowY > firstPersonThreshold && cameraMode != CamMode.Free)// && characterMotion.Speed < 0.2f)
+            //    cameraMode = CamMode.Orbit;
+            //}
+
+            if ((Mathf.Abs(rightY) > freeThreshold || Mathf.Abs(rightX) > freeThreshold) && cameraMode != CamMode.FirstPerson)
             {
-                if (cameraMode != CamMode.FirstPerson)
-                {
-                    fpStartingXRot = UpdateAngleInDeg(firstPersonCameraPosition.forward, Vector3.forward);
-                    //fpXRot = fpStartingXRot;
-                    fpXRot = 0f;
-                    distanceStartWhenGoingToFPS = Vector3.Distance(this.transform.position, firstPersonCamPos.XForm.position);
-                    fpYRot = 0f;
-                    cameraMode = CamMode.FirstPerson;
-                }
+                cameraMode = CamMode.Target;
+            }
+            else
+            {
+                cameraMode = CamMode.Orbit;
             }
 
-            //free camera case
-
-
-            if ((Mathf.Abs(rightY) > freeThreshold || Mathf.Abs(rightX) > freeThreshold) && cameraMode != CamMode.FirstPerson) // && System.Math.Round(characterMotion.Speed, 2) == 0)
-            {
-                cameraMode = CamMode.Free;
-                savedRigToGoal = Vector3.zero;
-            }
-
-
-
-            if ((cameraMode == CamMode.FirstPerson && Input.GetButton("ExitFPV")) ||
-                (cameraMode == CamMode.FirstPerson && Mathf.Abs(Input.GetAxis("360_L_Stick_X")) >= TARGETING_THRESHOLD) ||
-                (cameraMode == CamMode.FirstPerson && Mathf.Abs(Input.GetAxis("360_L_Stick_Y")) >= TARGETING_THRESHOLD) ||
-                (cameraMode == CamMode.Target && Input.GetAxis("Target") <= TARGETING_THRESHOLD))
-            {
-                if (cameraMode != CamMode.Orbit)
-                {
-                    cameraMode = CamMode.Orbit;
-                    characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Relative;
-                }
-            }
         }
+
+
+
 
         //NOTE NOTE NOTE NOTE NOTE NOTE
         //use this one when we are gliding!!
         //targetPosition = followXform.position + Vector3.up * distanceUp - followXform.forward * distanceAway;
 
+
+        Vector3 rigToGoalDirection = Vector3.Normalize(characterOffset - this.transform.position);
+        rigToGoalDirection.y = 0f;
+
+
         switch (cameraMode)
         {
+            #region Orbit
             case CamMode.Orbit:
                 ResetCamera();
+                characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Relative;
+
                 if (characterMotion.Speed > movementThreshold)
                 {
                     //all this does that the character tends to look to the side we are facing. 
@@ -220,17 +256,24 @@ public class ThirdPersonCamera : MonoBehaviour
 
                 }
                 targetPosition = characterOffset + character.up * distanceUp - Vector3.Normalize(curLookDir) * distanceAway;
-                Debug.DrawLine(character.position, targetPosition, Color.magenta);
+                Vector2 rotatedAngle = RotateVectorWithAngle(characterForward.x, characterForward.z, angleTest);
+                Vector3 finalAngle = new Vector3(rotatedAngle.x, 0f, rotatedAngle.y);
+                Debug.Log(curLookDir); 
+
+                Debug.DrawRay(characterMotion.transform.position, curLookDir * 10f, Color.red);
+                Debug.DrawRay(characterMotion.transform.position, finalAngle * 10f, Color.magenta);
+
+                //targetPosition = characterOffset + character.up * distanceUp - Vector3.Normalize(finalAngle) * distanceAway;
+
 
                 characterForward = characterMotion.Forward;
                 characterUp = characterMotion.Up;
-                characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Relative;
-
+                //Debug.DrawLine(character.position, targetPosition, Color.magenta);
                 break;
+            #endregion
 
+            #region Free
             case CamMode.Free:
-                Vector3 rigToGoalDirection = Vector3.Normalize(characterOffset - this.transform.position);
-                rigToGoalDirection.y = 0f;
                 Vector3 rigToGoal = characterOffset - parentRig.position;
                 rigToGoal.y = 0f;
                 Debug.DrawRay(parentRig.transform.position, rigToGoal, Color.red);
@@ -238,20 +281,20 @@ public class ThirdPersonCamera : MonoBehaviour
                 //moving camera in and out
                 //if statement works for positive values; dont tewwn if stick not increasing in either direction; also dont tween if user is rotation
                 //checked against right x threshold because very small values for rightY mess up the lerp function. 
-                if (rightY < -1 * rightStickThreshold && rightY <= rightStickPrevFrame.y && Mathf.Abs(rightX) < rightStickThreshold)
-                {
-                    distanceUpFree = Mathf.Lerp(distanceUp, distanceUp * distanceUpMultiplier, Mathf.Abs(rightY));
-                    distanceAwayFree = Mathf.Lerp(distanceAway, distanceAway * distanceAwayMultiplier, Mathf.Abs(rightY));
-                    targetPosition = characterOffset + character.up * distanceUpFree - rigToGoalDirection * distanceAwayFree;
-                }
-                else if (rightY > rightStickThreshold && rightY >= rightStickPrevFrame.y && Mathf.Abs(rightX) < rightStickThreshold)
-                {
-                    //subract height of camera from height of player to find Y distance
-                    distanceUpFree = Mathf.Lerp(Mathf.Abs(transform.position.y - characterOffset.y), camMinDistFromChar.y, rightY);
-                    //use magnitude function to find x distance
-                    distanceAwayFree = Mathf.Lerp(rigToGoal.magnitude, camMinDistFromChar.x, rightY);
-                    targetPosition = characterOffset + character.up * distanceUpFree - rigToGoalDirection * distanceAwayFree;
-                }
+                //if (rightY < -1 * rightStickThreshold && rightY <= rightStickPrevFrame.y && Mathf.Abs(rightX) < rightStickThreshold)
+                //{
+                //    distanceUpFree = Mathf.Lerp(distanceUp, distanceUp * distanceUpMultiplier, Mathf.Abs(rightY));
+                //    distanceAwayFree = Mathf.Lerp(distanceAway, distanceAway * distanceAwayMultiplier, Mathf.Abs(rightY));
+                //    targetPosition = characterOffset + character.up * distanceUpFree - rigToGoalDirection * distanceAwayFree;
+                //}
+                //else if (rightY > rightStickThreshold && rightY >= rightStickPrevFrame.y && Mathf.Abs(rightX) < rightStickThreshold)
+                //{
+                //    //subract height of camera from height of player to find Y distance
+                //    distanceUpFree = Mathf.Lerp(Mathf.Abs(transform.position.y - characterOffset.y), camMinDistFromChar.y, rightY);
+                //    //use magnitude function to find x distance
+                //    distanceAwayFree = Mathf.Lerp(rigToGoal.magnitude, camMinDistFromChar.x, rightY);
+                //    targetPosition = characterOffset + character.up * distanceUpFree - rigToGoalDirection * distanceAwayFree;
+                //}
 
                 parentRig.RotateAround(characterOffset, character.up, freeRotationDegreePerSecond * (Mathf.Abs(rightX) > rightStickThreshold ? rightX : 0f));
 
@@ -260,27 +303,36 @@ public class ThirdPersonCamera : MonoBehaviour
                     savedRigToGoal = rigToGoalDirection;
                 }
 
-                if (targetPosition == Vector3.zero)
-                {
-                    targetPosition = characterOffset + character.up * distanceUpFree - savedRigToGoal * distanceAwayFree;
-                }
+                //if (targetPosition == Vector3.zero)
+                //{
+                //    targetPosition = characterOffset + character.up * distanceUpFree - savedRigToGoal * distanceAwayFree;
+                //}
+
+                targetPosition = characterOffset + character.up * distanceUp - savedRigToGoal * distanceAway;
 
 
                 this.transform.position = SmoothPosition(this.transform.position, targetPosition);
                 transform.LookAt(lookAt);
                 break;
+            #endregion
 
-
+            #region Target
             case CamMode.Target:
                 //ResetCamera();
                 characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Absolute;
                 lookDir = character.forward;
                 curLookDir = character.forward;
-                //vull que sigui la posicio del personatge menys una distancia en el seu forward
-                //targetPosition = followXform.position - (followXform.forward * distanceAway); 
-                targetPosition = characterOffset + characterUp * distanceUp - characterForward * distanceAway;
-                break;
 
+                // targetPosition = characterOffset + characterUp * distanceUp - characterForward * distanceAway;
+
+
+                targetPosition = characterOffset + characterUp * distanceUp - rigToGoalDirection * distanceAway;
+                //targetPosition = characterOffset + characterUp * distanceUp - characterForward * distanceAway;
+
+                break;
+            #endregion
+
+            #region First Person
             case CamMode.FirstPerson:
                 //clamp this to a max.
                 //ResetCamera();
@@ -300,8 +352,9 @@ public class ThirdPersonCamera : MonoBehaviour
 
                 characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.NoInput;
                 break;
+            #endregion
 
-
+            #region Static
             case CamMode.Static:
                 if (staticCameraPosition != null)
                 {
@@ -314,7 +367,7 @@ public class ThirdPersonCamera : MonoBehaviour
                     cameraMode = CamMode.Orbit;
                 }
                 break;
-
+                #endregion
 
 
         }
@@ -331,11 +384,6 @@ public class ThirdPersonCamera : MonoBehaviour
 
     }
 
-
-    void DrawGizmos()
-    {
-        Gizmos.DrawSphere(gizmoPosition, 0.5f);
-    }
     #endregion
 
     #region Methods
@@ -372,7 +420,16 @@ public class ThirdPersonCamera : MonoBehaviour
     private void ResetCamera()
     {
         transform.localRotation = Quaternion.Lerp(transform.localRotation, Quaternion.identity, Time.deltaTime);
-       // parentRig.position = transform.position;
+        // parentRig.position = transform.position;
+    }
+
+    private static Vector2 RotateVectorWithAngle(float x, float y, float degrees)
+    {
+        Vector2 result = new Vector3();
+        result.x = x * Mathf.Cos(degrees * Mathf.Deg2Rad) - y * Mathf.Sin(degrees * Mathf.Deg2Rad);
+        result.y = x * Mathf.Sin(degrees * Mathf.Deg2Rad) + y * Mathf.Cos(degrees * Mathf.Deg2Rad);
+        return result;
+
     }
 
     #endregion
