@@ -260,22 +260,7 @@ public class CharacterV3 : MonoBehaviour
 		Vector3 _tang = Vector3.Cross(surfaceNormal, _firstTang);
 		Vector3 _inputTang = -_tang.normalized;
 
-		//Si nous sommes en fall, alors on ne prend plus en compte les input
-//		if (Vector3.Angle (Vector3.up, surfaceNormal) > Glide_angle)
-//			inputVector = Vector3.zero;
-		//TODO Si nous sommes en Fall, alors ne plus prendre en compte l'input pour monter
-//		if(myState == StabilityState.Falling)
-//		{
-			//TODO clamper l'input comme sur le tableau avec Mourdjen + tester si à zero ca marche bien
-//			float dotInput = Vector3.Dot(_inputTang, 
-//			if(_inputTang.y > 0f)
-//			{
-//				_inputTang.y = 0f;
-//			}
-			//_inputTang = Vector3.zero;
-//		}
-//		print(_inputTang);
-
+		//Direction input le long de la surface !!!!
 		Debug.DrawLine(transform.position, transform.position + (_firstTang * 4f), Color.cyan);
 		Debug.DrawLine(transform.position, transform.position + (_tang * 4f), Color.green);
 		Debug.DrawLine(transform.position, transform.position + (_inputTang * 4f), Color.red);
@@ -303,22 +288,14 @@ public class CharacterV3 : MonoBehaviour
 		if(myState == StabilityState.Falling)
 		{
 			//Clamp le vecteur à la chute
-
-//			_vectorToMove = Vector3.zero;
-		
 			float fallDot = Vector3.Dot(TangDownwards, _vectorToMove);
 			fallDot = Mathf.Clamp(fallDot, 0f, 1f);
-			//Normaliser fallDot avant de l'appliquer à _vectorMove si tu veux que la direction latérale ne soit pas ralentie
-
+				//Normaliser fallDot ici avant de l'appliquer à _vectorMove si tu veux que la direction latérale ne soit pas ralentie
 			_vectorToMove *= fallDot;
-
 		}
 
 		//Translation Speed
-//		_vectorToReturn = _vectorToReturn.normalized * GetCurrentSpeedByCurve (_vectorTolook.normalized * inputVector.magnitude);
 		_vectorToReturn = _vectorToReturn.normalized * GetCurrentSpeedByCurve (_vectorToMove.normalized * inputVector.magnitude);
-
-//		print(_vectorToMove);
 
 		return _vectorToReturn;
 	}

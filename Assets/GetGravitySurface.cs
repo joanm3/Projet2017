@@ -23,10 +23,15 @@ public class GetGravitySurface : MonoBehaviour {
 	}
 
 
+	//le bug c'est parce que c'est par objet
+
 	void OnCollisionStay(Collision col) {
 
 		//Temp average surface normal
 		Vector3 _average = Vector3.zero;
+
+		//if parametre < 3 alors raycast
+//		col.contacts.Length
 
 		foreach (ContactPoint contact in col.contacts) {
 			Debug.DrawRay(transform.position, contact.normal, Color.white);
@@ -41,6 +46,8 @@ public class GetGravitySurface : MonoBehaviour {
 		averageSurfaceNormal = _average;
 
 		Debug.DrawRay(transform.position, _average, Color.magenta);
+
+		print(_average);
 	}
 		
 }
