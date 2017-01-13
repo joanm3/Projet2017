@@ -11,7 +11,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
 
     public Transform playerTransform;
-    public CharacterMotion player;
+    public CharacterMotion characterMotion;
     public bool useJoystick = false;
 
     [Header("Camera values")]
@@ -20,7 +20,6 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     public AnimationCurve heightPositionByDistance = AnimationCurve.EaseInOut(0.0f, 0.0f, 1.0f, 1.0f);
     public float maxDistance = 40f;
     public float minDistance = 10f;
-    public float startingDistance = 20f;
     public float joystickSpeed = 2f;
     public float sensitivityX = 4.0f;
     public float sensitivityY = 1.0f;
@@ -114,6 +113,11 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     private float m_surfaceCameraAngle;
     private Quaternion m_rotationWithNormals;
 
+    [SerializeField]
+    private float m_distanceUp;
+    [SerializeField]
+    private float m_distanceAway;
+
 #if UNITY_EDITOR
 
     Vector3 gizmoPoint;
@@ -130,8 +134,18 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     Vector3 targetPosition = Vector3.zero;
     Vector3 lookAtPosition = new Vector3();
 
+    private float m_tLerpDistance = 0f;
+    private float m_currentXDistance = 0f;
+    [Range(0,1)]
+    public float startingDistance = 0.5f;
+    [SerializeField]
+    private float m_currentXDis;
+    private float m_currentYDis;
+
 #endif
 
+    private const float minY = 0f;
+    private const float maxY = 180f;
     public const string obstacleLayerString = "Obstacle";
     public const string fadeLayerString = "Fade";
     public const string terrainLayerString = "Terrain";
@@ -143,20 +157,20 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     {
         m_transform = transform;
         m_cam = Camera.main;
-        m_trueDistance = startingDistance;
+        //m_trueDistance = startingDistance;
         m_rotationWithNormals = m_rotation;
         if (playerTransform == null)
             playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
 
-        if (player == null)
-            player = playerTransform != null ? playerTransform.GetComponent<CharacterMotion>() : GameObject.FindGameObjectWithTag("Player").GetComponent<CharacterMotion>();
+        if (characterMotion == null)
+            characterMotion = playerTransform != null ? playerTransform.GetComponent<CharacterMotion>() : GameObject.FindGameObjectWithTag("Player").GetComponent<CharacterMotion>();
 
-        if (player != null)
+        if (characterMotion != null)
         {
-            playerRenderers = player.GetComponentsInChildren<Renderer>();
+            playerRenderers = characterMotion.GetComponentsInChildren<Renderer>();
         }
 
-        if (!player || !playerTransform || playerRenderers.Length <= 0)
+        if (!characterMotion || !playerTransform || playerRenderers.Length <= 0)
         {
             Debug.LogError("error assigning references for camera");
         }
@@ -166,13 +180,6 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         lookAtPosition = playerTransform.position;
     }
 
-    void Update()
-    {
-
-
-
-    }
-
 
     void LateUpdate()
     {
@@ -180,7 +187,13 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         //Vector3 targetPosition = Vector3.zero;
         //Vector3 lookAtPosition = playerTransform.position;
 
+
+
         UpdateInput();
+
+        m_tLerpDistance = GFunctions.NormalizedRangeValue(currentY, minY, maxY);
+        m_currentXDis = minDistancePosition.x + m_tLerpDistance * maxDistancePosition.x;
+        m_currentYDis = minDistancePosition.y + heightPositionByDistance.Evaluate(m_tLerpDistance) * maxDistancePosition.y;
 
 
         //CAMERA BEHAVIOURS
@@ -212,9 +225,15 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 {
                     //APPLY MOVEMENT
                     m_dir = new Vector3(0, 0, -m_trueDistance);
-                    m_rotation = Quaternion.Euler(Mathf.Max(currentY, yAngleMin) + yModificationAngle, currentX + xModificationAngle, 0f);
+                    m_rotation = Quaternion.Euler(0f, currentX + xModificationAngle, 0f);
                     Vector3 _rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, m_dir);
-                    targetPosition = playerTransform.position + _rotDirection;
+                    Vector3 _rotDirNormalized = _rotDirection.normalized;
+                    Vector3 _rotInVector3 = new Vector3(Mathf.Max(currentY, yAngleMin) + yModificationAngle, currentX + xModificationAngle, 0f);
+                    //targetPosition = characterOffset + character.up * distanceUp - Vector3.Normalize(curLookDir) * distanceAway;
+                    //targetPosition = playerTransform.position + _rotDirection;
+                    //targetPosition = playerTransform.position + characterMotion.Up * m_distanceUp - _rotDirNormalized * m_distanceAway;
+                    targetPosition = playerTransform.position + characterMotion.Up * m_currentYDis - _rotDirNormalized * m_currentXDis;
+
                     lookAtPosition = playerTransform.position;
                     break;
                 }
@@ -259,8 +278,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
         m_transform.position = Vector3.SmoothDamp(m_transform.position, targetPosition, ref m_velocityCamSmooth, m_camSmoothDampTime);
         m_transform.LookAt(lookAtPosition);
-        cameraPivotTransform.localPosition = pivotPosition; 
-            //Vector3.SmoothDamp(cameraPivotTransform.localPosition, pivotPosition, ref m_velocityCamSmooth, m_camSmoothDampTime);
+        cameraPivotTransform.localPosition = pivotPosition;
+        //Vector3.SmoothDamp(cameraPivotTransform.localPosition, pivotPosition, ref m_velocityCamSmooth, m_camSmoothDampTime);
         cameraPivotTransform.localRotation = Quaternion.Slerp(cameraPivotTransform.localRotation, Quaternion.Euler(pivotRotation), lerpVelocity * Time.deltaTime);
         //Quaternion.FromToRotation(cameraQuaternion.Slerp(cameraPivotTransform.localRotation, Quaternion.Euler(pivotRotation), lerpVelocity * Time.deltaTime);PivotTransform.localEulerAngles, pivotRotation); 
         //Quaternion.Slerp(cameraPivotTransform.localRotation, Quaternion.Euler(pivotRotation), lerpVelocity * Time.deltaTime); 
@@ -326,9 +345,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     {
 
         m_lerpedHeight = MappedLerp(Mathf.Max(currentY, yAngleMin), yAngleMin - minDistance, yAngleMax, maxDistance, 0f);
-        Debug.Log(currentY); 
-
-        m_distanceToYawn = (currentY > yAngleMin) ? 0f : MappedLerp(currentY, yAngleMin, yAngleMinToYawn, m_lerpedHeight, m_lerpedHeight + minDistanceAtYawn);
+        //m_distanceToYawn = (currentY > yAngleMin) ? 0f : MappedLerp(currentY, yAngleMin, yAngleMinToYawn, m_lerpedHeight, m_lerpedHeight + minDistanceAtYawn);
+        m_distanceToYawn = 0f;
 
 
         //yawn behaviour when at min distance
@@ -346,7 +364,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         if (!m_terrainRaycastEntered && !m_obstacleRaycastEntered)
         {
 
-            float _substraction = (currentY > yAngleMin) ? m_lerpedHeight : m_distanceToYawn;
+            //float _substraction = (currentY > yAngleMin) ? m_lerpedHeight : m_distanceToYawn;
+            float _substraction = 0f;
 
             m_trueDistance = maxDistance - _substraction;
 
@@ -368,7 +387,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         }
 
 
-        currentY = Mathf.Clamp(currentY, yAngleMinToYawn, yAngleMax);
+        currentY = Mathf.Clamp(currentY, minY, maxY);
         if (limitXAngle)
             currentX = Mathf.Clamp(currentX, xAngleMin, xAngleMax);
     }
@@ -381,7 +400,9 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         RaycastHit _hit;
         float _distance = maxDistance + (Vector3.Distance(m_transform.position, cameraPivotTransform.position));
         float _plusObstacleRaycastDistance = 0.1f;
-        float _raycastDistance = maxDistance - m_lerpedHeight + _plusObstacleRaycastDistance;
+        //REDO THIS THIS THIS THIS REDO
+        //float _raycastDistance = maxDistance - m_lerpedHeight + _plusObstacleRaycastDistance;
+        float _raycastDistance = maxDistance + _plusObstacleRaycastDistance;
 
         //Draw Gizmo
 #if UNITY_EDITOR
@@ -698,18 +719,18 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
     private void CameraRotationByNormal(ref Vector3 rotation, float intensity, float lerpFactor)
     {
-        if (player == null)
+        if (characterMotion == null)
             return;
 
-        if (player.SurfaceNormal != null)
+        if (characterMotion.SurfaceNormal != null)
         {
 
 
-            Vector3 norm = player.SurfaceNormal;
+            Vector3 norm = characterMotion.SurfaceNormal;
             if (norm == Vector3.zero)
                 return;
 
-            Vector3 cameraPosRelativeToPlayer = (cameraPivotTransform.position - player.transform.position).normalized;
+            Vector3 cameraPosRelativeToPlayer = (cameraPivotTransform.position - characterMotion.transform.position).normalized;
             Vector3 vectorOnFacePlane = Vector3.Cross(cameraPosRelativeToPlayer, Vector3.up);
 
 
