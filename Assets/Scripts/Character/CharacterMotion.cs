@@ -88,10 +88,13 @@ public class CharacterMotion : MonoBehaviour
     //avatar movement
     public Vector3 Forward { get { return m_characterForward; } }
     public Vector3 Up { get { return m_characterUp; } }
+    public Vector3 Right { get { return m_characterRight; } }
     private Vector3 m_characterForward;
     [SerializeField]
     private Vector3 m_characterDirection;
     private Vector3 m_characterUp;
+    private Vector3 m_characterRight;
+
     private float m_characterSpeed;
     public float Speed
     {
@@ -215,8 +218,10 @@ public class CharacterMotion : MonoBehaviour
 
         #region GET CHARACTER VALUES: INPUT + SURFACE
         m_characterRotation = m_normalRotation * m_inputRotation;
-        m_characterForward = (m_characterRotation * Vector3.forward).normalized;
+        m_characterForward = m_characterRotation * Vector3.forward;
         m_characterUp = m_characterRotation * Vector3.up;
+        m_characterRight = m_characterRotation * Vector3.right;
+
         m_characterCurrentForwardAngleFromGroundZero = GetCharacterForwardAngleFromGroundZero(m_characterForward);
         //Debug.Log(m_characterCurrentForwardAngleFromGroundZero); 
         m_characterSpeed = m_characterCurrentSpeed;

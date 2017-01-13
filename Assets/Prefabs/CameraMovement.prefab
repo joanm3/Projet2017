@@ -271,8 +271,8 @@ MonoBehaviour:
   playerTransform: {fileID: 0}
   characterMotion: {fileID: 0}
   useJoystick: 1
-  minDistancePosition: {x: 1, y: 3}
-  maxDistancePosition: {x: 10, y: 6}
+  minDistancePosition: {x: 3, y: 0.5}
+  maxDistancePosition: {x: 30, y: 40}
   heightPositionByDistance:
     serializedVersion: 2
     m_Curve:
@@ -346,6 +346,9 @@ MonoBehaviour:
   m_distanceAway: 8
   startingDistance: 20
   m_currentXDis: 0
+  lookDirFactorRotation: 0
+  lookDirDampTime: 1
+  movementLookDirectionThreshold: 0
 --- !u!114 &114886960839568128
 MonoBehaviour:
   m_ObjectHideFlags: 1

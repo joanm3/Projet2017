@@ -136,11 +136,21 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
     private float m_tLerpDistance = 0f;
     private float m_currentXDistance = 0f;
-    [Range(0,1)]
+    [Range(0, 1)]
     public float startingDistance = 0.5f;
     [SerializeField]
     private float m_currentXDis;
     private float m_currentYDis;
+    [SerializeField]
+    private float lookDirFactorRotation = 1;
+    [SerializeField]
+    private float lookDirDampTime = 1;
+    [SerializeField]
+    private float movementLookDirectionThreshold = 5f; 
+
+    private Vector3 characterUp;
+    private Vector3 characterForward;
+    private Vector3 lookDir;
 
 #endif
 
@@ -149,6 +159,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     public const string obstacleLayerString = "Obstacle";
     public const string fadeLayerString = "Fade";
     public const string terrainLayerString = "Terrain";
+    private Vector3 curLookDir;
 
 
 
@@ -191,9 +202,6 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
         UpdateInput();
 
-        m_tLerpDistance = GFunctions.NormalizedRangeValue(currentY, minY, maxY);
-        m_currentXDis = minDistancePosition.x + m_tLerpDistance * maxDistancePosition.x;
-        m_currentYDis = minDistancePosition.y + heightPositionByDistance.Evaluate(m_tLerpDistance) * maxDistancePosition.y;
 
 
         //CAMERA BEHAVIOURS
@@ -217,6 +225,11 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         //BEHAVIOUR Player too close to the camera
         PlayerFadeOutWhenTooClose();
 
+
+        Vector3 _offset = new Vector3(0f, m_currentYDis, 0f);
+        Vector3 characterOffset = playerTransform.position + _offset;
+        lookAtPosition = playerTransform.position;
+
         switch (cameraMode)
         {
 
@@ -224,17 +237,12 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             case CameraMode.Follow:
                 {
                     //APPLY MOVEMENT
-                    m_dir = new Vector3(0, 0, -m_trueDistance);
                     m_rotation = Quaternion.Euler(0f, currentX + xModificationAngle, 0f);
-                    Vector3 _rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, m_dir);
-                    Vector3 _rotDirNormalized = _rotDirection.normalized;
-                    Vector3 _rotInVector3 = new Vector3(Mathf.Max(currentY, yAngleMin) + yModificationAngle, currentX + xModificationAngle, 0f);
-                    //targetPosition = characterOffset + character.up * distanceUp - Vector3.Normalize(curLookDir) * distanceAway;
-                    //targetPosition = playerTransform.position + _rotDirection;
-                    //targetPosition = playerTransform.position + characterMotion.Up * m_distanceUp - _rotDirNormalized * m_distanceAway;
-                    targetPosition = playerTransform.position + characterMotion.Up * m_currentYDis - _rotDirNormalized * m_currentXDis;
+                    Vector3 _rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, -Vector3.forward);
 
-                    lookAtPosition = playerTransform.position;
+                    //check later the characterMotion.Up if its the best value. or better to use vector3.up 
+                    targetPosition = playerTransform.position + Vector3.up * m_currentYDis - _rotDirection * m_currentXDis;
+                    //lookAtPosition = playerTransform.position;
                     break;
                 }
             #endregion
@@ -242,16 +250,34 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             #region Orbit
             case CameraMode.Orbit:
                 {
-                    m_dir = new Vector3(0, 0, -m_trueDistance);
-                    m_rotation = Quaternion.Euler(Mathf.Max(currentY, yAngleMin) + yModificationAngle, currentX + xModificationAngle, 0f);
-                    Vector3 _rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, m_dir);
-                    Vector3 _finalPos = transform.forward - _rotDirection;
-                    _finalPos.z = -m_trueDistance;
+                    float rightX = Input.GetAxis("360_R_Stick_X");
+                    float rightY = Input.GetAxis("360_R_Stick_Y");
 
-                    //Debug.Log(transform.forward - _rotDirection);
-                    //m_transform.position = playerTransform.position + _rotDirection;
-                    lookAtPosition = playerTransform.position;
-                    targetPosition = playerTransform.position + (transform.forward * -m_trueDistance);
+                    if (characterMotion.Speed > movementLookDirectionThreshold)
+                    {
+                        //all this does that the character tends to look to the side we are facing. 
+                        lookDir = Vector3.Lerp(characterMotion.Right * (rightX < 0 ? 1f : -1f) * lookDirFactorRotation, characterMotion.Forward * (rightY < 0 ? -1f : 1f) * lookDirFactorRotation,
+                            Mathf.Abs(Vector3.Dot(this.transform.forward, characterMotion.Forward)));
+                        curLookDir = Vector3.Normalize(characterOffset - this.transform.position);
+                        curLookDir.y = 0f;
+                        curLookDir = Vector3.SmoothDamp(curLookDir, lookDir, ref m_velocityCamSmooth, lookDirDampTime);
+
+                    }
+                    targetPosition = playerTransform.position + Vector3.up * m_currentYDis - Vector3.Normalize(curLookDir) * m_currentXDis;
+
+                    characterForward = characterMotion.Forward;
+                    characterUp = characterMotion.Up;
+
+                    //m_dir = new Vector3(0, 0, -m_trueDistance);
+                    //m_rotation = Quaternion.Euler(Mathf.Max(currentY, yAngleMin) + yModificationAngle, currentX + xModificationAngle, 0f);
+                    //Vector3 _rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, m_dir);
+                    //Vector3 _finalPos = transform.forward - _rotDirection;
+                    //_finalPos.z = -m_trueDistance;
+
+                    ////Debug.Log(transform.forward - _rotDirection);
+                    ////m_transform.position = playerTransform.position + _rotDirection;
+                    //lookAtPosition = playerTransform.position;
+                    //targetPosition = playerTransform.position + (transform.forward * -m_trueDistance);
                     break;
                 }
             #endregion
@@ -339,25 +365,15 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             currentX += Input.GetAxis("Mouse X");
             currentY += Input.GetAxis("Mouse Y");
         }
+
+
+        m_tLerpDistance = GFunctions.NormalizedRangeValue(currentY, minY, maxY);
+        m_currentXDis = minDistancePosition.x + m_tLerpDistance * maxDistancePosition.x;
+        m_currentYDis = minDistancePosition.y + heightPositionByDistance.Evaluate(m_tLerpDistance) * maxDistancePosition.y;
     }
 
     private void FreeCameraUpdate()
     {
-
-        m_lerpedHeight = MappedLerp(Mathf.Max(currentY, yAngleMin), yAngleMin - minDistance, yAngleMax, maxDistance, 0f);
-        //m_distanceToYawn = (currentY > yAngleMin) ? 0f : MappedLerp(currentY, yAngleMin, yAngleMinToYawn, m_lerpedHeight, m_lerpedHeight + minDistanceAtYawn);
-        m_distanceToYawn = 0f;
-
-
-        //yawn behaviour when at min distance
-        pivotRotation.x = (currentY > yAngleMin) ? 0f : -MappedLerp(currentY, yAngleMin, yAngleMinToYawn, 0f, pitchAngle);
-        if (applyMovementWithYawn)
-        {
-            pivotPosition.x = (currentY > startMovementAtAngle) ? 0f : -MappedLerp(currentY, startMovementAtAngle, yAngleMinToYawn, 0f, xYawnMovement);
-            pivotPosition.y = (currentY > startMovementAtAngle) ? 0f : -MappedLerp(currentY, startMovementAtAngle, yAngleMinToYawn, 0f, -yYawnMovement);
-            //pivotPosition.x = (currentY > startMovementAtAngle) ? 0f : Mathf.Lerp(pivotPosition.x, -MappedLerp(currentY, startMovementAtAngle, yAngleMinToYawn, 0f, xYawnMovement), lerpVelocity);
-            //pivotPosition.y = (currentY > startMovementAtAngle) ? 0f : Mathf.Lerp(pivotPosition.y, -MappedLerp(currentY, startMovementAtAngle, yAngleMinToYawn, 0f, -yYawnMovement), lerpVelocity);
-        }
 
         //BEHAVIOUR Apply distance when no obstacle and with distance from ground
         //check this out for possible errors!
@@ -394,6 +410,9 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
     private void ObstacleBehaviours()
     {
+        //add here a ref vector3 to return later with the position
+        //or a float that return the m_tLerpDistance between 1 and to to know where to position camera. 
+
         #region RAYCAST PARAMETERS
         Vector3 _rayDirection = cameraPivotTransform.position - playerTransform.position;
         Vector3 _rayOrigin = playerTransform.position;
