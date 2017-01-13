@@ -15,6 +15,9 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     public bool useJoystick = false;
 
     [Header("Camera values")]
+    public Vector2 minDistancePosition;
+    public Vector2 maxDistancePosition;
+    public AnimationCurve heightPositionByDistance = AnimationCurve.EaseInOut(0.0f, 0.0f, 1.0f, 1.0f);
     public float maxDistance = 40f;
     public float minDistance = 10f;
     public float startingDistance = 20f;
@@ -223,8 +226,6 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                     m_dir = new Vector3(0, 0, -m_trueDistance);
                     m_rotation = Quaternion.Euler(Mathf.Max(currentY, yAngleMin) + yModificationAngle, currentX + xModificationAngle, 0f);
                     Vector3 _rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, m_dir);
-                    Debug.Log(_rotDirection);
-
                     Vector3 _finalPos = transform.forward - _rotDirection;
                     _finalPos.z = -m_trueDistance;
 
@@ -323,7 +324,9 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
     private void FreeCameraUpdate()
     {
+
         m_lerpedHeight = MappedLerp(Mathf.Max(currentY, yAngleMin), yAngleMin - minDistance, yAngleMax, maxDistance, 0f);
+        Debug.Log(currentY); 
 
         m_distanceToYawn = (currentY > yAngleMin) ? 0f : MappedLerp(currentY, yAngleMin, yAngleMinToYawn, m_lerpedHeight, m_lerpedHeight + minDistanceAtYawn);
 
