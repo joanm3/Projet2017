@@ -221,7 +221,7 @@ public class CharacterV3 : MonoBehaviour
 		FirstTang = Vector3.Cross (surfaceNormal, Vector3.up);
 		TangDownwards = Vector3.Cross (surfaceNormal, FirstTang);
 
-		Debug.DrawLine (rayHit.point, rayHit.point + TangDownwards * 5f, Color.black);
+//		Debug.DrawLine (rayHit.point, rayHit.point + TangDownwards * 5f, Color.black);
 
 		fromCtoG = ((Vector3.Angle (Vector3.up, surfaceNormal) - Confort_angle)) / (Glide_angle - Confort_angle);
 		fromCtoG = Mathf.Clamp (fromCtoG, 0f, 1f);
@@ -261,9 +261,9 @@ public class CharacterV3 : MonoBehaviour
 		Vector3 _inputTang = -_tang.normalized;
 
 		//Direction input le long de la surface !!!!
-		Debug.DrawLine(transform.position, transform.position + (_firstTang * 4f), Color.cyan);
-		Debug.DrawLine(transform.position, transform.position + (_tang * 4f), Color.green);
-		Debug.DrawLine(transform.position, transform.position + (_inputTang * 4f), Color.red);
+//		Debug.DrawLine(transform.position, transform.position + (_firstTang * 4f), Color.cyan);
+//		Debug.DrawLine(transform.position, transform.position + (_tang * 4f), Color.green);
+//		Debug.DrawLine(transform.position, transform.position + (_inputTang * 4f), Color.red);
 
 		Vector3 _vectorTolook = inputVector;		//Direction que le controler doit regarder
 		if (inputVector.magnitude < 0.3)

@@ -45,9 +45,9 @@ public class GetGravitySurface : MonoBehaviour {
 
 		averageSurfaceNormal = _average;
 
-		Debug.DrawRay(transform.position, _average, Color.magenta);
+//		Debug.DrawRay(transform.position, _average, Color.magenta);
 
-		print(_average);
+//		print(_average);
 	}
 		
 }
