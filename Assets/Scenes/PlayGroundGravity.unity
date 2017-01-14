@@ -867,64 +867,19 @@ Prefab:
       propertyPath: staticTransformPosition
       value: 
       objectReference: {fileID: 2085878535}
-    - target: {fileID: 1573390960575860, guid: e326332f5efa2c141a0c57df35432282, type: 2}
-      propertyPath: m_Icon
-      value: 
-      objectReference: {fileID: 7250588514170254948, guid: 0000000000000000d000000000000000,
-        type: 0}
-    - target: {fileID: 114329522706936888, guid: e326332f5efa2c141a0c57df35432282,
+    - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
         type: 2}
-      propertyPath: distanceAway
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 114329522706936888, guid: e326332f5efa2c141a0c57df35432282,
-        type: 2}
-      propertyPath: distanceUp
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 114329522706936888, guid: e326332f5efa2c141a0c57df35432282,
-        type: 2}
-      propertyPath: m_Enabled
-      value: 0
+      propertyPath: xAngleMin
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
         type: 2}
-      propertyPath: m_Enabled
-      value: 1
+      propertyPath: xAngleMax
+      value: -89
       objectReference: {fileID: 0}
     - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
         type: 2}
-      propertyPath: cameraMode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
-        type: 2}
-      propertyPath: joystickSpeed
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
-        type: 2}
-      propertyPath: m_camSmoothDampTime
-      value: 0.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
-        type: 2}
-      propertyPath: applyMovementWithYawn
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
-        type: 2}
-      propertyPath: pitchAngle
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
-        type: 2}
-      propertyPath: rotationAxisDependsOnCameraSurface
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
-        type: 2}
-      propertyPath: rotateCameraWithNormal
+      propertyPath: limitXAngle
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []

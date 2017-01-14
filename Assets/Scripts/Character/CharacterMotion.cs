@@ -53,6 +53,11 @@ public class CharacterMotion : MonoBehaviour
     private Vector3 m_upSurfaceNormal;
     private Quaternion m_normalRotation;
     private Vector3 m_surfaceTangDownwardsNormalized;
+    public Vector3 SurfaceTang
+    {
+        get { return m_surfaceTangDownwardsNormalized; }
+        private set { m_surfaceTangDownwardsNormalized = value; }
+    }
     private float m_surfaceAngle;
 
     //raycast
@@ -184,7 +189,7 @@ public class CharacterMotion : MonoBehaviour
 
         if (m_inputMagnitude >= 0.1f)
         {
-            m_inputDeltaHeadingAngleInDeg = UpdateAngleInDeg(m_inputVector, Vector3.forward);
+            m_inputDeltaHeadingAngleInDeg = GetAngleInDegFromVectors(m_inputVector, Vector3.forward);
         }
         // if(characterMovementType == CharacterMovementType.Relative)
         m_inputRotation = UpdateInputRotation(m_inputRotation, m_inputDeltaHeadingAngleInDeg);
@@ -567,7 +572,7 @@ public class CharacterMotion : MonoBehaviour
         return inputVector.magnitude;
     }
 
-    private float UpdateAngleInDeg(Vector3 direction, Vector3 worldVector)
+    private float GetAngleInDegFromVectors(Vector3 direction, Vector3 worldVector)
     {
         float _angle =
             Mathf.Atan2(Vector3.Dot(Vector3.up, Vector3.Cross(worldVector, direction)),

@@ -118,7 +118,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     [SerializeField]
     private float m_distanceAway;
     [SerializeField]
-    private float m_startingAngleFromPlayer = 0f; 
+    private float m_startingAngleFromPlayer = 0f;
 #if UNITY_EDITOR
 
     Vector3 gizmoPoint;
@@ -157,7 +157,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     private float m_targetXDistance = 10f;
     [SerializeField]
     private float m_targetYDistance = 3f;
-
+    [SerializeField]
+    private Vector3 posRelativeToPlayer;
+    [SerializeField]
+    private Vector3 positionBeforeGliding;
 #endif
 
     private const float minY = 0f;
@@ -195,7 +198,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
         if (applyMovementWithYawn && startMovementAtAngle == 0) { startMovementAtAngle = yAngleMin; }
         lookAtPosition = playerTransform.position;
-        currentX = m_startingAngleFromPlayer; 
+        currentX = m_startingAngleFromPlayer;
+        positionBeforeGliding = transform.position;
     }
 
 
@@ -216,9 +220,6 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         //BEHAVIOUR Block Axis
         BlockXAndYAxis();
 
-        //BEHAVIOUR Distance from ground
-        FreeCameraUpdate();
-
         //BEHAVIOUR Surface Normal
         if (AxisEqualsSurfaceAngle) SurfaceNormalBehaviour();
 
@@ -233,9 +234,11 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         PlayerFadeOutWhenTooClose();
 
 
-        Vector3 _offset = new Vector3(0f, m_currentYDis, 0f);
+        Vector3 _offset = new Vector3(0f, 0f, 0f);
         Vector3 characterOffset = playerTransform.position + _offset;
         lookAtPosition = playerTransform.position;
+        float rightX = Input.GetAxis("360_R_Stick_X");
+        float rightY = Input.GetAxis("360_R_Stick_Y");
 
         switch (cameraMode)
         {
@@ -245,10 +248,33 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 {
                     //APPLY MOVEMENT
                     m_rotation = Quaternion.Euler(0f, currentX + xModificationAngle, 0f);
-                    Vector3 _rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, -Vector3.forward);
-
+                    Vector3 _rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, m_rotation, m_normalRotation, -Vector3.forward);
                     //check later the characterMotion.Up if its the best value. or better to use vector3.up 
-                    targetPosition = playerTransform.position + Vector3.up * m_currentYDis - _rotDirection * m_currentXDis;
+
+                    if (characterMotion.characterState == CharacterMotion.CharacterState.Gliding
+                        || (characterMotion.characterState == CharacterMotion.CharacterState.StrongGliding)
+                        || (characterMotion.characterState == CharacterMotion.CharacterState.GoingDown))
+                    {
+                        //targetPosition = playerTransform.position + Vector3.up * m_currentYDis + playerTransform.forward * m_currentXDis;
+                        //targetPosition = playerTransform.position + Vector3.up * m_currentYDis - characterMotion.SurfaceTang * m_currentXDis;
+                        //targetPosition = playerTransform.position + Vector3.up * m_currentYDis - posRelativeToPlayer.normalized * m_currentXDis;
+                        //targetPosition = playerTransform.position + Vector3.up * m_currentYDis + _rotDirection * m_currentXDis;
+                        //float _distanceFromBeforeGliding = Vector3.Distance(transform.position, positionBeforeGliding); 
+                        //temporary, find other solution
+                        //should be the angle to look. 
+                        currentX = GetAngleInDegFromVectors(transform.forward, -Vector3.forward);
+                        targetPosition = transform.position;
+                    }
+                    else
+                    {
+
+                        posRelativeToPlayer = characterMotion.transform.position - transform.position;
+                        //_rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, m_rotation, m_normalRotation, -Vector3.forward);
+                        targetPosition = playerTransform.position + Vector3.up * m_currentYDis - _rotDirection * m_currentXDis;
+                        //positionBeforeGliding = transform.position; 
+                    }
+                    //targetPosition = playerTransform.position + Vector3.up * m_currentYDis - _rotDirection * m_currentXDis;
+
                     //lookAtPosition = playerTransform.position;
                     characterForward = characterMotion.Forward;
                     characterUp = characterMotion.Up;
@@ -259,8 +285,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             #region Orbit
             case CameraMode.Orbit:
                 {
-                    float rightX = Input.GetAxis("360_R_Stick_X");
-                    float rightY = Input.GetAxis("360_R_Stick_Y");
+
 
                     if (characterMotion.Speed > movementLookDirectionThreshold)
                     {
@@ -272,21 +297,28 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                         curLookDir = Vector3.SmoothDamp(curLookDir, lookDir, ref m_velocityCamSmooth, lookDirDampTime);
 
                     }
-                    targetPosition = playerTransform.position + Vector3.up * m_currentYDis - Vector3.Normalize(curLookDir) * m_currentXDis;
+
+                    Debug.LogFormat("curDir:{0}, forward:{1}", curLookDir.normalized, transform.forward);
+                    if (characterMotion.characterState == CharacterMotion.CharacterState.Gliding
+                    || (characterMotion.characterState == CharacterMotion.CharacterState.StrongGliding)
+                    || (characterMotion.characterState == CharacterMotion.CharacterState.GoingDown))
+                    {
+
+                        lookDir = Vector3.Lerp(characterMotion.Right * (rightX < 0 ? 1f : -1f) * lookDirFactorRotation, characterMotion.SurfaceTang * (rightY < 0 ? -1f : 1f) * lookDirFactorRotation,
+                                  Mathf.Abs(Vector3.Dot(this.transform.forward, characterMotion.SurfaceTang)));
+                        curLookDir = Vector3.Normalize(characterOffset - this.transform.position);
+                        curLookDir.y = 0f;
+                        curLookDir = Vector3.SmoothDamp(curLookDir, lookDir, ref m_velocityCamSmooth, lookDirDampTime);
+                        //change currentLookDir here to be the same as the exit
+                        //targetPosition = playerTransform.position + Vector3.up * m_currentYDis - Vector3.Normalize(curLookDir) * m_currentXDis;
+                    }
+                    else
+                    {
+                        targetPosition = playerTransform.position + Vector3.up * m_currentYDis - Vector3.Normalize(curLookDir) * m_currentXDis;
+                    }
 
                     characterForward = characterMotion.Forward;
                     characterUp = characterMotion.Up;
-
-                    //m_dir = new Vector3(0, 0, -m_trueDistance);
-                    //m_rotation = Quaternion.Euler(Mathf.Max(currentY, yAngleMin) + yModificationAngle, currentX + xModificationAngle, 0f);
-                    //Vector3 _rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, m_dir);
-                    //Vector3 _finalPos = transform.forward - _rotDirection;
-                    //_finalPos.z = -m_trueDistance;
-
-                    ////Debug.Log(transform.forward - _rotDirection);
-                    ////m_transform.position = playerTransform.position + _rotDirection;
-                    //lookAtPosition = playerTransform.position;
-                    //targetPosition = playerTransform.position + (transform.forward * -m_trueDistance);
                     break;
                 }
             #endregion
@@ -357,15 +389,15 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
 
 
-    private Vector3 RotateCameraWithSurfaceAxis(ref Quaternion rotationWithNormals, Vector3 direction)
+    private Vector3 RotateCameraWithSurfaceAxis(ref Quaternion rotationWithNormals, Quaternion rotation, Quaternion normalRotation, Vector3 direction)
     {
         if (AxisEqualsSurfaceAngle)
         {
-            rotationWithNormals = Quaternion.Slerp(rotationWithNormals, m_normalRotation * m_rotation, Time.deltaTime * 5f);
+            rotationWithNormals = Quaternion.Slerp(rotationWithNormals, normalRotation * rotation, Time.deltaTime * 5f);
             //Debug.Log("rotation: " + m_rotation); 
             //Vector3 _rotDirection = m_rotation * m_dir;
         }
-        Vector3 _rotDirection = (AxisEqualsSurfaceAngle) ? rotationWithNormals * direction : m_rotation * direction;
+        Vector3 _rotDirection = (AxisEqualsSurfaceAngle) ? rotationWithNormals * direction : rotation * direction;
         return _rotDirection;
     }
 
@@ -398,24 +430,6 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
     }
 
-    private void FreeCameraUpdate()
-    {
-
-        //BEHAVIOUR Apply distance when no obstacle and with distance from ground
-        //check this out for possible errors!
-        if (!m_terrainRaycastEntered && !m_obstacleRaycastEntered)
-        {
-
-            //float _substraction = (currentY > yAngleMin) ? m_lerpedHeight : m_distanceToYawn;
-            float _substraction = 0f;
-
-            m_trueDistance = maxDistance - _substraction;
-
-            //m_trueDistance = (Mathf.Abs(m_trueDistance - maxDistance) > 0.1f) ?
-            //    Mathf.Lerp(m_trueDistance, maxDistance - _substraction, Time.fixedDeltaTime * lerpVelocity) :
-            //    maxDistance - _substraction;
-        }
-    }
 
     private void BlockXAndYAxis()
     {
@@ -757,6 +771,17 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         }
 
         return false;
+    }
+
+    private float GetAngleInDegFromVectors(Vector3 direction, Vector3 worldVector)
+    {
+        float _angle =
+            Mathf.Atan2(Vector3.Dot(Vector3.up, Vector3.Cross(worldVector, direction)),
+            Vector3.Dot(worldVector, direction)) * Mathf.Rad2Deg;
+
+        //Debug.Log(_angle);
+
+        return _angle;
     }
     //...until here
 
