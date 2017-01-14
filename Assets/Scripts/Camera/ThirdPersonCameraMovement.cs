@@ -68,6 +68,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     public float rotationIntensity = 1f;
     public float rotationLerp = 3f;
     public Vector3 pivotRotation;
+    [Header("dont activate for the moment, some issues to solve")]
     public bool AxisEqualsSurfaceAngle = true;
 
     [Header("Static Camera Values")]
@@ -119,6 +120,11 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     private float m_distanceAway;
     [SerializeField]
     private float m_startingAngleFromPlayer = 0f;
+    [SerializeField]
+    Vector3 targetPosition = Vector3.zero;
+    [SerializeField]
+    Vector3 lookAtPosition = new Vector3();
+
 #if UNITY_EDITOR
 
     Vector3 gizmoPoint;
@@ -132,15 +138,13 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     Vector3 gizmoDownRayOrigin;
 
 
-    Vector3 targetPosition = Vector3.zero;
-    Vector3 lookAtPosition = new Vector3();
-
     private float m_tLerpDistance = 0f;
     private float m_currentXDistance = 0f;
     [Range(0, 1)]
     public float startingDistance = 0.5f;
     [SerializeField]
     private float m_currentXDis;
+    [SerializeField]
     private float m_currentYDis;
     [SerializeField]
     private float lookDirFactorRotation = 1;
@@ -161,6 +165,14 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     private Vector3 posRelativeToPlayer;
     [SerializeField]
     private Vector3 positionBeforeGliding;
+    [SerializeField]
+    private float followStartThreshold = 0.1f;
+    [SerializeField]
+    private bool blockCameraMode = false;
+    [SerializeField]
+    private Vector3 m_rotDirection;
+    [SerializeField]
+    private Vector3 curLookDir;
 #endif
 
     private const float minY = 0f;
@@ -168,8 +180,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     public const string obstacleLayerString = "Obstacle";
     public const string fadeLayerString = "Fade";
     public const string terrainLayerString = "Terrain";
-    private Vector3 curLookDir;
-
+    private const float TARGETING_THRESHOLD = 0.3f;
 
 
     // Use this for initialization
@@ -200,6 +211,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         lookAtPosition = playerTransform.position;
         currentX = m_startingAngleFromPlayer;
         positionBeforeGliding = transform.position;
+        cameraMode = CameraMode.Orbit;
     }
 
 
@@ -233,12 +245,47 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         //BEHAVIOUR Player too close to the camera
         PlayerFadeOutWhenTooClose();
 
+        float rightX = Input.GetAxis("360_R_Stick_X");
+        float rightY = Input.GetAxis("360_R_Stick_Y");
+
+
+        #region Assign Camera Mode
+        if (!blockCameraMode)
+        {
+            if (Input.GetAxis("Target") > TARGETING_THRESHOLD)
+            {
+                cameraMode = CameraMode.Target;
+
+            }
+            else
+            {
+                //follow camera case
+                if ((Mathf.Abs(rightX) > followStartThreshold) || (Mathf.Abs(rightY) > followStartThreshold)) // && System.Math.Round(characterMotion.Speed, 2) == 0)
+                {
+                    cameraMode = CameraMode.Follow;
+                }
+
+                //orbit case
+                if ((cameraMode == CameraMode.Target && Input.GetAxis("Target") <= TARGETING_THRESHOLD))
+                {
+                    if (cameraMode != CameraMode.Orbit)
+                    {
+                        cameraMode = CameraMode.Orbit;
+                        characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Relative;
+                    }
+                }
+            }
+        }
+        #endregion
+
+
 
         Vector3 _offset = new Vector3(0f, 0f, 0f);
         Vector3 characterOffset = playerTransform.position + _offset;
         lookAtPosition = playerTransform.position;
-        float rightX = Input.GetAxis("360_R_Stick_X");
-        float rightY = Input.GetAxis("360_R_Stick_Y");
+        //Debug.LogFormat("rot: {0}, forw: {1}", m_rotDirection, characterMotion.Forward);
+
+        //  Debug.Log(targetPosition);
 
         switch (cameraMode)
         {
@@ -247,8 +294,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             case CameraMode.Follow:
                 {
                     //APPLY MOVEMENT
-                    m_rotation = Quaternion.Euler(0f, currentX + xModificationAngle, 0f);
-                    Vector3 _rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, m_rotation, m_normalRotation, -Vector3.forward);
+                    m_rotation = Quaternion.Euler(0f, currentX, 0f);
+                    m_rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, m_rotation, m_normalRotation, -Vector3.forward);
                     //check later the characterMotion.Up if its the best value. or better to use vector3.up 
 
                     if (characterMotion.characterState == CharacterMotion.CharacterState.Gliding
@@ -267,15 +314,13 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                     }
                     else
                     {
+                        //targetPosition = playerTransform.position + Vector3.up * m_currentYDis - characterMotion.Forward * m_currentXDis;
 
-                        posRelativeToPlayer = characterMotion.transform.position - transform.position;
-                        //_rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, m_rotation, m_normalRotation, -Vector3.forward);
-                        targetPosition = playerTransform.position + Vector3.up * m_currentYDis - _rotDirection * m_currentXDis;
-                        //positionBeforeGliding = transform.position; 
+
+                        targetPosition = playerTransform.position + Vector3.up * m_currentYDis - m_rotDirection * m_currentXDis;
+
                     }
-                    //targetPosition = playerTransform.position + Vector3.up * m_currentYDis - _rotDirection * m_currentXDis;
 
-                    //lookAtPosition = playerTransform.position;
                     characterForward = characterMotion.Forward;
                     characterUp = characterMotion.Up;
                     break;
@@ -285,7 +330,6 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             #region Orbit
             case CameraMode.Orbit:
                 {
-
 
                     if (characterMotion.Speed > movementLookDirectionThreshold)
                     {
@@ -297,8 +341,6 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                         curLookDir = Vector3.SmoothDamp(curLookDir, lookDir, ref m_velocityCamSmooth, lookDirDampTime);
 
                     }
-
-                    Debug.LogFormat("curDir:{0}, forward:{1}", curLookDir.normalized, transform.forward);
                     if (characterMotion.characterState == CharacterMotion.CharacterState.Gliding
                     || (characterMotion.characterState == CharacterMotion.CharacterState.StrongGliding)
                     || (characterMotion.characterState == CharacterMotion.CharacterState.GoingDown))
@@ -309,14 +351,20 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                         curLookDir = Vector3.Normalize(characterOffset - this.transform.position);
                         curLookDir.y = 0f;
                         curLookDir = Vector3.SmoothDamp(curLookDir, lookDir, ref m_velocityCamSmooth, lookDirDampTime);
+                        curLookDir.Normalize(); 
                         //change currentLookDir here to be the same as the exit
                         //targetPosition = playerTransform.position + Vector3.up * m_currentYDis - Vector3.Normalize(curLookDir) * m_currentXDis;
                     }
                     else
                     {
-                        targetPosition = playerTransform.position + Vector3.up * m_currentYDis - Vector3.Normalize(curLookDir) * m_currentXDis;
+                        targetPosition = playerTransform.position + Vector3.up * m_currentYDis - curLookDir * m_currentXDis;
+
+                        //targetPosition = playerTransform.position + Vector3.up * m_currentYDis - characterMotion.Forward * m_currentXDis;
+                        // Debug.Log(targetPosition);
                     }
 
+                    m_rotDirection = curLookDir;
+                    currentX = GetAngleInDegFromVectors(transform.forward, -Vector3.forward);
                     characterForward = characterMotion.Forward;
                     characterUp = characterMotion.Up;
                     break;
@@ -347,7 +395,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                     characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Absolute;
                     lookDir = playerTransform.forward;
                     curLookDir = playerTransform.forward;
-
+                    currentY = maxY / 2f;
+                    currentX = GetAngleInDegFromVectors(transform.forward, -Vector3.forward);
                     // targetPosition = characterOffset + characterUp * distanceUp - characterForward * distanceAway;
 
                     targetPosition = playerTransform.position + characterUp * m_targetYDistance - characterForward * m_targetXDistance;
@@ -386,13 +435,11 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 #endif
     }
 
-
-
-
     private Vector3 RotateCameraWithSurfaceAxis(ref Quaternion rotationWithNormals, Quaternion rotation, Quaternion normalRotation, Vector3 direction)
     {
         if (AxisEqualsSurfaceAngle)
         {
+            //solve the lerp problem from orbit to target cam before activation. 
             rotationWithNormals = Quaternion.Slerp(rotationWithNormals, normalRotation * rotation, Time.deltaTime * 5f);
             //Debug.Log("rotation: " + m_rotation); 
             //Vector3 _rotDirection = m_rotation * m_dir;
@@ -403,21 +450,24 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
     private void UpdateInput()
     {
-        if (useJoystick)
+        if (cameraMode == CameraMode.Follow)
         {
-            float inputXStick = (Input.GetAxis("360_R_Stick_X") > 0.35f || Input.GetAxis("360_R_Stick_X") < -0.35f) ? Input.GetAxis("360_R_Stick_X") : 0f;
-            float inputYStick = (Input.GetAxis("360_R_Stick_Y") > 0.35f || Input.GetAxis("360_R_Stick_Y") < -0.35f) ? Input.GetAxis("360_R_Stick_Y") : 0f;
+            if (useJoystick)
+            {
+                float inputXStick = (Input.GetAxis("360_R_Stick_X") > 0.35f || Input.GetAxis("360_R_Stick_X") < -0.35f) ? Input.GetAxis("360_R_Stick_X") : 0f;
+                float inputYStick = (Input.GetAxis("360_R_Stick_Y") > 0.35f || Input.GetAxis("360_R_Stick_Y") < -0.35f) ? Input.GetAxis("360_R_Stick_Y") : 0f;
 
-            //Debug.LogFormat("Bool: {0}, stick: {1}", (Input.GetAxis("360_R_Stick_X") > 0.2f || Input.GetAxis("360_R_Stick_X") < -0.2f), inputXStick); 
+                //Debug.LogFormat("Bool: {0}, stick: {1}", (Input.GetAxis("360_R_Stick_X") > 0.2f || Input.GetAxis("360_R_Stick_X") < -0.2f), inputXStick); 
 
-            currentX += inputXStick * joystickSpeed;
-            currentY += inputYStick * joystickSpeed;
+                currentX += inputXStick * joystickSpeed;
+                currentY += inputYStick * joystickSpeed;
 
-        }
-        else
-        {
-            currentX += Input.GetAxis("Mouse X");
-            currentY += Input.GetAxis("Mouse Y");
+            }
+            else
+            {
+                currentX += Input.GetAxis("Mouse X");
+                currentY += Input.GetAxis("Mouse Y");
+            }
         }
 
 
