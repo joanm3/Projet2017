@@ -463,19 +463,19 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     {
 #if UNITY_EDITOR
 
-        if (!Application.isPlaying)
-            return;
-        //Vector3 gizmoRayDirection = playerTransform.position - m_transform.position;
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawRay(gizmoRayOrigin, gizmoRayDirection * gizmoDistance);
-        Gizmos.DrawWireSphere(gizmoPoint, gizmoRadius);
+        //if (!Application.isPlaying)
+        //    return;
+        ////Vector3 gizmoRayDirection = playerTransform.position - m_transform.position;
+        //Gizmos.color = Color.yellow;
+        //Gizmos.DrawRay(gizmoRayOrigin, gizmoRayDirection * gizmoDistance);
+        //Gizmos.DrawWireSphere(gizmoPoint, gizmoRadius);
 
 
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawRay(gizmoDownRayOrigin, gizmoDownRayDirection * gizmoDownDistance);
-        Gizmos.DrawWireSphere(gizmoDownPoint, 1f);
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(collisionPoint, 2f);
+        //Gizmos.color = Color.cyan;
+        //Gizmos.DrawRay(gizmoDownRayOrigin, gizmoDownRayDirection * gizmoDownDistance);
+        //Gizmos.DrawWireSphere(gizmoDownPoint, 1f);
+        //Gizmos.color = Color.red;
+        //Gizmos.DrawWireSphere(collisionPoint, 2f);
 
 #endif
     }

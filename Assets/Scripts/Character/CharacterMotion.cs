@@ -133,7 +133,7 @@ public class CharacterMotion : MonoBehaviour
     float m_surfaceCurrentDescentForce = 0f;
     [SerializeField]
     float m_currentTotalForce = 0f;
-
+    private Vector3 m_collisionPoint;
 
     #endregion
 
@@ -152,6 +152,8 @@ public class CharacterMotion : MonoBehaviour
 
     private void Update()
     {
+
+
         #region DELTA TIME
         //delta time
         float _dt = Time.deltaTime;
@@ -196,27 +198,33 @@ public class CharacterMotion : MonoBehaviour
         // if(characterMovementType == CharacterMovementType.Relative)
         m_inputRotation = UpdateInputRotation(m_inputRotation, m_inputDeltaHeadingAngleInDeg);
         //edit this to solve some problems. for the moment using the world up!!! change it but resolve porblems. 
-        m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, Up, 1f) : false;
+        m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, -Up, 1f) : false;
+        //m_isGrounded = true;
+        //Debug.Log("char.Up: " + Up);
         #endregion
 
         #region GET CURRENT SURFACE VALUES
         //we should calculate only when changing surface: lastsurface != currentSurface
         if (m_isGrounded)
         {
-            m_surfaceNormal = UpdateSurfaceNormalByRaycast(out m_surfaceHit, Up, 10f);
-            m_upSurfaceNormal = UpdateSurfaceNormalByRaycast(out m_upHit, -m_gravVector.normalized, 1f);
+            m_surfaceNormal = UpdateSurfaceNormalByRaycast(out m_surfaceHit, -Up, 10f);
+            m_upSurfaceNormal = UpdateSurfaceNormalByRaycast(out m_upHit, m_gravVector.normalized, 1f);
         }
         else
         {
             m_surfaceNormal = -m_gravVector.normalized;
         }
+        //Debug.Log("surfaceNormal: " + m_surfaceNormal);
 
-        m_normalRotation = GetRotationByNormal2(m_inputRotation, m_surfaceNormal);
+        m_normalRotation = GetRotationByNormal2(m_inputRotation, m_surfaceNormal, Vector3.up);
 
         //calculate when changing surface
         if (m_lastSurfaceNormal != m_surfaceNormal)
         {
-            m_surfaceAngle = ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, Vector3.up) : 0f);
+            Debug.LogFormat("surfaceNormal:{0}, up:{0}", m_surfaceNormal, Up);
+            m_surfaceAngle = ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, -m_gravVector.normalized) : 0f);
+
+            //m_surfaceAngle = ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, Vector3.up) : 0f);
             m_surfaceTangDownwardsNormalized = GetSurfaceTangentDownwards(m_surfaceNormal, m_surfaceHit.point);
             m_lastSurfaceNormal = m_surfaceNormal;
         }
@@ -340,13 +348,18 @@ public class CharacterMotion : MonoBehaviour
 
         #region CHARACTER MOTION
 
+        Debug.Log("surf.Angle: " + m_surfaceAngle);
+
         switch (characterMovementType)
         {
             case CharacterMovementType.Relative:
             case CharacterMovementType.Absolute:
             case CharacterMovementType.NoInput:
                 if (characterMovementType == CharacterMovementType.Relative)
-                    transform.rotation = m_inputRotation;
+                {
+
+                    //m_characterRenderer.rotation = Quaternion.identity;
+                }
 
                 UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
                 Vector3 _characterMotion = ((m_characterDirection * m_characterSpeed)) + m_fallVector;
@@ -370,18 +383,30 @@ public class CharacterMotion : MonoBehaviour
 
         if (!Application.isPlaying)
             return;
-        //Gizmos.color = Color.yellow;
-        //Gizmos.DrawWireSphere(m_surfaceHitPoint, 0.5f);
+
         float _linesLenght = 2f;
         Gizmos.color = Color.blue;
+        //forward
         Gizmos.DrawLine(transform.position, transform.position + (m_characterForward * _linesLenght));
         Gizmos.DrawSphere(m_surfaceHit.point, 0.5f);
+
+        //up
         Gizmos.color = Color.green;
+        Gizmos.DrawLine(transform.position, transform.position + m_characterUp * _linesLenght);
+
+        //gravity vector
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawLine(transform.position, transform.position + m_gravVector * _linesLenght);
+
+        Gizmos.color = Color.magenta;
+        //surfaceNormal
         Gizmos.DrawLine(m_surfaceHit.point, m_surfaceHit.point + (m_surfaceNormal * _linesLenght));
+
+        //tangent surface
         Gizmos.color = Color.cyan;
         Vector3 _groundPosition = new Vector3(transform.position.x, transform.position.y - m_controller.bounds.extents.y, transform.position.z);
         Gizmos.DrawLine(_groundPosition, _groundPosition + m_surfaceTangDownwardsNormalized * _linesLenght);
-        Gizmos.DrawCube(transform.position, Vector3.one * 0.5f);
+
     }
 
     #endregion
@@ -405,12 +430,14 @@ public class CharacterMotion : MonoBehaviour
             m_fallVector = Vector3.zero;
         }
 
-        m_surfaceHitCharacterPosition = GetSnapPositionByHitPoint(m_surfaceHit.point);
+        m_surfaceHitCharacterPosition = GetSnapPositionByHitPoint(m_collisionPoint);
         m_upHitPoint = GetSnapPositionByHitPoint(m_upHit.point);
         //this bugs when the angle of the surface is big and the character doesnt snap properly!! (problem with upHitPoint). 
         //transform.position = m_upHitPoint; 
         //try maybe with the renderer, but then the collider needs to be reposition and this causes problems. 
-        m_characterRenderer.position = m_upHitPoint;
+        //transform.position = m_upHitPoint;
+        Debug.Log("surfaceHitPosition: " + m_surfaceHitCharacterPosition);
+        //m_characterRenderer.position = m_upHitPoint;
     }
 
     private void OnAirUpdate(float deltaTime)
@@ -588,11 +615,11 @@ public class CharacterMotion : MonoBehaviour
         return _angle;
     }
 
-    private Quaternion GetRotationByNormal2(Quaternion rotation, Vector3 normal)
+    private Quaternion GetRotationByNormal2(Quaternion rotation, Vector3 normal, Vector3 upVector)
     {
 
         Quaternion _normalRot = rotation;
-        _normalRot = Quaternion.FromToRotation(Vector3.up, normal);
+        _normalRot = Quaternion.FromToRotation(upVector, normal);
 
         return _normalRot;
         //return Quaternion.FromToRotation(Vector3.up, normal) * transform.rotation;
@@ -614,10 +641,10 @@ public class CharacterMotion : MonoBehaviour
         return point - (-transform.up * (m_controller.bounds.extents.y));
     }
 
-    private Vector3 UpdateSurfaceNormalByRaycast(out RaycastHit hitInfo, Vector3 upVector, float distance)
+    private Vector3 UpdateSurfaceNormalByRaycast(out RaycastHit hitInfo, Vector3 rayDirection, float distance)
     {
 
-        if (GetRaycastAtPosition(out hitInfo, upVector, distance))
+        if (GetRaycastAtPosition(out hitInfo, rayDirection, distance))
         {
             return hitInfo.normal;
         }
@@ -637,15 +664,17 @@ public class CharacterMotion : MonoBehaviour
         return false;
     }
 
-    private bool GetRaycastAtPosition(out RaycastHit hitInfo, Vector3 upVector, float distance)
+
+
+    private bool GetRaycastAtPosition(out RaycastHit hitInfo, Vector3 rayDirection, float distance)
     {
-        Ray ray = new Ray(transform.position + (-upVector * (m_controller.bounds.extents.y - 0.3f)), -upVector);
+        Ray ray = new Ray(transform.position + (rayDirection * (m_controller.bounds.extents.y - 0.3f)), rayDirection);
         Debug.DrawRay(ray.origin, ray.direction * distance, Color.red);
         if (Physics.Raycast(ray, out hitInfo, distance))
         {
+            m_collisionPoint = hitInfo.point;
             return true;
         }
-
         return false;
     }
 
