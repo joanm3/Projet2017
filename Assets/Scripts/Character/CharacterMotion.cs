@@ -134,6 +134,9 @@ public class CharacterMotion : MonoBehaviour
     [SerializeField]
     float m_currentTotalForce = 0f;
     private Vector3 m_collisionPoint;
+    private float m_verticalSpeed;
+    [SerializeField]
+    private float m_characterInitialJumpSpeed = 1f;
 
     #endregion
 
@@ -236,7 +239,6 @@ public class CharacterMotion : MonoBehaviour
         #endregion
 
         #region FORCES
-        m_characterSpeed = m_characterCurrentSpeed;
         m_characterAngleInDegFromSurfaceTang = Vector3.Angle(m_characterForward, m_surfaceTangDownwardsNormalized);
         m_characterCurrentForwardAngleFromGroundZero = GetCharacterForwardAngleFromGroundZero(m_characterForward);
 
@@ -247,6 +249,7 @@ public class CharacterMotion : MonoBehaviour
         m_surfaceCurrentDescentForce = (m_characterAngleInDegFromSurfaceTang < 90f) ? GetAngleForce(m_gravForce, m_characterCurrentForwardAngleFromGroundZero, massPlayer) : -m_surfaceAngle;
         m_inputCurrentForce = UpdateInputForce(m_maxForce, m_inputMagnitude);
         m_characterCurrentSpeed = UpdateInputSpeed(ref m_currentTotalForce, m_characterCurrentSpeed, _dt);
+        m_characterSpeed = m_characterCurrentSpeed;
         #endregion
 
 
@@ -358,7 +361,7 @@ public class CharacterMotion : MonoBehaviour
                 }
 
                 UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
-                Vector3 _characterMotion = ((m_characterDirection * m_characterSpeed)) + m_fallVector;
+                Vector3 _characterMotion = (m_characterDirection * m_characterSpeed) + (m_verticalSpeed * Vector3.up);
                 //Debug.Log("direction: " + (m_characterDirection * m_characterSpeed) + "fallVector:" + m_fallVector + "motion: " + _characterMotion);
                 m_controller.Move(_characterMotion * _dt);
                 break;
@@ -412,6 +415,9 @@ public class CharacterMotion : MonoBehaviour
 
     private void OnGroundUpdate()
     {
+
+        m_verticalSpeed = 0f;
+
         if (Input.GetButtonDown("Jump"))
         {
             m_tGrav = 0f;
@@ -439,24 +445,30 @@ public class CharacterMotion : MonoBehaviour
 
     private void OnAirUpdate(float deltaTime)
     {
+        m_verticalSpeed += -m_gravForce * deltaTime;
+
         //test
         m_inputVector = Vector3.zero;
         m_gravForceVector = m_gravVector * m_airGravForce;
 
         //m_gravForceVector = m_gravVector * (-m_airGravForce * m_gravForceOverTime.Evaluate(m_tGrav));
         //check this problem later for suming deltatime to tgrav. 
-        //m_tGrav += deltaTime;
+        m_tGrav += deltaTime;
         //Debug.Log(m_tGrav);
 
-        m_jumpVector += m_gravForceVector * m_airGravForce * deltaTime;
-        m_fallVector += m_jumpVector * deltaTime;
+        //m_jumpVector += m_gravForceVector * deltaTime;
+        //m_fallVector += m_jumpVector;
         //Debug.Log(m_jumpVector);
     }
 
     private void Jump(Vector3 surfaceNormal)
     {
         m_isGrounded = false;
-        m_jumpVector = (Vector3.up + (surfaceNormal * 0.5f)).normalized * m_jumpForce;
+        m_verticalSpeed = m_jumpForce; //m_characterInitialJumpSpeed;
+
+
+
+        //m_jumpVector = (Vector3.up + (surfaceNormal * 0.5f)).normalized * m_jumpForce;
         Debug.Log("Jump Vector: " + m_jumpVector);
     }
     #endregion
