@@ -185,19 +185,16 @@ public class CharacterMotion : MonoBehaviour
                     m_inputMagnitude = 0f;
                 }
                 break;
-
         }
 
-        Vector3 circleRotationInputVector = (m_cam.transform.right * Input.GetAxis("Horizontal"));
 
 
         if (m_inputMagnitude >= 0.1f)
         {
             m_inputDeltaHeadingAngleInDeg = GetAngleInDegFromVectors(m_inputVector, Vector3.forward);
         }
-        // if(characterMovementType == CharacterMovementType.Relative)
+
         m_inputRotation = UpdateInputRotation(m_inputRotation, m_inputDeltaHeadingAngleInDeg);
-        //edit this to solve some problems. for the moment using the world up!!! change it but resolve porblems. 
         m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, -Up, 1f) : false;
         //m_isGrounded = true;
         //Debug.Log("char.Up: " + Up);
@@ -221,8 +218,8 @@ public class CharacterMotion : MonoBehaviour
         //calculate when changing surface
         if (m_lastSurfaceNormal != m_surfaceNormal)
         {
-            Debug.LogFormat("surfaceNormal:{0}, up:{0}", m_surfaceNormal, Up);
-            m_surfaceAngle = ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, -m_gravVector.normalized) : 0f);
+            //Debug.LogFormat("surfaceNormal:{0}, up:{0}", m_surfaceNormal, Up);
+            m_surfaceAngle = ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, -m_gravVector.normalized) : FallInflectionAngle);
 
             //m_surfaceAngle = ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, Vector3.up) : 0f);
             m_surfaceTangDownwardsNormalized = GetSurfaceTangentDownwards(m_surfaceNormal, m_surfaceHit.point);
@@ -322,6 +319,7 @@ public class CharacterMotion : MonoBehaviour
             case CharacterState.Falling:
             case CharacterState.Jumping:
                 {
+                    //redo on air behaviour
                     OnAirUpdate(_dt);
                     break;
                 }
@@ -348,7 +346,7 @@ public class CharacterMotion : MonoBehaviour
 
         #region CHARACTER MOTION
 
-        Debug.Log("surf.Angle: " + m_surfaceAngle);
+        //Debug.Log("surf.Angle: " + m_surfaceAngle);
 
         switch (characterMovementType)
         {
@@ -357,8 +355,8 @@ public class CharacterMotion : MonoBehaviour
             case CharacterMovementType.NoInput:
                 if (characterMovementType == CharacterMovementType.Relative)
                 {
-
-                    //m_characterRenderer.rotation = Quaternion.identity;
+                    transform.rotation = Quaternion.Euler(m_gravVector);
+                    m_characterRenderer.rotation = Quaternion.Euler(0f, m_inputDeltaHeadingAngleInDeg, 0f);
                 }
 
                 UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
@@ -436,18 +434,22 @@ public class CharacterMotion : MonoBehaviour
         //transform.position = m_upHitPoint; 
         //try maybe with the renderer, but then the collider needs to be reposition and this causes problems. 
         //transform.position = m_upHitPoint;
-        Debug.Log("surfaceHitPosition: " + m_surfaceHitCharacterPosition);
+        //Debug.Log("surfaceHitPosition: " + m_surfaceHitCharacterPosition);
         //m_characterRenderer.position = m_upHitPoint;
     }
 
     private void OnAirUpdate(float deltaTime)
     {
-        m_gravForceVector = m_gravVector * (-m_airGravForce * m_gravForceOverTime.Evaluate(m_tGrav));
+        //test
+        m_inputVector = Vector3.zero;
+        m_gravForceVector = m_gravVector * m_airGravForce;
+
+        //m_gravForceVector = m_gravVector * (-m_airGravForce * m_gravForceOverTime.Evaluate(m_tGrav));
         //check this problem later for suming deltatime to tgrav. 
         //m_tGrav += deltaTime;
         //Debug.Log(m_tGrav);
 
-        m_jumpVector += m_gravForceVector * -m_airGravForce * deltaTime;
+        m_jumpVector += m_gravForceVector * m_airGravForce * deltaTime;
         m_fallVector += m_jumpVector * deltaTime;
         //Debug.Log(m_jumpVector);
     }
@@ -669,7 +671,7 @@ public class CharacterMotion : MonoBehaviour
     private bool GetRaycastAtPosition(out RaycastHit hitInfo, Vector3 rayDirection, float distance)
     {
         Ray ray = new Ray(transform.position + (rayDirection * (m_controller.bounds.extents.y - 0.3f)), rayDirection);
-        Debug.DrawRay(ray.origin, ray.direction * distance, Color.red);
+        //Debug.DrawRay(ray.origin, ray.direction * distance, Color.red);
         if (Physics.Raycast(ray, out hitInfo, distance))
         {
             m_collisionPoint = hitInfo.point;
