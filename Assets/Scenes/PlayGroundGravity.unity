@@ -251,7 +251,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &220264260
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -880,7 +880,22 @@ Prefab:
     - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
         type: 2}
       propertyPath: limitXAngle
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
+        type: 2}
+      propertyPath: cameraMode
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
+        type: 2}
+      propertyPath: AxisEqualsSurfaceAngle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114817659037358224, guid: e326332f5efa2c141a0c57df35432282,
+        type: 2}
+      propertyPath: blockCameraMode
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: e326332f5efa2c141a0c57df35432282, type: 2}
@@ -1305,7 +1320,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: 8ce17ff6c3e88c140adbd10d26f31db5, type: 2}
+  - {fileID: 2100000, guid: 49a20b9e68f8b0f4eb382c0c1ceeb71d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

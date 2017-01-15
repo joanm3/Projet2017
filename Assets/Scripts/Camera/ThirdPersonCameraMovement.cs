@@ -68,7 +68,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     public float rotationIntensity = 1f;
     public float rotationLerp = 3f;
     public Vector3 pivotRotation;
-    [Header("dont activate for the moment, some issues to solve")]
+    //[Header("dont activate for the moment, some issues to solve")]
     public bool AxisEqualsSurfaceAngle = true;
 
     [Header("Static Camera Values")]
@@ -173,6 +173,17 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     private Vector3 m_rotDirection;
     [SerializeField]
     private Vector3 curLookDir;
+
+    private float hitLerpPos;
+    private Vector3 collisionPoint;
+
+    float hitXDistance = 1000f;
+    float hitYDistance = 1000f;
+
+    private Vector3 m_velocityCollisionCamSmooth;
+    [SerializeField]
+    private float m_camSmoothCollisionDampTime = 0.2f;
+
 #endif
 
     private const float minY = 0f;
@@ -210,37 +221,33 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         if (applyMovementWithYawn && startMovementAtAngle == 0) { startMovementAtAngle = yAngleMin; }
         lookAtPosition = playerTransform.position;
         currentX = m_startingAngleFromPlayer;
+        currentY = 90f;
         positionBeforeGliding = transform.position;
         cameraMode = CameraMode.Orbit;
+        hitLerpPos = -1f;
+        collisionPoint = Vector3.one * 100f;
     }
 
 
     void LateUpdate()
     {
-
-        //Vector3 targetPosition = Vector3.zero;
-        //Vector3 lookAtPosition = playerTransform.position;
-
-
-
-        UpdateInput();
-
-
-
-        //CAMERA BEHAVIOURS
+        //BEHAVIOUR Obstacles raycasting
+        ObstacleBehaviours(ref hitXDistance, ref hitYDistance);
 
         //BEHAVIOUR Block Axis
         BlockXAndYAxis();
 
+        //CAMERA BEHAVIOURS
+        UpdateInput();
+
         //BEHAVIOUR Surface Normal
+        //add a bool to change only when surface changes. 
         if (AxisEqualsSurfaceAngle) SurfaceNormalBehaviour();
 
         //BEHAVIOUR Rotation by normal
         if (cameraMode == CameraMode.Orbit || cameraMode == CameraMode.Follow)
             if (rotateCameraWithNormal) CameraRotationByNormal(ref pivotRotation, rotationIntensity, rotationLerp);
 
-        //BEHAVIOUR Obstacles raycasting
-        ObstacleBehaviours();
 
         //BEHAVIOUR Player too close to the camera
         PlayerFadeOutWhenTooClose();
@@ -260,7 +267,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             else
             {
                 //follow camera case
-                if ((Mathf.Abs(rightX) > followStartThreshold) || (Mathf.Abs(rightY) > followStartThreshold)) // && System.Math.Round(characterMotion.Speed, 2) == 0)
+                if ((Mathf.Abs(rightX) > followStartThreshold)) // || (Mathf.Abs(rightY) > followStartThreshold)) // && System.Math.Round(characterMotion.Speed, 2) == 0)
                 {
                     cameraMode = CameraMode.Follow;
                 }
@@ -280,7 +287,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
 
 
-        Vector3 _offset = new Vector3(0f, 0f, 0f);
+        Vector3 _offset = new Vector3(0f, m_currentYDis, 0f);
         Vector3 characterOffset = playerTransform.position + _offset;
         lookAtPosition = playerTransform.position;
         //Debug.LogFormat("rot: {0}, forw: {1}", m_rotDirection, characterMotion.Forward);
@@ -311,6 +318,9 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                         //should be the angle to look. 
                         currentX = GetAngleInDegFromVectors(transform.forward, -Vector3.forward);
                         targetPosition = transform.position;
+
+                        //prova a que sigui igual a la posicio del player  - vector3.forward * distancia
+
                     }
                     else
                     {
@@ -351,7 +361,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                         curLookDir = Vector3.Normalize(characterOffset - this.transform.position);
                         curLookDir.y = 0f;
                         curLookDir = Vector3.SmoothDamp(curLookDir, lookDir, ref m_velocityCamSmooth, lookDirDampTime);
-                        curLookDir.Normalize(); 
+                        curLookDir.Normalize();
                         //change currentLookDir here to be the same as the exit
                         //targetPosition = playerTransform.position + Vector3.up * m_currentYDis - Vector3.Normalize(curLookDir) * m_currentXDis;
                     }
@@ -412,7 +422,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
         m_transform.position = Vector3.SmoothDamp(m_transform.position, targetPosition, ref m_velocityCamSmooth, m_camSmoothDampTime);
         m_transform.LookAt(lookAtPosition);
-        cameraPivotTransform.localPosition = pivotPosition;
+
         cameraPivotTransform.localRotation = Quaternion.Slerp(cameraPivotTransform.localRotation, Quaternion.Euler(pivotRotation), lerpVelocity * Time.deltaTime);
 
     }
@@ -431,6 +441,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         Gizmos.color = Color.cyan;
         Gizmos.DrawRay(gizmoDownRayOrigin, gizmoDownRayDirection * gizmoDownDistance);
         Gizmos.DrawWireSphere(gizmoDownPoint, 1f);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(collisionPoint, 2f);
 
 #endif
     }
@@ -440,7 +452,9 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         if (AxisEqualsSurfaceAngle)
         {
             //solve the lerp problem from orbit to target cam before activation. 
-            rotationWithNormals = Quaternion.Slerp(rotationWithNormals, normalRotation * rotation, Time.deltaTime * 5f);
+            //rotationWithNormals = Quaternion.Slerp(rotationWithNormals, normalRotation * rotation, Time.deltaTime * 5f);
+            rotationWithNormals = normalRotation * rotation;
+
             //Debug.Log("rotation: " + m_rotation); 
             //Vector3 _rotDirection = m_rotation * m_dir;
         }
@@ -450,33 +464,37 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
     private void UpdateInput()
     {
-        if (cameraMode == CameraMode.Follow)
+
+        if (useJoystick)
         {
-            if (useJoystick)
-            {
-                float inputXStick = (Input.GetAxis("360_R_Stick_X") > 0.35f || Input.GetAxis("360_R_Stick_X") < -0.35f) ? Input.GetAxis("360_R_Stick_X") : 0f;
-                float inputYStick = (Input.GetAxis("360_R_Stick_Y") > 0.35f || Input.GetAxis("360_R_Stick_Y") < -0.35f) ? Input.GetAxis("360_R_Stick_Y") : 0f;
+            float inputXStick = (Input.GetAxis("360_R_Stick_X") > 0.35f || Input.GetAxis("360_R_Stick_X") < -0.35f) ? Input.GetAxis("360_R_Stick_X") : 0f;
+            float inputYStick = (Input.GetAxis("360_R_Stick_Y") > 0.35f || Input.GetAxis("360_R_Stick_Y") < -0.35f) ? Input.GetAxis("360_R_Stick_Y") : 0f;
 
-                //Debug.LogFormat("Bool: {0}, stick: {1}", (Input.GetAxis("360_R_Stick_X") > 0.2f || Input.GetAxis("360_R_Stick_X") < -0.2f), inputXStick); 
+            //Debug.LogFormat("Bool: {0}, stick: {1}", (Input.GetAxis("360_R_Stick_X") > 0.2f || Input.GetAxis("360_R_Stick_X") < -0.2f), inputXStick); 
 
-                currentX += inputXStick * joystickSpeed;
-                currentY += inputYStick * joystickSpeed;
+            currentX += inputXStick * joystickSpeed;
+            currentY += inputYStick * joystickSpeed;
 
-            }
-            else
-            {
-                currentX += Input.GetAxis("Mouse X");
-                currentY += Input.GetAxis("Mouse Y");
-            }
+        }
+        else
+        {
+            currentX += Input.GetAxis("Mouse X");
+            currentY += Input.GetAxis("Mouse Y");
         }
 
 
         m_tLerpDistance = GFunctions.NormalizedRangeValue(currentY, minY, maxY);
+
+
         m_currentXDis = minDistancePosition.x + m_tLerpDistance * maxDistancePosition.x;
         m_currentYDis = minDistancePosition.y + heightPositionByDistance.Evaluate(m_tLerpDistance) * maxDistancePosition.y;
 
+
+
         m_currentXDis = Mathf.Clamp(m_currentXDis, minDistancePosition.x, maxDistancePosition.x);
         m_currentYDis = Mathf.Clamp(m_currentYDis, minDistancePosition.y, maxDistancePosition.y);
+        Debug.LogFormat("x: {0}, hitX: {1}", m_currentXDis, hitXDistance);
+        Debug.LogFormat("y: {0}, hitY: {1}", m_currentYDis, hitYDistance);
 
     }
 
@@ -498,20 +516,28 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             currentX = Mathf.Clamp(currentX, xAngleMin, xAngleMax);
     }
 
-    private void ObstacleBehaviours()
+
+    private void ObstacleBehaviours(ref float hitXDistance, ref float hitYDistance)
     {
         //add here a ref vector3 to return later with the position
         //or a float that return the m_tLerpDistance between 1 and to to know where to position camera. 
 
+        //check that is always vector3.up!!
+
+
+        //cameraPivotTransform.position.x multiply by rotation to know the true distance. 
+
         #region RAYCAST PARAMETERS
-        Vector3 _rayDirection = cameraPivotTransform.position - playerTransform.position;
+        Vector3 _rayDirection = transform.position - playerTransform.position;
         Vector3 _rayOrigin = playerTransform.position;
         RaycastHit _hit;
-        float _distance = maxDistance + (Vector3.Distance(m_transform.position, cameraPivotTransform.position));
+        //redo this
+        float _distance = Vector3.Distance(playerTransform.position, transform.position);
         float _plusObstacleRaycastDistance = 0.1f;
         //REDO THIS THIS THIS THIS REDO
         //float _raycastDistance = maxDistance - m_lerpedHeight + _plusObstacleRaycastDistance;
-        float _raycastDistance = maxDistance + _plusObstacleRaycastDistance;
+        float _raycastDistance = _distance + _plusObstacleRaycastDistance;
+        collisionPoint = Vector3.zero;
 
         //Draw Gizmo
 #if UNITY_EDITOR
@@ -524,6 +550,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         //BEHAVIOUR WITH OBSTACLES
         if (Physics.Raycast(_rayOrigin, _rayDirection, out _hit, _raycastDistance, SumLayers(obstacleMask, fadeMask, terrainMask)))
         {
+            Vector3 _playerXPositionOnPlane = Vector3.ProjectOnPlane(playerTransform.position, Vector3.up);
+
             if (_hit.collider.gameObject.layer == LayerMask.NameToLayer(obstacleLayerString))
             {
                 #region OBSTACLE ENTER
@@ -548,14 +576,15 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                         }
                     }
                     float _lerpedAlphaB = (m_colliderRend.material.color.a >= 0.001f) ?
-                    Mathf.Lerp(m_colliderRend.material.color.a, 0.0f, Time.deltaTime * lerpVelocity * 3f) : 0f;
+                            Mathf.Lerp(m_colliderRend.material.color.a, 0.0f, Time.deltaTime * lerpVelocity * 3f) : 0f;
                     m_colliderRend.material.color = new Color(m_colliderRend.material.color.r, m_colliderRend.material.color.g, m_colliderRend.material.color.b, _lerpedAlphaB);
                     //Debug.Log (_lerpedAlpha); 
-                    m_trueDistance = Mathf.Lerp(m_trueDistance, _hit.distance, Time.deltaTime * lerpVelocity * 2f);
-                    if (Mathf.Abs(m_trueDistance - _hit.distance) <= 0.1f)
-                    {
-                        m_trueDistance = _hit.distance;
-                    }
+                    collisionPoint = _hit.point;
+
+
+
+                    cameraPivotTransform.position = Vector3.SmoothDamp(cameraPivotTransform.position, _hit.point, ref m_velocityCollisionCamSmooth, m_camSmoothCollisionDampTime);
+
                     m_obstacleRaycastEntered = true;
                 }
                 #endregion
@@ -632,11 +661,11 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 m_terrainCollider = _hit.collider.GetComponent<TerrainCollider>();
                 if (m_terrainCollider.enabled)
                 {
-                    m_trueDistance = _hit.distance;
+                    collisionPoint = _hit.point;
 
-                    //m_trueDistance = Mathf.Lerp(m_trueDistance, _hit.distance, Time.deltaTime * lerpVelocity * 2f);
-                    //Debug.Log (_hit.distance);
-                    //gizmoPoint = _hit.point;
+                    //cameraPivotTransform.position = _hit.point;
+                    cameraPivotTransform.position = Vector3.SmoothDamp(cameraPivotTransform.position, _hit.point, ref m_velocityCollisionCamSmooth, m_camSmoothCollisionDampTime);
+
                     m_terrainRaycastEntered = true;
                 }
                 #endregion
@@ -652,6 +681,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         {
             #region NO COLLISIONS
             m_colliderRend = null;
+
+            cameraPivotTransform.position = (Vector3.Distance(cameraPivotTransform.position, transform.position) > 0.05f) ?
+                Vector3.SmoothDamp(cameraPivotTransform.position, transform.position, ref m_velocityCollisionCamSmooth, m_camSmoothCollisionDampTime) :
+                cameraPivotTransform.position = transform.position;
 
             #endregion
         }
@@ -850,7 +883,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             if (norm == Vector3.zero)
                 return;
 
-            Vector3 cameraPosRelativeToPlayer = (cameraPivotTransform.position - characterMotion.transform.position).normalized;
+            Vector3 cameraPosRelativeToPlayer = (transform.position - characterMotion.transform.position).normalized;
             Vector3 vectorOnFacePlane = Vector3.Cross(cameraPosRelativeToPlayer, Vector3.up);
 
 

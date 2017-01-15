@@ -60,7 +60,7 @@ GameObject:
   m_Layer: 0
   m_Name: CameraPivot
   m_TagString: Untagged
-  m_Icon: {fileID: 1654036009018553494, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 5721338939258241955, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -312,8 +312,8 @@ MonoBehaviour:
   minDistToStartFadeCharacter: 2
   distanceToFullyDisappear: 1.2
   limitXAngle: 0
-  xAngleMin: -50
-  xAngleMax: 50
+  xAngleMin: -90
+  xAngleMax: -89
   yAngleMin: 0
   yAngleMax: 0
   yAngleMinToYawn: -20
@@ -344,13 +344,23 @@ MonoBehaviour:
   m_camSmoothDampTime: 0.2
   m_distanceUp: 3
   m_distanceAway: 8
+  m_startingAngleFromPlayer: 0
+  targetPosition: {x: 0, y: 0, z: 0}
+  lookAtPosition: {x: 0, y: 0, z: 0}
   startingDistance: 20
   m_currentXDis: 0
+  m_currentYDis: 0
   lookDirFactorRotation: 1
   lookDirDampTime: 0.1
   movementLookDirectionThreshold: 10
   m_targetXDistance: 6
   m_targetYDistance: 1
+  posRelativeToPlayer: {x: 0, y: 0, z: 0}
+  positionBeforeGliding: {x: 0, y: 0, z: 0}
+  followStartThreshold: 0.1
+  blockCameraMode: 0
+  m_rotDirection: {x: 0, y: 0, z: 0}
+  curLookDir: {x: 0, y: 0, z: 0}
 --- !u!114 &114886960839568128
 MonoBehaviour:
   m_ObjectHideFlags: 1
