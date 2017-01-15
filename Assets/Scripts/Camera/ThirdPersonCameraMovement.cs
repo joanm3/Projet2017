@@ -12,6 +12,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
     public Transform playerTransform;
     public CharacterMotion characterMotion;
+    public Camera cam;
     public bool useJoystick = false;
 
     [Header("Camera values")]
@@ -67,13 +68,16 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     public bool rotateCameraWithNormal = true;
     public float rotationIntensity = 1f;
     public float rotationLerp = 3f;
-    public Vector3 pivotRotation;
+    [SerializeField]
+    private Vector2 cameraLocalRotation;
+    private Vector3 pivotRotation;
     //[Header("dont activate for the moment, some issues to solve")]
     public bool AxisEqualsSurfaceAngle = true;
 
     [Header("Static Camera Values")]
     public Transform staticTransformPosition;
-
+    public enum LookAtType { player, forward, customTransform };
+    public LookAtType staticLookAtPosition = LookAtType.forward;
     private Transform m_transform;
     private Camera m_cam;
 
@@ -259,26 +263,32 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         #region Assign Camera Mode
         if (!blockCameraMode)
         {
-            if (Input.GetAxis("Target") > TARGETING_THRESHOLD)
-            {
-                cameraMode = CameraMode.Target;
 
-            }
-            else
+            if ((cameraMode != CameraMode.Static && cameraMode != CameraMode.Rail))
             {
-                //follow camera case
-                if ((Mathf.Abs(rightX) > followStartThreshold)) // || (Mathf.Abs(rightY) > followStartThreshold)) // && System.Math.Round(characterMotion.Speed, 2) == 0)
+                if (Input.GetAxis("Target") > TARGETING_THRESHOLD)
                 {
-                    cameraMode = CameraMode.Follow;
-                }
-
-                //orbit case
-                if ((cameraMode == CameraMode.Target && Input.GetAxis("Target") <= TARGETING_THRESHOLD))
-                {
-                    if (cameraMode != CameraMode.Orbit)
+                    if (cameraMode != CameraMode.Target)
                     {
-                        cameraMode = CameraMode.Orbit;
-                        characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Relative;
+                        cameraMode = CameraMode.Target;
+                    }
+                }
+                else
+                {
+                    //follow camera case
+                    if ((Mathf.Abs(rightX) > followStartThreshold)) // || (Mathf.Abs(rightY) > followStartThreshold)) // && System.Math.Round(characterMotion.Speed, 2) == 0)
+                    {
+                        cameraMode = CameraMode.Follow;
+                    }
+
+                    //orbit case
+                    if ((cameraMode == CameraMode.Target && Input.GetAxis("Target") <= TARGETING_THRESHOLD))
+                    {
+                        if (cameraMode != CameraMode.Orbit)
+                        {
+                            cameraMode = CameraMode.Orbit;
+                            characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Relative;
+                        }
                     }
                 }
             }
@@ -331,6 +341,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
                     }
 
+                    cameraLocalRotation = Vector3.zero;
                     characterForward = characterMotion.Forward;
                     characterUp = characterMotion.Up;
                     break;
@@ -373,6 +384,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                         // Debug.Log(targetPosition);
                     }
 
+                    cameraLocalRotation = Vector3.zero;
                     m_rotDirection = curLookDir;
                     currentX = GetAngleInDegFromVectors(transform.forward, -Vector3.forward);
                     characterForward = characterMotion.Forward;
@@ -384,17 +396,32 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             #region Static
             case CameraMode.Static:
                 {
-                    //do a lerp also here. 
-
                     if (staticTransformPosition != null)
                     {
                         targetPosition = staticTransformPosition.position;
                     }
                     else
+                        cameraMode = CameraMode.Follow;
+
+                    switch (staticLookAtPosition)
                     {
-                        cameraMode = CameraMode.Orbit;
+                        case LookAtType.player:
+                            lookAtPosition = playerTransform.position;
+                            break;
+                        case LookAtType.forward:
+                        //apply a customTransform behaviour
+                        case LookAtType.customTransform:
+                            cameraLocalRotation.x += rightY * joystickSpeed;
+                            cameraLocalRotation.y += rightX * joystickSpeed;
+
+                            cameraLocalRotation.y = Mathf.Clamp(cameraLocalRotation.y, -20f, 10f);
+                            cameraLocalRotation.x = Mathf.Clamp(cameraLocalRotation.x, -20f, 20f);
+                            lookAtPosition = staticTransformPosition.forward;
+                            break;
                     }
-                    lookAtPosition = playerTransform.position;
+
+
+
                     break;
                 }
             #endregion
@@ -410,8 +437,11 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                     // targetPosition = characterOffset + characterUp * distanceUp - characterForward * distanceAway;
 
                     targetPosition = playerTransform.position + characterUp * m_targetYDistance - characterForward * m_targetXDistance;
+                    cameraLocalRotation.y += rightY * joystickSpeed;
+                    cameraLocalRotation.x += rightX * joystickSpeed;
+                    cameraLocalRotation.y = Mathf.Clamp(cameraLocalRotation.y, -20f, 10f);
+                    cameraLocalRotation.x = Mathf.Clamp(cameraLocalRotation.x, -20f, 20f);
 
-                    //targetPosition = characterOffset + characterUp * distanceUp - rigToGoalDirection * distanceAway;
                 }
                 break;
                 #endregion
@@ -422,8 +452,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
         m_transform.position = Vector3.SmoothDamp(m_transform.position, targetPosition, ref m_velocityCamSmooth, m_camSmoothDampTime);
         m_transform.LookAt(lookAtPosition);
-
         cameraPivotTransform.localRotation = Quaternion.Slerp(cameraPivotTransform.localRotation, Quaternion.Euler(pivotRotation), lerpVelocity * Time.deltaTime);
+        cam.transform.localRotation = Quaternion.Slerp(cam.transform.localRotation, Quaternion.Euler(new Vector3(cameraLocalRotation.y, cameraLocalRotation.x)), lerpVelocity * Time.deltaTime);
 
     }
     private void OnDrawGizmos()
@@ -489,12 +519,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         m_currentXDis = minDistancePosition.x + m_tLerpDistance * maxDistancePosition.x;
         m_currentYDis = minDistancePosition.y + heightPositionByDistance.Evaluate(m_tLerpDistance) * maxDistancePosition.y;
 
-
-
         m_currentXDis = Mathf.Clamp(m_currentXDis, minDistancePosition.x, maxDistancePosition.x);
         m_currentYDis = Mathf.Clamp(m_currentYDis, minDistancePosition.y, maxDistancePosition.y);
-        Debug.LogFormat("x: {0}, hitX: {1}", m_currentXDis, hitXDistance);
-        Debug.LogFormat("y: {0}, hitY: {1}", m_currentYDis, hitYDistance);
+        //Debug.LogFormat("x: {0}, hitX: {1}", m_currentXDis, hitXDistance);
+        //Debug.LogFormat("y: {0}, hitY: {1}", m_currentYDis, hitYDistance);
 
     }
 

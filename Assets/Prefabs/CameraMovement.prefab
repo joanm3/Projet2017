@@ -267,9 +267,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a387ed186a45a16429d72d5af6571f53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraMode: 0
+  cameraMode: 1
   playerTransform: {fileID: 0}
   characterMotion: {fileID: 0}
+  cam: {fileID: 20188294762983464}
   useJoystick: 1
   minDistancePosition: {x: 8, y: 0.5}
   maxDistancePosition: {x: 30, y: 40}
@@ -331,9 +332,10 @@ MonoBehaviour:
   rotateCameraWithNormal: 1
   rotationIntensity: 1
   rotationLerp: 3
-  pivotRotation: {x: 0, y: 0, z: 0}
+  cameraLocalRotation: {x: 0, y: 0}
   AxisEqualsSurfaceAngle: 1
   staticTransformPosition: {fileID: 0}
+  staticLookAtPosition: 0
   m_lerpedHeight: 0
   m_trueDistance: 0
   m_colliderRend: {fileID: 0}
@@ -361,6 +363,7 @@ MonoBehaviour:
   blockCameraMode: 0
   m_rotDirection: {x: 0, y: 0, z: 0}
   curLookDir: {x: 0, y: 0, z: 0}
+  m_camSmoothCollisionDampTime: 0.2
 --- !u!114 &114886960839568128
 MonoBehaviour:
   m_ObjectHideFlags: 1
