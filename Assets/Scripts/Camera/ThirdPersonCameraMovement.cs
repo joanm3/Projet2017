@@ -227,7 +227,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         currentX = m_startingAngleFromPlayer;
         currentY = 90f;
         positionBeforeGliding = transform.position;
-        cameraMode = CameraMode.Orbit;
+        if (!blockCameraMode)
+            cameraMode = CameraMode.Orbit;
         hitLerpPos = -1f;
         collisionPoint = Vector3.one * 100f;
     }
@@ -315,6 +316,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                     m_rotDirection = RotateCameraWithSurfaceAxis(ref m_rotationWithNormals, m_rotation, m_normalRotation, -Vector3.forward);
                     //check later the characterMotion.Up if its the best value. or better to use vector3.up 
 
+                    //behaviour when gliding. 
                     if (characterMotion.characterState == CharacterMotion.CharacterState.Gliding
                         || (characterMotion.characterState == CharacterMotion.CharacterState.StrongGliding)
                         || (characterMotion.characterState == CharacterMotion.CharacterState.GoingDown))
@@ -327,9 +329,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                         //temporary, find other solution
                         //should be the angle to look. 
                         currentX = GetAngleInDegFromVectors(transform.forward, -Vector3.forward);
-                        targetPosition = transform.position;
+                        ///targetPosition = transform.position;
 
                         //prova a que sigui igual a la posicio del player  - vector3.forward * distancia
+                        targetPosition = playerTransform.position + Vector3.up * m_currentYDis - m_rotDirection * m_currentXDis;
 
                     }
                     else

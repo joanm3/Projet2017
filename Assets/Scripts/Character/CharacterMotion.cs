@@ -146,6 +146,8 @@ public class CharacterMotion : MonoBehaviour
         m_surfaceAngle = 0f;
         m_characterDirection = m_characterForward;
         m_inputRotation = transform.rotation;
+        if (m_cam == null)
+            m_cam = Camera.main;
     }
 
     private void Update()
@@ -194,19 +196,19 @@ public class CharacterMotion : MonoBehaviour
         // if(characterMovementType == CharacterMovementType.Relative)
         m_inputRotation = UpdateInputRotation(m_inputRotation, m_inputDeltaHeadingAngleInDeg);
         //edit this to solve some problems. for the moment using the world up!!! change it but resolve porblems. 
-        m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, Vector3.up, 1f) : false;
+        m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, Up, 1f) : false;
         #endregion
 
         #region GET CURRENT SURFACE VALUES
         //we should calculate only when changing surface: lastsurface != currentSurface
         if (m_isGrounded)
         {
-            m_surfaceNormal = UpdateSurfaceNormalByRaycast(out m_surfaceHit, transform.up, 10f);
-            m_upSurfaceNormal = UpdateSurfaceNormalByRaycast(out m_upHit, Vector3.up, 1f);
+            m_surfaceNormal = UpdateSurfaceNormalByRaycast(out m_surfaceHit, Up, 10f);
+            m_upSurfaceNormal = UpdateSurfaceNormalByRaycast(out m_upHit, -m_gravVector.normalized, 1f);
         }
         else
         {
-            m_surfaceNormal = Vector3.up;
+            m_surfaceNormal = -m_gravVector.normalized;
         }
 
         m_normalRotation = GetRotationByNormal2(m_inputRotation, m_surfaceNormal);
@@ -295,12 +297,16 @@ public class CharacterMotion : MonoBehaviour
             if (characterState != CharacterState.Jumping || m_fallVector.y < -0.1f)
                 characterState = CharacterState.Falling;
         }
+        #endregion
 
+
+        #region Character State Behaviours
         switch (characterState)
         {
             case CharacterState.Idle:
             case CharacterState.Walking:
             case CharacterState.Running:
+            case CharacterState.Stopping:
                 {
                     OnGroundUpdate();
                     break;
@@ -332,7 +338,6 @@ public class CharacterMotion : MonoBehaviour
         #endregion
 
 
-
         #region CHARACTER MOTION
 
         switch (characterMovementType)
@@ -344,8 +349,8 @@ public class CharacterMotion : MonoBehaviour
                     transform.rotation = m_inputRotation;
 
                 UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
-                Vector3 _characterMotionA = ((m_characterDirection * m_characterSpeed)) + m_fallVector;
-                m_controller.Move(_characterMotionA * _dt);
+                Vector3 _characterMotion = ((m_characterDirection * m_characterSpeed)) + m_fallVector;
+                m_controller.Move(_characterMotion * _dt);
                 break;
             case CharacterMovementType.NoMovement:
                 break;
@@ -405,7 +410,7 @@ public class CharacterMotion : MonoBehaviour
         //this bugs when the angle of the surface is big and the character doesnt snap properly!! (problem with upHitPoint). 
         //transform.position = m_upHitPoint; 
         //try maybe with the renderer, but then the collider needs to be reposition and this causes problems. 
-        //m_characterRenderer.position = m_upHitPoint;
+        m_characterRenderer.position = m_upHitPoint;
     }
 
     private void OnAirUpdate(float deltaTime)
@@ -595,8 +600,9 @@ public class CharacterMotion : MonoBehaviour
 
     private Quaternion UpdateInputRotation(Quaternion rotation, float deltaAngleInDegrees)
     {
-
+        m_tMove = GFunctions.NormalizedRangeValue(Speed, 0f, velMax);
         float _currentRotationSpeed = ((m_maxRotSpeed - m_minRotSpeed) * m_rotationBySpeed.Evaluate(m_tMove)) + m_minRotSpeed;
+        //Debug.LogFormat("speedValue:{0}, rotSpeed:{1}", m_tMove, _currentRotationSpeed);
         Quaternion _headingDelta = Quaternion.AngleAxis(deltaAngleInDegrees, transform.up);
         Quaternion _rRot = Quaternion.RotateTowards(rotation, _headingDelta, _currentRotationSpeed * Time.deltaTime);
 

@@ -30,7 +30,7 @@ public class CharacterMotionEditor : Editor
     private readonly CProperty AIR_GRAV_FORCE = new CProperty("m_airGravForce", "Air Gravity Force");
     private readonly CProperty AIR_CURVE = new CProperty("m_gravForceOverTime", "Air Gravity Curve");
     private readonly CProperty AIR_JUMP_FORCE = new CProperty("m_jumpForce", "Jump Force");
-    private readonly CProperty AIR_GRAV_VECTOR = new CProperty("m_gravVector", "Gravity Direction");
+    private readonly CProperty AIR_GRAV_VECTOR = new CProperty("m_gravVector", "Gravity Vector");
     private readonly CProperty AIR_GRAV_INPUT = new CProperty("m_inputGravityMultiplier", "Air Stop Input Multiplier (not applied yet)");
     private readonly CProperty AIR_TIME_COOLDOWN = new CProperty("m_tJumpCooldown", "Time between jumps");
 
