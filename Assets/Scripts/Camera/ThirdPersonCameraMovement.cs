@@ -328,7 +328,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                         //float _distanceFromBeforeGliding = Vector3.Distance(transform.position, positionBeforeGliding); 
                         //temporary, find other solution
                         //should be the angle to look. 
-                        currentX = GetAngleInDegFromVectors(transform.forward, -Vector3.forward);
+                        //currentX = GetAngleInDegFromVectors(transform.forward, -Vector3.forward);
                         ///targetPosition = transform.position;
 
                         //prova a que sigui igual a la posicio del player  - vector3.forward * distancia
@@ -538,7 +538,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         }
         if (Mathf.Abs(currentY) >= 360)
         {
-            currentX = 0f;
+            currentY = 0f;
         }
 
 

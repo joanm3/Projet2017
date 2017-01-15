@@ -233,25 +233,25 @@ public class CharacterMotion : MonoBehaviour
         m_characterForward = m_characterRotation * Vector3.forward;
         m_characterUp = m_characterRotation * Vector3.up;
         m_characterRight = m_characterRotation * Vector3.right;
+        #endregion
 
-        m_characterCurrentForwardAngleFromGroundZero = GetCharacterForwardAngleFromGroundZero(m_characterForward);
-        //Debug.Log(m_characterCurrentForwardAngleFromGroundZero); 
+        #region FORCES
         m_characterSpeed = m_characterCurrentSpeed;
         m_characterAngleInDegFromSurfaceTang = Vector3.Angle(m_characterForward, m_surfaceTangDownwardsNormalized);
+        m_characterCurrentForwardAngleFromGroundZero = GetCharacterForwardAngleFromGroundZero(m_characterForward);
 
+        //this was used to calculate velmax using force, now we use the velMax to calculate the force to apply. 
         //velMax = VelMax(massPlayer, maxForce, friction);
         m_maxForce = GetMaxForce(friction, velMax, massPlayer);
         m_gravForce = GetGravityFromInflectionAngle(FallInflectionAngle, m_maxForce, massPlayer);
-        m_surfaceCurrentDescentForce = GetAngleForce(m_gravForce, m_characterCurrentForwardAngleFromGroundZero, massPlayer);
+        m_surfaceCurrentDescentForce = (m_characterAngleInDegFromSurfaceTang < 90f) ? GetAngleForce(m_gravForce, m_characterCurrentForwardAngleFromGroundZero, massPlayer) : -m_surfaceAngle;
         m_inputCurrentForce = UpdateInputForce(m_maxForce, m_inputMagnitude);
-        //m_inputCurrentSpeed += CalculateDeltaVel(out m_currentTotalForce, _dt);
         m_characterCurrentSpeed = UpdateInputSpeed(ref m_currentTotalForce, m_characterCurrentSpeed, _dt);
-
-
         #endregion
 
 
-        #region GET CHARACTER STATE
+
+        #region ASSIGN CHARACTER STATE
         if (m_isGrounded)
         {
             //When in standard surface
@@ -305,7 +305,7 @@ public class CharacterMotion : MonoBehaviour
         #endregion
 
 
-        #region Character State Behaviours
+        #region CHARACTER STATE BEHAVIOURS
         switch (characterState)
         {
             case CharacterState.Idle:
@@ -346,8 +346,6 @@ public class CharacterMotion : MonoBehaviour
 
         #region CHARACTER MOTION
 
-        //Debug.Log("surf.Angle: " + m_surfaceAngle);
-
         switch (characterMovementType)
         {
             case CharacterMovementType.Relative:
@@ -361,6 +359,7 @@ public class CharacterMotion : MonoBehaviour
 
                 UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
                 Vector3 _characterMotion = ((m_characterDirection * m_characterSpeed)) + m_fallVector;
+                //Debug.Log("direction: " + (m_characterDirection * m_characterSpeed) + "fallVector:" + m_fallVector + "motion: " + _characterMotion);
                 m_controller.Move(_characterMotion * _dt);
                 break;
             case CharacterMovementType.NoMovement:
