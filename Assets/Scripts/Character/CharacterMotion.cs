@@ -58,10 +58,15 @@ public class CharacterMotion : MonoBehaviour
         get { return m_surfaceTangDownwardsNormalized; }
         private set { m_surfaceTangDownwardsNormalized = value; }
     }
+    [SerializeField]
     private float m_surfaceAngle;
 
     //raycast
     private RaycastHit m_surfaceHit;
+    public RaycastHit SurfaceHit
+    {
+        get { return m_surfaceHit; }
+    }
     private RaycastHit m_upHit;
     private Vector3 m_surfaceHitCharacterPosition;
     private Vector3 m_upHitPoint;
@@ -227,7 +232,14 @@ public class CharacterMotion : MonoBehaviour
 
             //m_surfaceAngle = ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, Vector3.up) : 0f);
             m_surfaceTangDownwardsNormalized = GetSurfaceTangentDownwards(m_surfaceNormal, m_surfaceHit.point);
-            if (m_surfaceTangDownwardsNormalized != Vector3.zero) m_glidingVector = -m_surfaceTangDownwardsNormalized;
+
+
+            //this is not exactly correct, find a better way to assign GLIDING VECTOR GLIDING VECTOR GLIDING VECTOR 
+            if (m_surfaceTangDownwardsNormalized != Vector3.zero &&
+                (characterState == CharacterState.Gliding || characterState == CharacterState.StrongGliding))
+            {
+                m_glidingVector = -m_surfaceTangDownwardsNormalized;
+            }
             m_lastSurfaceNormal = m_surfaceNormal;
         }
         #endregion
@@ -248,7 +260,9 @@ public class CharacterMotion : MonoBehaviour
         //velMax = VelMax(massPlayer, maxForce, friction);
         m_maxForce = GetMaxForce(friction, velMax, massPlayer);
         m_gravForce = GetGravityFromInflectionAngle(FallInflectionAngle, m_maxForce, massPlayer);
-        m_surfaceCurrentDescentForce = (m_characterAngleInDegFromSurfaceTang < 90f) ? GetAngleForce(m_gravForce, m_characterCurrentForwardAngleFromGroundZero, massPlayer) : -m_surfaceAngle;
+        m_surfaceCurrentDescentForce = (m_characterAngleInDegFromSurfaceTang < 90f) ?
+            GetAngleForce(m_gravForce, m_characterCurrentForwardAngleFromGroundZero, massPlayer) :
+            GetAngleForce(m_gravForce, m_surfaceAngle, massPlayer);
         m_inputCurrentForce = UpdateInputForce(m_maxForce, m_inputMagnitude);
         m_characterCurrentSpeed = UpdateInputSpeed(ref m_currentTotalForce, m_characterCurrentSpeed, _dt);
         m_characterSpeed = m_characterCurrentSpeed;
@@ -459,7 +473,14 @@ public class CharacterMotion : MonoBehaviour
 
         if (Vector3.Distance(transform.position, m_surfaceHitCharacterPosition) >= 0.1f)
         {
-            transform.position = m_surfaceHitCharacterPosition;
+            if (characterState != CharacterState.Gliding && characterState != CharacterState.StrongGliding)
+            {
+                if (m_surfaceAngle < 45f)
+                {
+                    Debug.Log("snapping");
+                    transform.position = m_surfaceHitCharacterPosition;
+                }
+            }
         }
     }
 
@@ -574,12 +595,13 @@ public class CharacterMotion : MonoBehaviour
 
     private void UpdateCharacterDirection(ref Vector3 directionVector, float deltaTime)
     {
+
+        //check all this function it creates bugs. 
         if (Mathf.Sign(Speed) < 0f)
         {
-
-            Debug.Log("speed smaller than zero");
             directionVector = m_glidingVector;
-            Debug.Log(m_glidingVector);
+            //Debug.Log("using gliding vector:");
+            //directionVector = m_characterForward;
             //directionVector = Vector3.MoveTowards(directionVector, -m_surfaceTangDownwardsNormalized, deltaTime);
         }
         else
@@ -636,6 +658,7 @@ public class CharacterMotion : MonoBehaviour
         Vector3 inputVector = (Vector3.forward * Input.GetAxis("Vertical"))
         + (Vector3.right * Input.GetAxis("Horizontal"));
         return inputVector.magnitude;
+
     }
 
     private float GetAngleInDegFromVectors(Vector3 direction, Vector3 worldVector)

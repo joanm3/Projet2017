@@ -13,7 +13,7 @@ public class CharacterMotionEditor : Editor
 
     //character
     private readonly CProperty CHAR_STATE = new CProperty("characterState", "Character State");
-    private readonly CProperty CHAR_MOV_TYPE = new CProperty("characterMovementType", "Movement Type"); 
+    private readonly CProperty CHAR_MOV_TYPE = new CProperty("characterMovementType", "Movement Type");
 
     //references
     private readonly CProperty CAM = new CProperty("m_cam", "Camera");
@@ -24,6 +24,7 @@ public class CharacterMotionEditor : Editor
     private readonly CProperty MAX_ROT_SPEED = new CProperty("m_maxRotSpeed", "Max Rotation Speed");
     private readonly CProperty MIN_ROT_SPEED = new CProperty("m_minRotSpeed", "Min Rotation Speed");
     private readonly CProperty CURVE_ROT_SPEED = new CProperty("m_rotationBySpeed", "Rotation Speed Curve");
+
 
     //air
     private readonly CProperty AIR_GROUNDED = new CProperty("m_isGrounded", "Is Grounded?");
@@ -53,6 +54,7 @@ public class CharacterMotionEditor : Editor
     private readonly CProperty INPUT_CURR_FORCE = new CProperty("m_inputCurrentForce", "Input Current Force");
     private readonly CProperty SUF_DESC_FORCE = new CProperty("m_surfaceCurrentDescentForce", "Surface Descent Force");
     private readonly CProperty TOTAL_FORCE = new CProperty("m_currentTotalForce", "TOTAL Force");
+    private readonly CProperty SURFACE_ANGLE = new CProperty("m_surfaceAngle", "Surface Angle");
 
     private static bool _showCustomInspector = true;
     private static bool _showReferences;
@@ -103,7 +105,7 @@ public class CharacterMotionEditor : Editor
         _showMovement = EditorGUILayout.Foldout(_showMovement, "Movement");
         if (_showMovement)
         {
-            p.DisplayField(CHAR_MOV_TYPE); 
+            p.DisplayField(CHAR_MOV_TYPE);
             p.DisplayField(CURVE_ROT_SPEED);
             p.DisplayField(START_RUNNING);
             p.DisplayField(MAX_ROT_SPEED);
@@ -146,6 +148,7 @@ public class CharacterMotionEditor : Editor
             p.DisplayField(CHAR_CURR_SPEED);
             p.DisplayField(SURF_GRAV_FORCE);
             p.DisplayField(CHAR_MAX_FORCE);
+            p.DisplayField(SURFACE_ANGLE);
             p.DisplayField(INPUT_CURR_FORCE);
             p.DisplayField(SUF_DESC_FORCE);
             p.DisplayField(TOTAL_FORCE);

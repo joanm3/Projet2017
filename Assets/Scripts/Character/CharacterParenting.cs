@@ -1,50 +1,62 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CharacterParenting : MonoBehaviour {
-	
-	[Header("Ce script sert à synchroniser le joueur sur les mouvements du membre sur lequel il se trouve.")]
+public class CharacterParenting : MonoBehaviour
+{
 
-	//public fonctions for characterV3.
-	/*
+    [Header("Ce script sert à synchroniser le joueur sur les mouvements du membre sur lequel il se trouve.")]
+    public CharacterMotion characterMotion;
+    //public fonctions for characterV3.
+    /*
 	 * 1 - it makes the player child of the surface he is currently colliding
 	 * 2 - it ressets its rotation so it not wiggle with his parent
 	 * 
 	 */
 
-	//TODO Upgrade this script by using the uv coordinates instead of parenting ?
 
-	[Tooltip("Empeche le parent de changer la rotation du joueur (càd force le joueur à être vertical)")]
-	public bool resetPlayerVerticality = true;
+    //TODO Upgrade this script by using the uv coordinates instead of parenting ?
 
-	public BoneColliderLink[] links;
+    [Tooltip("Empeche le parent de changer la rotation du joueur (càd force le joueur à être vertical)")]
+    public bool resetPlayerVerticality = false;
 
-	public void SetPlayerParent (Transform characterTransform, RaycastHit rayhit)
-	{
+    public BoneColliderLink[] links;
+
+    public void SetPlayerParent(Transform characterTransform, RaycastHit rayhit)
+    {
 
         if (rayhit.collider == null)
-            return; 
+            return;
 
-		//Compare le collider sur lequel on a les pieds avec tous les colliders de la liste
-		for (int i = 0; i < links.Length; i++)
-		{
-			//Lorsqu'on trouve le collider, on récupère le bone auquel il est link
-			if(rayhit.collider.transform == links[i].myCollider)
-			{
-				characterTransform.parent = links[i].myBone;
-//				print(transform.parent.name);
-				break;
-			}else{
-				characterTransform.parent = null;
-			}
-		}
-	
-		if(resetPlayerVerticality)
-		{
-			characterTransform.rotation = Quaternion.LookRotation(characterTransform.forward, Vector3.up);
-		}
+        //Compare le collider sur lequel on a les pieds avec tous les colliders de la liste
+        for (int i = 0; i < links.Length; i++)
+        {
+            //Lorsqu'on trouve le collider, on récupère le bone auquel il est link
+            if (rayhit.collider.transform == links[i].myCollider)
+            {
+                characterTransform.parent = links[i].myBone;
+                //				print(transform.parent.name);
+                break;
+            }
+            else {
+                characterTransform.parent = null;
+            }
+        }
 
-	}
+        if (resetPlayerVerticality)
+        {
+            characterTransform.rotation = Quaternion.LookRotation(characterTransform.forward, Vector3.up);
+        }
+
+    }
+
+
+    void Update()
+    {
+        if (characterMotion != null)
+        {
+            SetPlayerParent(characterMotion.transform, characterMotion.SurfaceHit);
+        }
+    }
 
 }
 
@@ -54,8 +66,8 @@ public class CharacterParenting : MonoBehaviour {
 [System.Serializable]
 public class BoneColliderLink
 {
-	public string name;
-	public Transform myCollider;
-	public Transform myBone;
+    public string name;
+    public Transform myCollider;
+    public Transform myBone;
 
 }

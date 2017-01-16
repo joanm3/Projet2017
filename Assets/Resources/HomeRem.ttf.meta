@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 3355e31fe0d0b7044bd96641d8adc182
+timeCreated: 1483813127
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Home Remedy
+  fontNames:
+  - Home Remedy
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

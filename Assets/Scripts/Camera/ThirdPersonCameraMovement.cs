@@ -590,7 +590,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 m_terrainRaycastEntered = false;
                 //gizmoPoint = _hit.point;
                 m_colliderRend = GetRendererFromCollision(_hit);
-                if (m_colliderRend.enabled)
+                if (m_colliderRend != null && m_colliderRend.enabled)
                 {
                     if (!obstacleRenderers.Contains(m_colliderRend)) obstacleRenderers.Add(m_colliderRend);
                     for (int i = 0; i < obstacleRenderers.Count; i++)
@@ -613,8 +613,9 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                     collisionPoint = _hit.point;
 
 
+                    //cameraPivotTransform.position = Vector3.SmoothDamp(cameraPivotTransform.position, _hit.point, ref m_velocityCollisionCamSmooth, m_camSmoothCollisionDampTime);
 
-                    cameraPivotTransform.position = Vector3.SmoothDamp(cameraPivotTransform.position, _hit.point, ref m_velocityCollisionCamSmooth, m_camSmoothCollisionDampTime);
+                    cameraPivotTransform.position = _hit.point + (transform.forward);
 
                     m_obstacleRaycastEntered = true;
                 }
@@ -694,8 +695,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 {
                     collisionPoint = _hit.point;
 
-                    //cameraPivotTransform.position = _hit.point;
-                    cameraPivotTransform.position = Vector3.SmoothDamp(cameraPivotTransform.position, _hit.point, ref m_velocityCollisionCamSmooth, m_camSmoothCollisionDampTime);
+                    cameraPivotTransform.position = _hit.point + (transform.forward);
+                    //cameraPivotTransform.position = Vector3.SmoothDamp(cameraPivotTransform.position, _hit.point, ref m_velocityCollisionCamSmooth, m_camSmoothCollisionDampTime);
 
                     m_terrainRaycastEntered = true;
                 }
@@ -936,13 +937,26 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         }
     }
 
+
+    //change this renderer for an array of renderers!!!
     public static Renderer GetRendererFromCollision(RaycastHit hit)
     {
         Renderer _colliderRend = (Renderer)hit.collider.GetComponent<MeshRenderer>();
         if (_colliderRend == null)
-            _colliderRend = (Renderer)hit.collider.GetComponent<MeshRenderer>();
-        if (_colliderRend == null)
             _colliderRend = (Renderer)hit.collider.GetComponent<SkinnedMeshRenderer>();
+        if (_colliderRend == null)
+            _colliderRend = (Renderer)hit.collider.GetComponent<Renderer>();
+
+        if (_colliderRend == null)
+            _colliderRend = (Renderer)hit.collider.GetComponentInChildren<MeshRenderer>();
+        if (_colliderRend == null)
+            _colliderRend = (Renderer)hit.collider.GetComponentInChildren<SkinnedMeshRenderer>();
+        if (_colliderRend == null)
+            _colliderRend = (Renderer)hit.collider.GetComponentInChildren<Renderer>();
+
+        if (_colliderRend == null)
+            Debug.LogError("collider renderer not found", hit.collider);
+
         return _colliderRend;
     }
 
