@@ -222,7 +222,8 @@ public class CharacterMotion : MonoBehaviour
         if (m_lastSurfaceNormal != m_surfaceNormal)
         {
             //Debug.LogFormat("surfaceNormal:{0}, up:{0}", m_surfaceNormal, Up);
-            m_surfaceAngle = ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, -m_gravVector.normalized) : FallInflectionAngle);
+            m_surfaceAngle = ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, -m_gravVector.normalized) : 0f);
+
 
             //m_surfaceAngle = ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, Vector3.up) : 0f);
             m_surfaceTangDownwardsNormalized = GetSurfaceTangentDownwards(m_surfaceNormal, m_surfaceHit.point);
@@ -356,7 +357,7 @@ public class CharacterMotion : MonoBehaviour
             case CharacterMovementType.NoInput:
                 if (characterMovementType == CharacterMovementType.Relative)
                 {
-                    transform.rotation = Quaternion.Euler(m_gravVector);
+                    transform.rotation = Quaternion.Euler(Vector3.zero);
                     m_characterRenderer.rotation = Quaternion.Euler(0f, m_inputDeltaHeadingAngleInDeg, 0f);
                 }
 
