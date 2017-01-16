@@ -69,7 +69,7 @@ public class CharacterMotion : MonoBehaviour
     //gravity
     [SerializeField]
     private bool m_isGrounded = false;
-    private Vector3 m_jumpVector;
+    private Vector3 m_fallVec;
     private Vector3 m_fallVector;
     [SerializeField]
     private float m_airGravForce = 100f;
@@ -362,7 +362,9 @@ public class CharacterMotion : MonoBehaviour
                 }
 
                 UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
-                Vector3 _characterMotion = (m_characterDirection * m_characterSpeed) + (m_verticalSpeed * Vector3.up);
+                //Vector3 _characterMotion = (m_characterDirection * m_characterSpeed) + (m_verticalSpeed * Vector3.up);
+                Vector3 _characterMotion = (m_characterDirection * m_characterSpeed) + m_fallVec;
+
                 //Debug.Log("direction: " + (m_characterDirection * m_characterSpeed) + "fallVector:" + m_fallVector + "motion: " + _characterMotion);
                 m_controller.Move(_characterMotion * _dt);
                 break;
@@ -430,24 +432,23 @@ public class CharacterMotion : MonoBehaviour
         m_inputGravityMultiplier = 1f;
         if (m_tGrav >= m_tJumpCooldown)
         {
-            m_jumpVector = Vector3.zero;
+            m_fallVec = Vector3.zero;
             m_fallVector = Vector3.zero;
         }
 
         m_surfaceHitCharacterPosition = GetSnapPositionByHitPoint(m_collisionPoint);
         m_upHitPoint = GetSnapPositionByHitPoint(m_upHit.point);
-        //this bugs when the angle of the surface is big and the character doesnt snap properly!! (problem with upHitPoint). 
-        //transform.position = m_upHitPoint; 
-        //try maybe with the renderer, but then the collider needs to be reposition and this causes problems. 
-        //transform.position = m_upHitPoint;
-        //Debug.Log("surfaceHitPosition: " + m_surfaceHitCharacterPosition);
-        //m_characterRenderer.position = m_upHitPoint;
+
+        if (Vector3.Distance(transform.position, m_surfaceHitCharacterPosition) >= 0.1f)
+        {
+            transform.position = m_surfaceHitCharacterPosition;
+        }
     }
 
     private void OnAirUpdate(float deltaTime)
     {
         m_verticalSpeed += -m_gravForce * deltaTime;
-
+        m_fallVec += -m_gravForce * -m_gravVector * deltaTime;
         //test
         m_inputVector = Vector3.zero;
         m_gravForceVector = m_gravVector * m_airGravForce;
@@ -465,12 +466,9 @@ public class CharacterMotion : MonoBehaviour
     private void Jump(Vector3 surfaceNormal)
     {
         m_isGrounded = false;
-        m_verticalSpeed = m_jumpForce; //m_characterInitialJumpSpeed;
-
-
-
+        m_fallVec = (Vector3.up + (surfaceNormal * 0.5f)).normalized * m_jumpForce; //m_characterInitialJumpSpeed;
         //m_jumpVector = (Vector3.up + (surfaceNormal * 0.5f)).normalized * m_jumpForce;
-        Debug.Log("Jump Vector: " + m_jumpVector);
+        Debug.Log("Jump Vector: " + m_fallVec);
     }
     #endregion
 
@@ -652,7 +650,7 @@ public class CharacterMotion : MonoBehaviour
 
     private Vector3 GetSnapPositionByHitPoint(Vector3 point)
     {
-        return point - (-transform.up * (m_controller.bounds.extents.y));
+        return point - (-transform.up * (m_controller.bounds.extents.y + 0.1f));
     }
 
     private Vector3 UpdateSurfaceNormalByRaycast(out RaycastHit hitInfo, Vector3 rayDirection, float distance)

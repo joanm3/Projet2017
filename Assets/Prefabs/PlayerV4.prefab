@@ -427,7 +427,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 0
   m_isGrounded: 0
-  m_airGravForce: 30
+  m_airGravForce: 9.8
   m_gravForceOverTime:
     serializedVersion: 2
     m_Curve:
@@ -446,7 +446,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
-  m_jumpForce: 100
+  m_jumpForce: 30
   m_gravVector: {x: -0, y: -1, z: -0}
   m_inputGravityMultiplier: 1
   m_tJumpCooldown: 0.2
@@ -465,6 +465,7 @@ MonoBehaviour:
   m_inputCurrentForce: 0
   m_surfaceCurrentDescentForce: 0
   m_currentTotalForce: 0
+  m_characterInitialJumpSpeed: 1
 --- !u!143 &143725867177485170
 CharacterController:
   m_ObjectHideFlags: 1
