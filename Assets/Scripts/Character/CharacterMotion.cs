@@ -227,6 +227,7 @@ public class CharacterMotion : MonoBehaviour
 
             //m_surfaceAngle = ((m_isGrounded) ? Vector3.Angle(m_surfaceNormal, Vector3.up) : 0f);
             m_surfaceTangDownwardsNormalized = GetSurfaceTangentDownwards(m_surfaceNormal, m_surfaceHit.point);
+            if (m_surfaceTangDownwardsNormalized != Vector3.zero) m_glidingVector = -m_surfaceTangDownwardsNormalized;
             m_lastSurfaceNormal = m_surfaceNormal;
         }
         #endregion
@@ -412,6 +413,23 @@ public class CharacterMotion : MonoBehaviour
 
     }
 
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (characterState == CharacterState.Falling || characterState == CharacterState.Jumping)
+        {
+            //get the 
+            //hit.point
+            //then see if the point is under the player
+            //if true then change to grounded
+            //apply the surface normal with hit.normal. 
+            //check the raycasts.  
+            m_surfaceNormal = hit.normal;
+
+            Debug.Log("collision while falling");
+        }
+
+    }
+
     #endregion
 
     #region BEHAVIOURS
@@ -552,20 +570,24 @@ public class CharacterMotion : MonoBehaviour
         return fMax / (mass * Mathf.Sin(angleInDeg * Mathf.Deg2Rad));
     }
 
+    Vector3 m_glidingVector;
+
     private void UpdateCharacterDirection(ref Vector3 directionVector, float deltaTime)
     {
-        if (m_inputCurrentForce < Mathf.Abs(m_surfaceCurrentDescentForce))
+        if (Mathf.Sign(Speed) < 0f)
         {
-            //directionVector = m_surfaceTangDownwardsNormalized;
 
+            Debug.Log("speed smaller than zero");
+            directionVector = m_glidingVector;
+            Debug.Log(m_glidingVector);
             //directionVector = Vector3.MoveTowards(directionVector, -m_surfaceTangDownwardsNormalized, deltaTime);
         }
         else
         {
             //directionVector = Vector3.MoveTowards(directionVector, m_characterForward, deltaTime);
-            //directionVector = m_characterForward;
+            directionVector = m_characterForward;
         }
-        directionVector = m_characterForward;
+        //directionVector = m_characterForward;
 
     }
 
