@@ -391,7 +391,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                         // Debug.Log(targetPosition);
                     }
 
-                    cameraLocalRotation = Vector3.zero;
+                    //cameraLocalRotation = Vector3.zero;
                     m_rotDirection = curLookDir;
                     currentX = GetAngleInDegFromVectors(transform.forward, -Vector3.forward);
                     characterForward = characterMotion.Forward;

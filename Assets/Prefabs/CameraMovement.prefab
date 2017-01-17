@@ -307,6 +307,7 @@ MonoBehaviour:
   obstacleRenderers: []
   playerRenderers: []
   m_distanceToYawn: 0
+  m_sphereCastRadiusForFadingObjects: 8
   m_camSmoothDampTime: 0.2
   m_distanceUp: 3
   m_distanceAway: 8
@@ -324,7 +325,7 @@ MonoBehaviour:
   posRelativeToPlayer: {x: 0, y: 0, z: 0}
   positionBeforeGliding: {x: 0, y: 0, z: 0}
   followStartThreshold: 0.1
-  blockCameraMode: 1
+  blockCameraMode: 0
   m_rotDirection: {x: 0, y: 0, z: 0}
   curLookDir: {x: 0, y: 0, z: 0}
   m_camSmoothCollisionDampTime: 0.1
