@@ -236,7 +236,7 @@ public class CharacterMotion : MonoBehaviour
 
             //this is not exactly correct, find a better way to assign GLIDING VECTOR GLIDING VECTOR GLIDING VECTOR 
             if (m_surfaceTangDownwardsNormalized != Vector3.zero &&
-                (characterState == CharacterState.Gliding || characterState == CharacterState.StrongGliding))
+                (m_surfaceAngle > StartForcesAngle))
             {
                 m_glidingVector = -m_surfaceTangDownwardsNormalized;
             }
@@ -266,6 +266,10 @@ public class CharacterMotion : MonoBehaviour
         m_inputCurrentForce = UpdateInputForce(m_maxForce, m_inputMagnitude);
         m_characterCurrentSpeed = UpdateInputSpeed(ref m_currentTotalForce, m_characterCurrentSpeed, _dt);
         m_characterSpeed = m_characterCurrentSpeed;
+        if (!Glide && m_characterSpeed < 0f && m_surfaceAngle < FallInflectionAngle)
+        {
+            m_characterSpeed = 0f;
+        }
         #endregion
 
 
@@ -524,7 +528,10 @@ public class CharacterMotion : MonoBehaviour
         //Debug.Log(frictionForce);
         //is angle is smaller than start forces, dont apply surfacedescentforce
         //CHANGE HERE TO STOP THE GLIDING LOOP when changing from one surface to another. 
-        currentTotalForce = (StartForcesAngle < m_surfaceAngle) && (Glide) ? m_inputCurrentForce + frictionForce + (m_surfaceCurrentDescentForce) : m_inputCurrentForce + frictionForce;
+        currentTotalForce = (StartForcesAngle < m_surfaceAngle) ? m_inputCurrentForce + frictionForce + (m_surfaceCurrentDescentForce) : m_inputCurrentForce + frictionForce;
+
+
+
 
         //force = mass * acc
         float acc = currentTotalForce / massPlayer;
