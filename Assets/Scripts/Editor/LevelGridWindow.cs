@@ -36,6 +36,9 @@ public class LevelGridWindow : EditorWindow
 
     private void EventHandler(SceneView sceneview)
     {
+        if (LevelGrid.Ins == null)
+            return;
+
         _transformSelected = (Selection.activeTransform != null);
 
         if (Selection.activeTransform != null)
