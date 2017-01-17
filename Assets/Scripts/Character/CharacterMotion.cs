@@ -435,14 +435,9 @@ public class CharacterMotion : MonoBehaviour
     {
         if (characterState == CharacterState.Falling || characterState == CharacterState.Jumping)
         {
-            //get the 
-            //hit.point
-            //then see if the point is under the player
-            //if true then change to grounded
-            //apply the surface normal with hit.normal. 
-            //check the raycasts.  
-            m_surfaceNormal = hit.normal;
 
+            //fall vector has to have the direction of the tang downwards of the point!
+            m_gravFallingVector = GetSurfaceTangentDownwards(hit.normal, hit.point);
             Debug.Log("collision while falling");
         }
 
@@ -454,7 +449,7 @@ public class CharacterMotion : MonoBehaviour
 
     private void OnGroundUpdate()
     {
-
+        m_gravFallingVector = m_gravVector;
         m_verticalSpeed = 0f;
 
         if (Input.GetButtonDown("Jump"))
@@ -488,13 +483,15 @@ public class CharacterMotion : MonoBehaviour
         }
     }
 
+    private Vector3 m_gravFallingVector;
+
     private void OnAirUpdate(float deltaTime)
     {
-        m_verticalSpeed += -m_gravForce * deltaTime;
-        m_fallVec += -m_gravForce * -m_gravVector * deltaTime;
+        //m_verticalSpeed += -m_gravForce * deltaTime;
+        m_fallVec += -m_gravForce * -m_gravFallingVector * deltaTime;
+        Debug.Log(m_fallVec);
         //test
         m_inputVector = Vector3.zero;
-        m_gravForceVector = m_gravVector * m_airGravForce;
 
         //m_gravForceVector = m_gravVector * (-m_airGravForce * m_gravForceOverTime.Evaluate(m_tGrav));
         //check this problem later for suming deltatime to tgrav. 

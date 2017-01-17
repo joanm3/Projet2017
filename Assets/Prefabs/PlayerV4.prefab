@@ -459,7 +459,7 @@ MonoBehaviour:
   velMax: 23.73
   stopThreshold: 0.8
   Glide: 1
-  StartForcesAngle: 45
+  StartForcesAngle: 20
   FallInflectionAngle: 60
   m_gravForce: 9.8
   m_maxForce: 1
