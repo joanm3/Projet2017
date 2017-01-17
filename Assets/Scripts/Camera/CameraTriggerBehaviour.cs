@@ -39,7 +39,7 @@ public class CameraTriggerBehaviour : MonoBehaviour
     public Transform staticTransformPosition;
 
     [Header("OnTriggerExit")]
-    public bool returnToLastCamera = false;
+    public bool triggerCameraOnExit = false;
     #endregion
 
 
@@ -53,29 +53,29 @@ public class CameraTriggerBehaviour : MonoBehaviour
     [SerializeField]
     private ThirdPersonCameraMovement.CameraMode m_lastCameraMode = ThirdPersonCameraMovement.CameraMode.Follow;
     [SerializeField]
-    private float m_lastMaxDistance = 50f;
+    private float m_exitMaxDistance = 50f;
     [SerializeField]
-    private float m_lastMinDistance = 5f;
+    private float m_exitMinDistance = 5f;
     [SerializeField]
-    private float m_lastXModificationAngle = 0f;
+    private float m_exitXModificationAngle = 0f;
     [SerializeField]
-    private float m_lastYModificationAngle = 0f;
+    private float m_exitYModificationAngle = 0f;
     [SerializeField]
-    private bool m_lastLimitXAngle = false;
+    private bool m_exitLimitXAngle = false;
     [SerializeField]
-    private float m_lastXAngleMin = -50.0f;
+    private float m_exitXAngleMin = -50.0f;
     [SerializeField]
-    private float m_lastXAngleMax = 50.0f;
+    private float m_exitXAngleMax = 50.0f;
     [SerializeField]
-    private float m_lastYAngleMin = -20.0f;
+    private float m_exitYAngleMin = -20.0f;
     [SerializeField]
-    private float m_lastYAngleMax = 50.0f;
+    private float m_exitYAngleMax = 50.0f;
     [SerializeField]
-    private bool m_lastRotateCameraWithNormal = true;
+    private bool m_exitRotateCameraWithNormal = true;
     [SerializeField]
-    private float m_lastRotationIntensity = 1f;
+    private float m_exitRotationIntensity = 1f;
     [SerializeField]
-    private Transform m_lastStaticTransformPosition;
+    private Transform m_exitStaticTransformPosition;
 
 
 
@@ -90,7 +90,7 @@ public class CameraTriggerBehaviour : MonoBehaviour
             thirdPersonCameraMovement = Camera.main.GetComponentInParent<ThirdPersonCameraMovement>();
 
         journeyLength = Mathf.Abs(thirdPersonCameraMovement.maxDistance - maxDistance);
-        AssignLastValues(thirdPersonCameraMovement);
+        //AssignLastValues(thirdPersonCameraMovement);
     }
 
     void FixedUpdate()
@@ -129,7 +129,7 @@ public class CameraTriggerBehaviour : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        if (returnToLastCamera && other.tag == "Player")
+        if (triggerCameraOnExit && other.tag == "Player")
         {
             //do the lerp like before
             ReturnToLastValues(ref thirdPersonCameraMovement);
@@ -226,33 +226,33 @@ public class CameraTriggerBehaviour : MonoBehaviour
     private void AssignLastValues(ThirdPersonCameraMovement lastCam)
     {
         m_lastCameraMode = lastCam.cameraMode;
-        m_lastMaxDistance = lastCam.maxDistance;
-        m_lastMinDistance = lastCam.minDistance;
-        m_lastXModificationAngle = lastCam.xModificationAngle;
-        m_lastLimitXAngle = lastCam.limitXAngle;
-        m_lastXAngleMin = lastCam.xAngleMin;
-        m_lastXAngleMax = lastCam.xAngleMax;
-        m_lastYAngleMin = lastCam.yAngleMin;
-        m_lastYAngleMax = lastCam.yAngleMax;
-        m_lastRotateCameraWithNormal = lastCam.rotateCameraWithNormal;
-        m_lastRotationIntensity = lastCam.rotationIntensity;
-        m_lastStaticTransformPosition = lastCam.staticTransformPosition;
+        m_exitMaxDistance = lastCam.maxDistance;
+        m_exitMinDistance = lastCam.minDistance;
+        m_exitXModificationAngle = lastCam.xModificationAngle;
+        m_exitLimitXAngle = lastCam.limitXAngle;
+        m_exitXAngleMin = lastCam.xAngleMin;
+        m_exitXAngleMax = lastCam.xAngleMax;
+        m_exitYAngleMin = lastCam.yAngleMin;
+        m_exitYAngleMax = lastCam.yAngleMax;
+        m_exitRotateCameraWithNormal = lastCam.rotateCameraWithNormal;
+        m_exitRotationIntensity = lastCam.rotationIntensity;
+        m_exitStaticTransformPosition = lastCam.staticTransformPosition;
     }
 
     private void ReturnToLastValues(ref ThirdPersonCameraMovement newCam)
     {
         newCam.cameraMode = m_lastCameraMode;
-        newCam.maxDistance = m_lastMaxDistance;
-        newCam.minDistance = m_lastMinDistance;
-        newCam.xModificationAngle = m_lastXModificationAngle;
-        newCam.limitXAngle = m_lastLimitXAngle;
-        newCam.xAngleMin = m_lastXAngleMin;
-        newCam.xAngleMax = m_lastXAngleMax;
-        newCam.yAngleMin = m_lastYAngleMin;
-        newCam.yAngleMax = m_lastYAngleMax;
-        newCam.rotateCameraWithNormal = m_lastRotateCameraWithNormal;
-        newCam.rotationIntensity = m_lastRotationIntensity;
-        newCam.staticTransformPosition = m_lastStaticTransformPosition;
+        newCam.maxDistance = m_exitMaxDistance;
+        newCam.minDistance = m_exitMinDistance;
+        newCam.xModificationAngle = m_exitXModificationAngle;
+        newCam.limitXAngle = m_exitLimitXAngle;
+        newCam.xAngleMin = m_exitXAngleMin;
+        newCam.xAngleMax = m_exitXAngleMax;
+        newCam.yAngleMin = m_exitYAngleMin;
+        newCam.yAngleMax = m_exitYAngleMax;
+        newCam.rotateCameraWithNormal = m_exitRotateCameraWithNormal;
+        newCam.rotationIntensity = m_exitRotationIntensity;
+        newCam.staticTransformPosition = m_exitStaticTransformPosition;
     }
 
 }

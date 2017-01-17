@@ -477,8 +477,8 @@ public class CharacterMotion : MonoBehaviour
             {
                 if (m_surfaceAngle < 45f)
                 {
-                    Debug.Log("snapping");
-                    transform.position = m_surfaceHitCharacterPosition;
+                    //Debug.Log("snapping");
+                    //transform.position = m_surfaceHitCharacterPosition;
                 }
             }
         }
@@ -521,7 +521,7 @@ public class CharacterMotion : MonoBehaviour
         //test stuff now its too strong. 
         //float frictionForce = (signVel < 0) ? 0 : -signVel * m_inputCurrentSpeed * m_inputCurrentSpeed * friction;
         float frictionForce = -signVel * m_characterCurrentSpeed * m_characterCurrentSpeed * friction;
-
+        Debug.Log(frictionForce);
         //is angle is smaller than start forces, dont apply surfacedescentforce
         currentTotalForce = (StartForcesAngle < m_surfaceAngle) && (Glide) ? m_inputCurrentForce + frictionForce + (m_surfaceCurrentDescentForce) : m_inputCurrentForce + frictionForce;
 
@@ -729,8 +729,11 @@ public class CharacterMotion : MonoBehaviour
         //Debug.DrawRay(ray.origin, ray.direction * distance, Color.red);
         if (Physics.Raycast(ray, out hitInfo, distance))
         {
-            m_collisionPoint = hitInfo.point;
-            return true;
+            if (!hitInfo.collider.isTrigger)
+            {
+                m_collisionPoint = hitInfo.point;
+                return true;
+            }
         }
         return false;
     }
