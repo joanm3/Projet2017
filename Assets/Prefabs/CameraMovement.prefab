@@ -127,7 +127,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1573390960575860}
   m_LocalRotation: {x: 0.020759558, y: 0.9789879, z: -0.15424044, w: 0.13176411}
-  m_LocalPosition: {x: 5.4, y: 5.7, z: 22.24}
+  m_LocalPosition: {x: 5.4, y: 5.7, z: 31.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4832717959196630}
@@ -143,7 +143,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.32396194, g: 0.78676474, b: 0.40375555, a: 0}
+  m_BackGroundColor: {r: 0.059039775, g: 0.61764705, b: 0.15535139, a: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -298,7 +298,7 @@ MonoBehaviour:
   rotationLerp: 3
   cameraLocalRotation: {x: 0, y: 0}
   AxisEqualsSurfaceAngle: 0
-  staticTransformPosition: {fileID: 0}
+  staticTransformPosition: {fileID: 4892790338838798}
   staticLookAtPosition: 0
   m_lerpedHeight: 0
   m_trueDistance: 0
@@ -327,7 +327,8 @@ MonoBehaviour:
   blockCameraMode: 1
   m_rotDirection: {x: 0, y: 0, z: 0}
   curLookDir: {x: 0, y: 0, z: 0}
-  m_camSmoothCollisionDampTime: 0.01
+  m_camSmoothCollisionDampTime: 0.1
+  m_smoothCollision: 1
 --- !u!114 &114886960839568128
 MonoBehaviour:
   m_ObjectHideFlags: 1

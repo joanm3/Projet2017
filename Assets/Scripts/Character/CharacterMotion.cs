@@ -521,8 +521,9 @@ public class CharacterMotion : MonoBehaviour
         //test stuff now its too strong. 
         //float frictionForce = (signVel < 0) ? 0 : -signVel * m_inputCurrentSpeed * m_inputCurrentSpeed * friction;
         float frictionForce = -signVel * m_characterCurrentSpeed * m_characterCurrentSpeed * friction;
-        Debug.Log(frictionForce);
+        //Debug.Log(frictionForce);
         //is angle is smaller than start forces, dont apply surfacedescentforce
+        //CHANGE HERE TO STOP THE GLIDING LOOP when changing from one surface to another. 
         currentTotalForce = (StartForcesAngle < m_surfaceAngle) && (Glide) ? m_inputCurrentForce + frictionForce + (m_surfaceCurrentDescentForce) : m_inputCurrentForce + frictionForce;
 
         //force = mass * acc

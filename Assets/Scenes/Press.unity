@@ -443,6 +443,10 @@ Prefab:
       propertyPath: m_LocalEulerAnglesHint.y
       value: 182.553
       objectReference: {fileID: 0}
+    - target: {fileID: 1149748887254702, guid: 8ba4c362afcd9f748a8b53c47464ea2c, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 114686539131818438, guid: 8ba4c362afcd9f748a8b53c47464ea2c, type: 2}
   m_ParentPrefab: {fileID: 100100000, guid: 8ba4c362afcd9f748a8b53c47464ea2c, type: 2}
@@ -981,7 +985,7 @@ GameObject:
   m_Layer: 12
   m_Name: cameraPosition
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -992,7 +996,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 307340712}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.077, z: 0.0938}
+  m_LocalPosition: {x: 0.2, y: 0.077, z: 0.2926}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 760100936}
@@ -2459,8 +2463,8 @@ MonoBehaviour:
   m_exitXModificationAngle: 0
   m_exitYModificationAngle: 0
   m_exitLimitXAngle: 1
-  m_exitXAngleMin: -1
-  m_exitXAngleMax: 1
+  m_exitXAngleMin: 179
+  m_exitXAngleMax: 181
   m_exitYAngleMin: -20
   m_exitYAngleMax: 50
   m_exitRotateCameraWithNormal: 0
@@ -3512,6 +3516,10 @@ Prefab:
     - target: {fileID: 4192547612494126, guid: 8ba4c362afcd9f748a8b53c47464ea2c, type: 2}
       propertyPath: m_LocalScale.z
       value: 1.0000002
+      objectReference: {fileID: 0}
+    - target: {fileID: 1149748887254702, guid: 8ba4c362afcd9f748a8b53c47464ea2c, type: 2}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 114686539131818438, guid: 8ba4c362afcd9f748a8b53c47464ea2c, type: 2}
@@ -7639,6 +7647,10 @@ Prefab:
     - target: {fileID: 4192547612494126, guid: 8ba4c362afcd9f748a8b53c47464ea2c, type: 2}
       propertyPath: m_LocalScale.z
       value: 1.0000002
+      objectReference: {fileID: 0}
+    - target: {fileID: 1149748887254702, guid: 8ba4c362afcd9f748a8b53c47464ea2c, type: 2}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 114686539131818438, guid: 8ba4c362afcd9f748a8b53c47464ea2c, type: 2}

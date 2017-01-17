@@ -20,6 +20,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4051773446125562}
   - component: {fileID: 65816164912420918}
+  - component: {fileID: 114880154668316332}
   m_Layer: 9
   m_Name: Floor1
   m_TagString: Untagged
@@ -52,7 +53,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1631909031844490}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 26.0096, y: 0, z: 13.0048}
+  m_LocalPosition: {x: 13.0048, y: 0, z: 13.0048}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4866323548381066}
@@ -134,3 +135,17 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 13.0048, y: 0.20320344, z: 13.0048}
   m_Center: {x: 6.502398, y: -0.10160494, z: 6.502398}
+--- !u!114 &114880154668316332
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1631909031844490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33969631a8550dc47a7e10ed0b8b636e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useChildBoxCollider: {fileID: 0}
+  removeBoxColliderInGame: 0
+  pivot: 0

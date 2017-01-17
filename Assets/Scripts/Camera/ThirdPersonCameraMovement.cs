@@ -104,6 +104,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     private Renderer[] playerRenderers;
     [SerializeField]
     float m_distanceToYawn;
+    [SerializeField]
+    private float m_sphereCastRadiusForFadingObjects = 15f;
     private Quaternion m_rotation;
     private Vector3 m_dir;
     private bool m_playerColorChanged = false;
@@ -187,6 +189,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     private Vector3 m_velocityCollisionCamSmooth;
     [SerializeField]
     private float m_camSmoothCollisionDampTime = 0.2f;
+    [SerializeField]
+    private bool m_smoothCollision = true;
 
 #endif
 
@@ -463,19 +467,19 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     {
 #if UNITY_EDITOR
 
-        //if (!Application.isPlaying)
-        //    return;
-        ////Vector3 gizmoRayDirection = playerTransform.position - m_transform.position;
-        //Gizmos.color = Color.yellow;
-        //Gizmos.DrawRay(gizmoRayOrigin, gizmoRayDirection * gizmoDistance);
-        //Gizmos.DrawWireSphere(gizmoPoint, gizmoRadius);
+        if (!Application.isPlaying)
+            return;
+        //Vector3 gizmoRayDirection = playerTransform.position - m_transform.position;
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawRay(gizmoRayOrigin, gizmoRayDirection * gizmoDistance);
+        Gizmos.DrawWireSphere(gizmoPoint, gizmoRadius);
 
 
-        //Gizmos.color = Color.cyan;
-        //Gizmos.DrawRay(gizmoDownRayOrigin, gizmoDownRayDirection * gizmoDownDistance);
-        //Gizmos.DrawWireSphere(gizmoDownPoint, 1f);
-        //Gizmos.color = Color.red;
-        //Gizmos.DrawWireSphere(collisionPoint, 2f);
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawRay(gizmoDownRayOrigin, gizmoDownRayDirection * gizmoDownDistance);
+        Gizmos.DrawWireSphere(gizmoDownPoint, 1f);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(collisionPoint, 2f);
 
 #endif
     }
@@ -613,9 +617,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                     collisionPoint = _hit.point;
 
 
-                    //cameraPivotTransform.position = Vector3.SmoothDamp(cameraPivotTransform.position, _hit.point, ref m_velocityCollisionCamSmooth, m_camSmoothCollisionDampTime);
 
-                    cameraPivotTransform.position = _hit.point + (transform.forward);
+                    cameraPivotTransform.position = m_smoothCollision ?
+                        Vector3.SmoothDamp(cameraPivotTransform.position, _hit.point, ref m_velocityCollisionCamSmooth, m_camSmoothCollisionDampTime) :
+                        _hit.point + (transform.forward);
 
                     m_obstacleRaycastEntered = true;
                 }
@@ -626,23 +631,23 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 #region FADE ENTER
                 m_obstacleRaycastEntered = false;
                 m_terrainRaycastEntered = false;
-                float _radius = 15f;
 #if UNITY_EDITOR
-                gizmoRadius = _radius;
+                gizmoRadius = m_sphereCastRadiusForFadingObjects;
                 gizmoPoint = _hit.point;
 #endif
                 m_colliderRend = GetRendererFromCollision(_hit);
 
                 //ADD LAYER MASK DONNO WHY IT IS NOT WORKING
                 //LATER ON CHANGE SPHERE COLLIDER FOR CAPSULE COLLIDER TO AVOID MAKING DISAPEAR OBJECTS FAR
-                RaycastHit[] _sphereHits = Physics.SphereCastAll(_hit.point, _radius, Vector3.one, Mathf.Infinity);
+                RaycastHit[] _sphereHits = Physics.SphereCastAll(_hit.point, m_sphereCastRadiusForFadingObjects, Vector3.one, Mathf.Infinity);
 
                 for (int i = 0; i < _sphereHits.Length; i++)
                 {
 
                     if (_sphereHits[i].collider.gameObject.layer == LayerMask.NameToLayer(fadeLayerString))
                     {
-                        Renderer _rend = _sphereHits[i].collider.GetComponent<Renderer>();
+                        Renderer _rend = GetRendererFromCollision(_sphereHits[i]);
+
                         if (!fadeRenderers.Contains(_rend) && _rend != null)
                         {
                             fadeRenderers.Add(_rend);
@@ -695,8 +700,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                 {
                     collisionPoint = _hit.point;
 
-                    cameraPivotTransform.position = _hit.point + (transform.forward);
-                    //cameraPivotTransform.position = Vector3.SmoothDamp(cameraPivotTransform.position, _hit.point, ref m_velocityCollisionCamSmooth, m_camSmoothCollisionDampTime);
+                    cameraPivotTransform.position =
+                    cameraPivotTransform.position = m_smoothCollision ?
+                        Vector3.SmoothDamp(cameraPivotTransform.position, _hit.point, ref m_velocityCollisionCamSmooth, m_camSmoothCollisionDampTime) :
+                        _hit.point + (transform.forward);
 
                     m_terrainRaycastEntered = true;
                 }
@@ -956,6 +963,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
         if (_colliderRend == null)
             Debug.LogError("collider renderer not found", hit.collider);
+
+        Debug.Log(_colliderRend);
 
         return _colliderRend;
     }
