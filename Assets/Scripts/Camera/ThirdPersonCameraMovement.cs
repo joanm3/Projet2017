@@ -76,8 +76,9 @@ public class ThirdPersonCameraMovement : MonoBehaviour
 
     [Header("Static Camera Values")]
     public Transform staticTransformPosition;
+    public Transform staticTransformLookAt;
     public enum LookAtType { player, forward, customTransform };
-    public LookAtType staticLookAtPosition = LookAtType.forward;
+    public LookAtType staticLookAtType = LookAtType.forward;
     private Transform m_transform;
     private Camera m_cam;
 
@@ -306,7 +307,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         Vector3 characterOffset = playerTransform.position + _offset;
         lookAtPosition = playerTransform.position;
         //Debug.LogFormat("rot: {0}, forw: {1}", m_rotDirection, characterMotion.Forward);
-
+        float zCamRotation = 0f;
         //  Debug.Log(targetPosition);
 
         switch (cameraMode)
@@ -410,20 +411,42 @@ public class ThirdPersonCameraMovement : MonoBehaviour
                     else
                         cameraMode = CameraMode.Follow;
 
-                    switch (staticLookAtPosition)
+                    switch (staticLookAtType)
                     {
                         case LookAtType.player:
                             lookAtPosition = playerTransform.position;
                             break;
                         case LookAtType.forward:
-                        //apply a customTransform behaviour
-                        case LookAtType.customTransform:
                             cameraLocalRotation.x += rightY * joystickSpeed;
                             cameraLocalRotation.y += rightX * joystickSpeed;
 
                             cameraLocalRotation.y = Mathf.Clamp(cameraLocalRotation.y, -20f, 10f);
                             cameraLocalRotation.x = Mathf.Clamp(cameraLocalRotation.x, -20f, 20f);
                             lookAtPosition = staticTransformPosition.forward;
+                            break;
+                        case LookAtType.customTransform:
+                            //cameraLocalRotation.x += rightY * joystickSpeed;
+                            //cameraLocalRotation.y += rightX * joystickSpeed;
+
+                            //cameraLocalRotation.y = Mathf.Clamp(cameraLocalRotation.y, -20f, 10f);
+                            //cameraLocalRotation.x = Mathf.Clamp(cameraLocalRotation.x, -20f, 20f);
+                            if (staticTransformLookAt != null)
+
+                            {
+                                zCamRotation = -staticTransformLookAt.eulerAngles.z;
+                                lookAtPosition = staticTransformLookAt.position;
+                                Vector3 _angles = transform.localEulerAngles;
+                                _angles.z = staticTransformLookAt.eulerAngles.z;
+                                Vector3 _anglesTwo = new Vector3(0f, 0f, staticTransformLookAt.eulerAngles.z);
+                                //transform.rotation = staticTransformPosition.rotation;
+                                //cam.transform.localRotation = staticTransformLookAt.rotation;
+                                //cam.transform.localEulerAngles = _anglesTwo;
+                                //Debug.Log(cam.transform.localEulerAngles);
+                            }
+                            else
+                            {
+                                lookAtPosition = playerTransform.position;
+                            }
                             break;
                     }
 
@@ -458,9 +481,18 @@ public class ThirdPersonCameraMovement : MonoBehaviour
             characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Relative;
 
         m_transform.position = Vector3.SmoothDamp(m_transform.position, targetPosition, ref m_velocityCamSmooth, m_camSmoothDampTime);
-        m_transform.LookAt(lookAtPosition);
+
         cameraPivotTransform.localRotation = Quaternion.Slerp(cameraPivotTransform.localRotation, Quaternion.Euler(pivotRotation), lerpVelocity * Time.deltaTime);
-        cam.transform.localRotation = Quaternion.Slerp(cam.transform.localRotation, Quaternion.Euler(new Vector3(cameraLocalRotation.y, cameraLocalRotation.x)), lerpVelocity * Time.deltaTime);
+
+        m_transform.LookAt(lookAtPosition);
+
+        //if ((cameraMode == CameraMode.Static && staticLookAtType != LookAtType.customTransform) || cameraMode != CameraMode.Static)
+        //{
+
+        //zCamRotation = cam.transform.localEulerAngles.z;
+        cam.transform.localRotation = Quaternion.Slerp(cam.transform.localRotation, Quaternion.Euler(new Vector3(cameraLocalRotation.y, cameraLocalRotation.x, zCamRotation)), lerpVelocity * Time.deltaTime);
+
+        //}
 
     }
     private void OnDrawGizmos()
@@ -961,10 +993,10 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         if (_colliderRend == null)
             _colliderRend = (Renderer)hit.collider.GetComponentInChildren<Renderer>();
 
-        if (_colliderRend == null)
-            Debug.LogError("collider renderer not found", hit.collider);
+        //if (_colliderRend == null)
+        // Debug.LogError("collider renderer not found", hit.collider);
 
-        Debug.Log(_colliderRend);
+
 
         return _colliderRend;
     }

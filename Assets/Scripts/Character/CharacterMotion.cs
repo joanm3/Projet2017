@@ -154,6 +154,7 @@ public class CharacterMotion : MonoBehaviour
         m_surfaceAngle = 0f;
         m_characterDirection = m_characterForward;
         m_inputRotation = transform.rotation;
+        m_gravFallingVector = m_gravVector;
         if (m_cam == null)
             m_cam = Camera.main;
     }
@@ -489,7 +490,7 @@ public class CharacterMotion : MonoBehaviour
     {
         //m_verticalSpeed += -m_gravForce * deltaTime;
         m_fallVec += -m_gravForce * -m_gravFallingVector * deltaTime;
-        Debug.Log(m_fallVec);
+        //Debug.Log(m_fallVec);
         //test
         m_inputVector = Vector3.zero;
 

@@ -34,12 +34,17 @@ public class CameraTriggerBehaviour : MonoBehaviour
     public bool changeRotationByNormal = true;
     public bool rotateCameraWithNormal = true;
     public float rotationIntensity = 1f;
+    public bool axisEqualsSurfaceAngle = false;
 
     [Header("Static Camera")]
     public Transform staticTransformPosition;
+    public Transform staticTransformLookAt;
+    public ThirdPersonCameraMovement.LookAtType staticLookAt;
 
     [Header("OnTriggerExit")]
     public bool triggerCameraOnExit = false;
+    public bool destroyTriggerOnExit = false;
+
     #endregion
 
 
@@ -76,7 +81,12 @@ public class CameraTriggerBehaviour : MonoBehaviour
     private float m_exitRotationIntensity = 1f;
     [SerializeField]
     private Transform m_exitStaticTransformPosition;
-
+    [SerializeField]
+    private bool m_exitAxisEqualSurfaceAngle = false;
+    [SerializeField]
+    private Transform m_exitStaticTransformLookAt;
+    [SerializeField]
+    private ThirdPersonCameraMovement.LookAtType m_exitStaticLookAt;
 
 
 
@@ -135,27 +145,13 @@ public class CameraTriggerBehaviour : MonoBehaviour
             ReturnToLastValues(ref thirdPersonCameraMovement);
         }
 
+        if (destroyTriggerOnExit && other.tag == "Player")
+            Destroy(this);
+
     }
 
     private void LerpToNewValues(float t)
     {
-        //        public bool changeGeneralValues = true;
-        //public float maxDistance = 50f;
-        //public float minDistance = 5f;
-
-        //[Header("Modifications")]
-        //public bool changeModifications = true;
-        //public float xModificationAngle = 0f;
-        //public float yModificationAngle = 0f;
-
-
-        //[Header("Rotation By Normal")]
-        //public bool changeRotationByNormal = true;
-        //public bool rotationByNormal = true;
-        //public float rotationIntensity = 1f;
-
-        //[Header("Static Camera")]
-        //public Transform staticPosition;
 
         thirdPersonCameraMovement.cameraMode = newCameraMode;
 
@@ -185,9 +181,11 @@ public class CameraTriggerBehaviour : MonoBehaviour
         {
             thirdPersonCameraMovement.rotateCameraWithNormal = rotateCameraWithNormal;
             thirdPersonCameraMovement.rotationIntensity = Mathf.Lerp(thirdPersonCameraMovement.rotationIntensity, rotationIntensity, t);
+            thirdPersonCameraMovement.AxisEqualsSurfaceAngle = axisEqualsSurfaceAngle;
         }
-
         thirdPersonCameraMovement.staticTransformPosition = staticTransformPosition;
+        thirdPersonCameraMovement.staticTransformLookAt = staticTransformLookAt;
+        thirdPersonCameraMovement.staticLookAtType = staticLookAt;
 
     }
 
@@ -237,6 +235,9 @@ public class CameraTriggerBehaviour : MonoBehaviour
         m_exitRotateCameraWithNormal = lastCam.rotateCameraWithNormal;
         m_exitRotationIntensity = lastCam.rotationIntensity;
         m_exitStaticTransformPosition = lastCam.staticTransformPosition;
+        m_exitAxisEqualSurfaceAngle = lastCam.AxisEqualsSurfaceAngle;
+        m_exitStaticTransformLookAt = lastCam.staticTransformLookAt;
+        m_exitStaticLookAt = lastCam.staticLookAtType;
     }
 
     private void ReturnToLastValues(ref ThirdPersonCameraMovement newCam)
@@ -253,6 +254,9 @@ public class CameraTriggerBehaviour : MonoBehaviour
         newCam.rotateCameraWithNormal = m_exitRotateCameraWithNormal;
         newCam.rotationIntensity = m_exitRotationIntensity;
         newCam.staticTransformPosition = m_exitStaticTransformPosition;
+        newCam.AxisEqualsSurfaceAngle = m_exitAxisEqualSurfaceAngle;
+        newCam.staticTransformLookAt = m_exitStaticTransformLookAt;
+        newCam.staticLookAtType = m_exitStaticLookAt;
     }
 
 }

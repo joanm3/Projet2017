@@ -39,6 +39,9 @@ public class SnapToGridEditor : Editor
 
     private void EventHandler(SceneView sceneview)
     {
+        if (LevelGrid.Ins == null)
+            return;
+
         if (m_myTarget == null)
             m_myTarget = target as SnapToGrid;
 
