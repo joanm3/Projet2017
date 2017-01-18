@@ -472,8 +472,8 @@ public class CharacterMotion : MonoBehaviour
         if (Input.GetButtonDown("Jump"))
         {
             m_tGrav = 0f;
-            characterState = CharacterState.Jumping;
-            Jump(m_surfaceNormal);
+            //characterState = CharacterState.Jumping;
+            //Jump(m_surfaceNormal);
         }
 
         //change this to when hitting ground to calculate once, not every frame. 
@@ -532,9 +532,7 @@ public class CharacterMotion : MonoBehaviour
     {
         CA.isGrounded = IsGrounded;
         CA.SetAnimatorDirection(Forward, Up, m_inputVector);
-        Debug.Log(m_characterCurrentForwardAngleFromGroundZero);
         CA.SetAnimatorInclinaison(m_characterCurrentForwardAngleFromGroundZero, -10, 10, 0.5f);
-        Debug.Log(CA.inclinaison);
         CA.SetMovingMode(Speed, velMax);
     }
 

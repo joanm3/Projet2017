@@ -9,13 +9,30 @@ public class ConstantRotation : MonoBehaviour
     public float rotationAngleForce = 2f;
     public bool rotateToPositif = true;
     public float targetAngle = 0f;
+    public Transform target;
+    public bool ApplyOnTriggerEnter = false;
 
     [SerializeField]
     private float actualRotation;
 
+    private bool m_startRotation = true;
+
+
+    void Start()
+    {
+        if (target == null)
+            target = this.transform;
+        if (ApplyOnTriggerEnter)
+            m_startRotation = false;
+    }
+
+
     // Update is called once per frame
     void Update()
     {
+
+        if (!m_startRotation)
+            return;
 
         float value = rotationAngleForce * Time.deltaTime;
 
@@ -32,46 +49,56 @@ public class ConstantRotation : MonoBehaviour
             {
                 case AxisRotation.x:
                     if (rotateToPositif)
-                        transform.eulerAngles += new Vector3(value, transform.eulerAngles.y, transform.eulerAngles.z);
+                        target.eulerAngles += new Vector3(value, transform.eulerAngles.y, transform.eulerAngles.z);
                     else
-                        transform.eulerAngles -= new Vector3(value, transform.eulerAngles.y, transform.eulerAngles.z);
+                        target.eulerAngles -= new Vector3(value, transform.eulerAngles.y, transform.eulerAngles.z);
 
-                    actualRotation = transform.eulerAngles.x;
+                    actualRotation = target.eulerAngles.x;
                     break;
                 case AxisRotation.y:
                     if (rotateToPositif)
-                        transform.eulerAngles += new Vector3(transform.eulerAngles.x, value, transform.eulerAngles.z);
+                        target.eulerAngles += new Vector3(transform.eulerAngles.x, value, transform.eulerAngles.z);
                     else
-                        transform.eulerAngles -= new Vector3(transform.eulerAngles.x, value, transform.eulerAngles.z);
+                        target.eulerAngles -= new Vector3(transform.eulerAngles.x, value, transform.eulerAngles.z);
 
-                    actualRotation = transform.eulerAngles.y;
+                    actualRotation = target.eulerAngles.y;
                     break;
                 case AxisRotation.z:
                     if (rotateToPositif)
 
-                        transform.eulerAngles += new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, value);
+                        target.eulerAngles += new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, value);
                     else
-                        transform.eulerAngles -= new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, value);
+                        target.eulerAngles -= new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, value);
 
-                    actualRotation = transform.eulerAngles.z;
+                    actualRotation = target.eulerAngles.z;
                     break;
             }
         }
         else
         {
-            switch (axisRotation)
-            {
-                case AxisRotation.x:
-                    transform.eulerAngles = new Vector3(targetAngle, transform.eulerAngles.y, transform.eulerAngles.z);
-                    break;
-                case AxisRotation.y:
-                    transform.eulerAngles = new Vector3(transform.eulerAngles.x, targetAngle, transform.eulerAngles.z);
-                    break;
-                case AxisRotation.z:
-                    transform.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, targetAngle);
-                    break;
-            }
+            //switch (axisRotation)
+            //{
+            //    case AxisRotation.x:
+            //        target.eulerAngles = new Vector3(targetAngle, transform.eulerAngles.y, transform.eulerAngles.z);
+            //        break;
+            //    case AxisRotation.y:
+            //        target.eulerAngles = new Vector3(transform.eulerAngles.x, targetAngle, transform.eulerAngles.z);
+            //        break;
+            //    case AxisRotation.z:
+            //        target.eulerAngles = new Vector3(transform.eulerAngles.x, transform.eulerAngles.y, targetAngle);
+            //        break;
+            //}
         }
 
     }
+
+
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Player")
+            m_startRotation = true;
+    }
+
+
 }
