@@ -377,7 +377,7 @@ public class CharacterV3 : MonoBehaviour
 		
 		Gizmos.color = Color.blue; 
 		//Player - up
-		Gizmos.DrawRay (transform.position + (Vector3.up * myController.bounds.extents.y), -Vector3.up); 
+//		Gizmos.DrawRay (transform.position + (Vector3.up * myController.bounds.extents.y), -Vector3.up); 
 
 		//Surface Normal
 		Gizmos.color = (Vector3.Angle (Vector3.up, surfaceNormal) < Confort_angle) ? 
