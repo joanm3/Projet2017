@@ -129,8 +129,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1573390960575860}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.83, y: 3.5, z: -4.33}
+  m_LocalRotation: {x: 0.33490282, y: -0, z: -0, w: 0.94225276}
+  m_LocalPosition: {x: 2.75, y: 20.75, z: -38.46}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4832717959196630}
@@ -259,8 +259,8 @@ MonoBehaviour:
   characterMotion: {fileID: 0}
   cam: {fileID: 20188294762983464}
   useJoystick: 1
-  minDistancePosition: {x: 8, y: 0.5}
-  maxDistancePosition: {x: 30, y: 40}
+  minDistancePosition: {x: 6, y: 0.5}
+  maxDistancePosition: {x: 20, y: 30}
   heightPositionByDistance:
     serializedVersion: 2
     m_Curve:
@@ -322,7 +322,8 @@ MonoBehaviour:
   cameraLocalRotation: {x: 0, y: 0}
   AxisEqualsSurfaceAngle: 0
   staticTransformPosition: {fileID: 0}
-  staticLookAtPosition: 0
+  staticTransformLookAt: {fileID: 0}
+  staticLookAtType: 1
   m_lerpedHeight: 0
   m_trueDistance: 0
   m_colliderRend: {fileID: 0}
@@ -348,7 +349,7 @@ MonoBehaviour:
   posRelativeToPlayer: {x: 0, y: 0, z: 0}
   positionBeforeGliding: {x: 0, y: 0, z: 0}
   followStartThreshold: 0.1
-  blockCameraMode: 1
+  blockCameraMode: 0
   m_rotDirection: {x: 0, y: 0, z: 0}
   curLookDir: {x: 0, y: 0, z: 0}
   m_camSmoothCollisionDampTime: 0.1

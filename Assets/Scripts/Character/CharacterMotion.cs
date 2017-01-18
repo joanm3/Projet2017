@@ -14,6 +14,9 @@ public class CharacterMotion : MonoBehaviour
     private CharacterController m_controller;
     [SerializeField]
     private Transform m_characterRenderer;
+    [SerializeField]
+    characterAnimation CA;
+
 
     //input
     public enum CharacterMovementType { Absolute, Relative, NoInput, NoMovement };
@@ -21,6 +24,7 @@ public class CharacterMotion : MonoBehaviour
 
     [Header("Input")]
     private Vector3 m_inputVector;
+    public Vector3 InputVector { get { return m_inputVector; } }
     private float m_inputMagnitude;
     private float m_inputDeltaHeadingAngleInDeg;
     private Quaternion m_inputRotation;
@@ -74,6 +78,11 @@ public class CharacterMotion : MonoBehaviour
     //gravity
     [SerializeField]
     private bool m_isGrounded = false;
+    public bool IsGrounded
+    {
+        get { return m_isGrounded; }
+    }
+
     private Vector3 m_fallVec;
     private Vector3 m_fallVector;
     [SerializeField]
@@ -102,6 +111,7 @@ public class CharacterMotion : MonoBehaviour
     private Vector3 m_characterForward;
     [SerializeField]
     private Vector3 m_characterDirection;
+
     private Vector3 m_characterUp;
     private Vector3 m_characterRight;
 
@@ -115,7 +125,6 @@ public class CharacterMotion : MonoBehaviour
     private float m_characterCurrentForwardAngleFromGroundZero;
     [SerializeField]
     private float m_characterCurrentSpeed;
-
 
     //forces
     [Range(0.1f, 3f)]
@@ -266,12 +275,14 @@ public class CharacterMotion : MonoBehaviour
             GetAngleForce(m_gravForce, m_surfaceAngle, massPlayer);
         m_inputCurrentForce = UpdateInputForce(m_maxForce, m_inputMagnitude);
         m_characterCurrentSpeed = UpdateInputSpeed(ref m_currentTotalForce, m_characterCurrentSpeed, _dt);
+
         m_characterSpeed = m_characterCurrentSpeed;
         if (!Glide && m_characterSpeed < 0f && m_surfaceAngle < FallInflectionAngle)
         {
             m_characterSpeed = 0f;
         }
         #endregion
+
 
 
 
@@ -365,6 +376,11 @@ public class CharacterMotion : MonoBehaviour
                 }
         }
 
+        #endregion
+
+
+        #region ASSIGN ANIMATOR
+        AssignAnimation();
         #endregion
 
 
@@ -511,6 +527,21 @@ public class CharacterMotion : MonoBehaviour
         //m_jumpVector = (Vector3.up + (surfaceNormal * 0.5f)).normalized * m_jumpForce;
         Debug.Log("Jump Vector: " + m_fallVec);
     }
+
+    private void AssignAnimation()
+    {
+        CA.isGrounded = IsGrounded;
+        CA.SetAnimatorDirection(Forward, Up, m_inputVector);
+        Debug.Log(m_characterCurrentForwardAngleFromGroundZero);
+        CA.SetAnimatorInclinaison(m_characterCurrentForwardAngleFromGroundZero, -10, 10, 0.5f);
+        Debug.Log(CA.inclinaison);
+        CA.SetMovingMode(Speed, velMax);
+    }
+
+
+
+
+
     #endregion
 
     #region FUNCTIONS TO GET VALUES
