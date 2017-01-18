@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: d486bf401636d704580ab0698980b5c8
+timeCreated: 1483813127
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: ParmaInitialenMK
+  fontNames:
+  - ParmaInitialenMK
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: a0eb981befda7bc4e9353d31e4d28ace
+timeCreated: 1483890917
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: CalligraphyFLF
+  fontNames:
+  - CalligraphyFLF
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

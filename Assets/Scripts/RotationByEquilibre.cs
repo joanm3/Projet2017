@@ -192,13 +192,13 @@ public class RotationByEquilibre : MonoBehaviour {
 		}
 	}
 
-	void OnValidate()
-	{
-		if(Recovery_Angle < GetComponent<CharacterV3>().Confort_angle)
-		{
-			Debug.LogError("Attention ! un Recovery_Angle inférieur au Confort_Angle signifie que le joueur peut rester bloquer entre les deux après une perte d'équilibre");
-		}
-	}
+	//void OnValidate()
+	//{
+	//	if(Recovery_Angle < GetComponent<CharacterV3>().Confort_angle)
+	//	{
+	//		Debug.LogError("Attention ! un Recovery_Angle inférieur au Confort_Angle signifie que le joueur peut rester bloquer entre les deux après une perte d'équilibre");
+	//	}
+	//}
 		
 
 }

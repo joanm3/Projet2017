@@ -18,8 +18,8 @@ TagManager:
   - Obstacle
   - Fade
   - Terrain
-  - PlayerFeet
-  - 
+  - Grid
+  - Environment
   - 
   - 
   - 
