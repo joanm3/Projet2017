@@ -25,6 +25,8 @@ public class plaitAnimation : MonoBehaviour {
     [Range(1f, 90f)]
     private float maxAngle = 25f;
 
+	public Vector3 directionOfFalling = -Vector3.up;
+
     private List<Transform> m_bonesList;
     private List<Transform> m_initialBonesTransform;
 
@@ -137,7 +139,7 @@ public class plaitAnimation : MonoBehaviour {
     {
 		Quaternion toReturn;
 		//Check if moving
-		Vector3 _finalMoveVector = (_moveDir.normalized.magnitude > 0f) ? _moveDir : -Vector3.up;
+		Vector3 _finalMoveVector = (_moveDir.normalized.magnitude > 0f) ? _moveDir : directionOfFalling;
 
 		//We rotate the up of the bone toward the desired vector, because this is the way the rig was created in it's 3d software
 		Quaternion fromTo = Quaternion.FromToRotation(_boneTransform.up, _finalMoveVector) * _boneTransform.rotation;

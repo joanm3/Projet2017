@@ -142,7 +142,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4679490940579294}
-  - component: {fileID: 114357213623719438}
   m_Layer: 0
   m_Name: Armature
   m_TagString: Untagged
@@ -158,6 +157,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4389043341608846}
+  - component: {fileID: 114218418502275306}
   m_Layer: 0
   m_Name: Arche
   m_TagString: Untagged
@@ -289,7 +289,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1568201814241790}
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0.0000029653306}
-  m_LocalPosition: {x: -123, y: 0, z: 626}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 19.789856, y: 19.78985, z: 19.78985}
   m_Children:
   - {fileID: 4679490940579294}
@@ -473,12 +473,12 @@ MeshCollider:
   m_InflateMesh: 0
   m_SkinWidth: 0.01
   m_Mesh: {fileID: 4300002, guid: 25423ef2a0a71fd45ab1513c24f6010d, type: 3}
---- !u!114 &114357213623719438
+--- !u!114 &114218418502275306
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1559647026737062}
+  m_GameObject: {fileID: 1568201814241790}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f464a57561b50c4b90191a6d6458cb8, type: 3}
@@ -524,6 +524,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   maxAngle: 25
+  directionOfFalling: {x: -0, y: -1, z: -0}
 --- !u!137 &137707304254269162
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1
