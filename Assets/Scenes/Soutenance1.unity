@@ -37,7 +37,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -323,6 +323,20 @@ Prefab:
     - target: {fileID: 4734887025125442, guid: 2909c8735dea9b145815ca22bcd7cb57, type: 2}
       propertyPath: m_RootOrder
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 114659913763377108, guid: 2909c8735dea9b145815ca22bcd7cb57,
+        type: 2}
+      propertyPath: waves.Array.data[0].Speed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114659913763377108, guid: 2909c8735dea9b145815ca22bcd7cb57,
+        type: 2}
+      propertyPath: waves.Array.data[1].Speed
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4226941016508086, guid: 2909c8735dea9b145815ca22bcd7cb57, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: -4.09
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 2909c8735dea9b145815ca22bcd7cb57, type: 2}

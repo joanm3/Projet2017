@@ -235,7 +235,7 @@ public class CharacterMotion : MonoBehaviour
             m_inputRotation = UpdateInputRotation(m_inputRotation, m_inputDeltaHeadingAngleInDeg);
         }
 
-        m_isGrounded = GetRaycastAtPosition(out m_surfaceHit, -Up, 1.5f);
+        m_isGrounded = GetRaycastAtPosition(out m_surfaceHit, -Up, 3f);
         m_surfacePoint = m_surfaceHit.point;
         if (m_surfaceTransform != m_surfaceHit.transform)
             m_lastFrameSnapInitialized = false;
@@ -481,7 +481,7 @@ public class CharacterMotion : MonoBehaviour
                     transform.rotation = m_inputRotation;
                 }
 
-                UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
+                UpdateCharacterDirection(ref m_characterDirection, _dt * 6f, 0.5f);
                 //Vector3 _characterMotion = (m_characterDirection * m_characterSpeed) + (m_verticalSpeed * Vector3.up);
                 Vector3 _characterMotion = (m_characterDirection * m_characterSpeed) + m_fallVec;
 
@@ -527,7 +527,8 @@ public class CharacterMotion : MonoBehaviour
         Gizmos.color = Color.magenta;
         //surfaceNormal
         //Gizmos.DrawLine(m_surfaceHit.point, m_surfaceHit.point + (m_surfaceNormal * _linesLenght));
-        Gizmos.DrawSphere(m_surfaceTransform.TransformPoint(m_lastFrameSnap), 0.25f);
+        if (m_surfaceTransform != null)
+            Gizmos.DrawSphere(m_surfaceTransform.TransformPoint(m_lastFrameSnap), 0.25f);
         //tangent surface
         Gizmos.color = Color.cyan;
         Vector3 _groundPosition = new Vector3(transform.position.x, transform.position.y - m_controller.bounds.extents.y, transform.position.z);
@@ -579,12 +580,12 @@ public class CharacterMotion : MonoBehaviour
         {
             if (characterState != CharacterState.Gliding && characterState != CharacterState.StrongGliding)
             {
-                if (!m_snappedToPosition)
-                {
-                    //Debug.Log("snapping");
-                    //transform.position = m_surfaceHitCharacterPosition;
-                    //m_snappedToPosition = true;
-                }
+                //if (!m_snappedToPosition)
+                //{
+                Debug.Log("snapping");
+                transform.position = m_surfaceHitCharacterPosition;
+                m_snappedToPosition = true;
+                //}
             }
         }
     }
@@ -724,24 +725,41 @@ public class CharacterMotion : MonoBehaviour
 
     Vector3 m_glidingVector;
 
-    private void UpdateCharacterDirection(ref Vector3 directionVector, float deltaTime)
+    private void UpdateCharacterDirection(ref Vector3 directionVector, float deltaTime, float lerpFactor)
     {
+
 
         //check all this function it creates bugs. 
         if (Mathf.Sign(Speed) < 0f)
         {
-            directionVector = m_glidingVector;
+            //directionVector = Vector3.Lerp(directionVector, m_glidingVector,  );
             //Debug.Log("using gliding vector:");
-            //directionVector = m_characterForward;
+            directionVector = m_glidingVector;
             //directionVector = Vector3.MoveTowards(directionVector, -m_surfaceTangDownwardsNormalized, deltaTime);
         }
+        //else if ((Mathf.Sign(Speed) > 0f && m_inputMagnitude < 0.2f))
+        //{
+        //    directionVector = -m_glidingVector;
+
+        //}
         else
         {
             //directionVector = Vector3.MoveTowards(directionVector, m_characterForward, deltaTime);
+            directionVector = Vector3.Slerp(directionVector, m_characterForward, Time.deltaTime * lerpFactor);
             directionVector = m_characterForward;
+
         }
         //directionVector = m_characterForward;
-
+        //if (m_surfaceTangDownwardsNormalized != Vector3.zero &&
+        //        (m_surfaceAngle > StartForcesAngle))
+        //{
+        //    directionVector = Vector3.Slerp(m_glidingVector, m_characterForward, Mathf.Clamp(m_inputMagnitude / 0.2f, 0.0f, 1.0f));
+        //}
+        //else
+        //{
+        //    directionVector = m_characterForward;
+        //}
+        //Vector3.SmoothDamp()
     }
 
 
