@@ -137,7 +137,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!108 &140542589
 Light:
   m_ObjectHideFlags: 0
@@ -648,7 +648,7 @@ Light:
   serializedVersion: 7
   m_Type: 1
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
-  m_Intensity: 1
+  m_Intensity: 0.88
   m_Range: 10
   m_SpotAngle: 30
   m_CookieSize: 10
@@ -1898,6 +1898,10 @@ Prefab:
       propertyPath: m_AABB.m_Extent.z
       value: 0.028045734
       objectReference: {fileID: 0}
+    - target: {fileID: 1198294407739098, guid: adda59abde2c64e4294d3ba1695eb9bc, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: adda59abde2c64e4294d3ba1695eb9bc, type: 2}
   m_IsPrefabParent: 0
@@ -2549,6 +2553,18 @@ Prefab:
         type: 2}
       propertyPath: far clip plane
       value: 20000
+      objectReference: {fileID: 0}
+    - target: {fileID: 4011148373746976, guid: e326332f5efa2c141a0c57df35432282, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: -0.30070576
+      objectReference: {fileID: 0}
+    - target: {fileID: 4011148373746976, guid: e326332f5efa2c141a0c57df35432282, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 0.953717
+      objectReference: {fileID: 0}
+    - target: {fileID: 4011148373746976, guid: e326332f5efa2c141a0c57df35432282, type: 2}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -35
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: e326332f5efa2c141a0c57df35432282, type: 2}

@@ -329,20 +329,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
-    - target: {fileID: 114659913763377108, guid: 2909c8735dea9b145815ca22bcd7cb57,
-        type: 2}
-      propertyPath: waves.Array.data[0].Speed
-      value: 0.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 114659913763377108, guid: 2909c8735dea9b145815ca22bcd7cb57,
-        type: 2}
-      propertyPath: waves.Array.data[1].Speed
-      value: 0.6
-      objectReference: {fileID: 0}
-    - target: {fileID: 4226941016508086, guid: 2909c8735dea9b145815ca22bcd7cb57, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: -4.09
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 2909c8735dea9b145815ca22bcd7cb57, type: 2}
   m_IsPrefabParent: 0
