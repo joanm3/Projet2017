@@ -137,7 +137,7 @@ Prefab:
     - target: {fileID: 114458663166565990, guid: dc1d1f69e95940d4bab5318551910988,
         type: 2}
       propertyPath: FallInflectionAngle
-      value: 46.5
+      value: 36.46
       objectReference: {fileID: 0}
     - target: {fileID: 114458663166565990, guid: dc1d1f69e95940d4bab5318551910988,
         type: 2}
@@ -152,12 +152,17 @@ Prefab:
     - target: {fileID: 114458663166565990, guid: dc1d1f69e95940d4bab5318551910988,
         type: 2}
       propertyPath: velMax
-      value: 31.99
+      value: 25.07
       objectReference: {fileID: 0}
     - target: {fileID: 114458663166565990, guid: dc1d1f69e95940d4bab5318551910988,
         type: 2}
       propertyPath: StartForcesAngle
-      value: 10.1
+      value: 8.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 114458663166565990, guid: dc1d1f69e95940d4bab5318551910988,
+        type: 2}
+      propertyPath: m_lerpForcesVelocity
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: dc1d1f69e95940d4bab5318551910988, type: 2}
