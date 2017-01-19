@@ -2473,8 +2473,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1043053349769534}
-  m_LocalRotation: {x: -0, y: -0, z: 0.012085421, w: 0.99992704}
-  m_LocalPosition: {x: -5.326636, y: 37.7416, z: 1.43}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 4.65, y: 1.86, z: 5.62}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4901834509470834}
@@ -3302,6 +3302,7 @@ MonoBehaviour:
   m_cam: {fileID: 0}
   m_characterRenderer: {fileID: 4990310244853796}
   CA: {fileID: 114594173572400758}
+  m_snap: 0
   characterMovementType: 1
   m_startRunningSpeed: 10
   m_maxRotSpeed: 1440

@@ -16,9 +16,9 @@ public class CharacterMotion : MonoBehaviour
     private Transform m_characterRenderer;
     [SerializeField]
     characterAnimation CA;
-	[SerializeField]
-	private bool m_snap = true; 
-	public bool Snap {get {return m_snap;}}
+    [SerializeField]
+    private bool m_snap = true;
+    public bool Snap { get { return m_snap; } }
 
     //input
     public enum CharacterMovementType { Absolute, Relative, NoInput, NoMovement };
@@ -29,6 +29,7 @@ public class CharacterMotion : MonoBehaviour
     public Vector3 InputVector { get { return m_inputVector; } }
     private float m_inputMagnitude;
     private float m_inputDeltaHeadingAngleInDeg;
+
     private Quaternion m_inputRotation;
     public Quaternion Rotation { get { return m_inputRotation; } set { m_inputRotation = value; } }
     [SerializeField]
@@ -393,10 +394,14 @@ public class CharacterMotion : MonoBehaviour
             case CharacterMovementType.Relative:
             case CharacterMovementType.Absolute:
             case CharacterMovementType.NoInput:
-                if (characterMovementType == CharacterMovementType.Relative)
+                if (characterMovementType == CharacterMovementType.Relative && transform.parent != null)
                 {
                     transform.rotation = Quaternion.Euler(Vector3.zero);
                     m_characterRenderer.rotation = Quaternion.Euler(0f, m_inputDeltaHeadingAngleInDeg, 0f);
+                }
+                else
+                {
+                    transform.rotation = m_inputRotation;
                 }
 
                 UpdateCharacterDirection(ref m_characterDirection, _dt * 6f);
@@ -495,7 +500,7 @@ public class CharacterMotion : MonoBehaviour
             {
                 if (m_snap)
                 {
-					
+
                     Debug.Log("snapping");
                     transform.position = m_surfaceHitCharacterPosition;
                 }
@@ -618,11 +623,11 @@ public class CharacterMotion : MonoBehaviour
 
     }
 
-	private float UpdateInputForce(float maxForce, float forceMagnitude, float minMagnitude)
+    private float UpdateInputForce(float maxForce, float forceMagnitude, float minMagnitude)
     {
 
-		if(forceMagnitude < minMagnitude)
-			return 0f; 
+        if (forceMagnitude < minMagnitude)
+            return 0f;
         // magnitude between 0 and 1
         return maxForce * forceMagnitude;
     }
@@ -670,8 +675,8 @@ public class CharacterMotion : MonoBehaviour
         if (inputVector.magnitude >= 0.99f)
             inputVector.Normalize();
         //Debug.Log(inputVector.magnitude);
-		if(inputVector.magnitude <= 0.4f)
-			return Vector3.zero;
+        if (inputVector.magnitude <= 0.4f)
+            return Vector3.zero;
 
         return inputVector;
     }
@@ -701,7 +706,7 @@ public class CharacterMotion : MonoBehaviour
     {
         Vector3 inputVector = (Vector3.forward * Input.GetAxis("Vertical"))
         + (Vector3.right * Input.GetAxis("Horizontal"));
-        return inputVector.magnitude;
+        return inputVector.normalized.magnitude;
 
     }
 
