@@ -616,11 +616,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 22
       objectReference: {fileID: 0}
-    - target: {fileID: 114750747172138394, guid: f0e0cd9983e53234fb75040a13996473,
-        type: 2}
-      propertyPath: m_lerpForcesVelocity
-      value: 1.5
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: f0e0cd9983e53234fb75040a13996473, type: 2}
   m_IsPrefabParent: 0

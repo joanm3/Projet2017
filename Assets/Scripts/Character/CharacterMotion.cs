@@ -16,6 +16,7 @@ public class CharacterMotion : MonoBehaviour
     private Transform m_characterRenderer;
     [SerializeField]
     characterAnimation CA;
+    public GetGravitySurface gravitySurfaceDetector;
     [SerializeField]
     private bool m_snap = true;
     public bool Snap { get { return m_snap; } }
@@ -227,7 +228,12 @@ public class CharacterMotion : MonoBehaviour
         //we should calculate only when changing surface: lastsurface != currentSurface
         if (m_isGrounded)
         {
-            m_surfaceNormal = UpdateSurfaceNormalByRaycast(out m_surfaceHit, -Up, 10f);
+            if (gravitySurfaceDetector != null)
+                m_surfaceNormal = gravitySurfaceDetector.averageSurfaceNormal;
+            else
+                m_surfaceNormal = UpdateSurfaceNormalByRaycast(out m_surfaceHit, -Up, 10f);
+
+
             m_upSurfaceNormal = UpdateSurfaceNormalByRaycast(out m_upHit, m_gravVector.normalized, 1f);
         }
         else

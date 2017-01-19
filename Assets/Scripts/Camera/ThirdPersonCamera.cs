@@ -201,7 +201,7 @@ public class ThirdPersonCamera : MonoBehaviour
                     if (cameraMode != CamMode.Orbit)
                     {
                         cameraMode = CamMode.Orbit;
-                        characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Relative;
+                       // characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Relative;
                     }
                 }
             }
@@ -243,7 +243,7 @@ public class ThirdPersonCamera : MonoBehaviour
             #region Orbit
             case CamMode.Orbit:
                 ResetCamera();
-                characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Relative;
+                //characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Relative;
 
                 if (characterMotion.Speed > movementThreshold)
                 {
@@ -317,7 +317,7 @@ public class ThirdPersonCamera : MonoBehaviour
             #region Target
             case CamMode.Target:
                 //ResetCamera();
-                characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Absolute;
+               // characterMotion.characterMovementType = CharacterMotion.CharacterMovementType.Absolute;
                 lookDir = character.forward;
                 curLookDir = character.forward;
 
