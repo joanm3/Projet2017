@@ -112,8 +112,8 @@ public class CameraTriggerBehaviour : MonoBehaviour
 
         if (changeCamera == true)
         {
-            thirdPersonCameraMovement.currentX = 0f;
-            thirdPersonCameraMovement.currentY = 0f;
+            //thirdPersonCameraMovement.currentX = 0f;
+            //thirdPersonCameraMovement.currentY = 0f;
 
             LerpToNewValues(fracJourney);
 
