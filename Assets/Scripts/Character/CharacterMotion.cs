@@ -16,7 +16,9 @@ public class CharacterMotion : MonoBehaviour
     private Transform m_characterRenderer;
     [SerializeField]
     characterAnimation CA;
-
+	[SerializeField]
+	private bool m_snap = true; 
+	public bool Snap {get {return m_snap;}}
 
     //input
     public enum CharacterMovementType { Absolute, Relative, NoInput, NoMovement };
@@ -491,10 +493,11 @@ public class CharacterMotion : MonoBehaviour
         {
             if (characterState != CharacterState.Gliding && characterState != CharacterState.StrongGliding)
             {
-                if (m_surfaceAngle < 45f)
+                if (m_snap)
                 {
-                    //Debug.Log("snapping");
-                    //transform.position = m_surfaceHitCharacterPosition;
+					
+                    Debug.Log("snapping");
+                    transform.position = m_surfaceHitCharacterPosition;
                 }
             }
         }
@@ -736,7 +739,7 @@ public class CharacterMotion : MonoBehaviour
 
     private Vector3 GetSnapPositionByHitPoint(Vector3 point)
     {
-        return point - (-transform.up * (m_controller.bounds.extents.y + 0.1f));
+        return point - (-transform.up * (m_controller.bounds.extents.y));
     }
 
     private Vector3 UpdateSurfaceNormalByRaycast(out RaycastHit hitInfo, Vector3 rayDirection, float distance)
