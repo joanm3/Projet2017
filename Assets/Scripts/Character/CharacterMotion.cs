@@ -78,7 +78,7 @@ public class CharacterMotion : MonoBehaviour
     private RaycastHit m_upHit;
     private Vector3 m_surfaceHitCharacterPosition;
     private Vector3 m_upHitPoint;
-
+    private Vector3 m_surfacePoint;
     //gravity
     [SerializeField]
     private bool m_isGrounded = false;
@@ -129,7 +129,7 @@ public class CharacterMotion : MonoBehaviour
     private float m_characterCurrentForwardAngleFromGroundZero;
     [SerializeField]
     private float m_characterCurrentSpeed;
-
+    private Vector3 m_lastMotionStep;
     //forces
     [Range(0.1f, 3f)]
     public float massPlayer = 1;
@@ -158,6 +158,17 @@ public class CharacterMotion : MonoBehaviour
     [SerializeField]
     private float m_lerpForcesVelocity = 1f;
     private bool m_snappedToPosition = false;
+    private Transform m_surfaceTransform;
+
+
+
+    private Transform m_lastSurfaceTransform;
+    //Vector3 m_lastSurfacePosition;
+    //Quaternion m_lastSurfaceRotation;
+    //Vector3 m_lastSurfaceLocalScale;
+
+    Vector3 m_lastFrameSnap;
+    bool m_lastFrameSnapInitialized = false;
 
     #endregion
 
@@ -165,6 +176,8 @@ public class CharacterMotion : MonoBehaviour
 
     private void Start()
     {
+
+        m_lastSurfaceTransform = new GameObject().transform;
         m_controller = GetComponent<CharacterController>();
         m_lastSurfaceNormal = m_surfaceNormal;
         m_surfaceAngle = 0f;
@@ -211,6 +224,9 @@ public class CharacterMotion : MonoBehaviour
                 break;
         }
 
+        m_characterForward = m_characterRotation * Vector3.forward;
+        m_characterUp = m_characterRotation * Vector3.up;
+        m_characterRight = m_characterRotation * Vector3.right;
 
 
         if (m_inputMagnitude >= 0.5f)
@@ -219,7 +235,16 @@ public class CharacterMotion : MonoBehaviour
             m_inputRotation = UpdateInputRotation(m_inputRotation, m_inputDeltaHeadingAngleInDeg);
         }
 
-        m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, -Up, 1f) : false;
+        m_isGrounded = GetRaycastAtPosition(out m_surfaceHit, -Up, 1.5f);
+        m_surfacePoint = m_surfaceHit.point;
+        if (m_surfaceTransform != m_surfaceHit.transform)
+            m_lastFrameSnapInitialized = false;
+
+
+
+
+
+        m_surfaceTransform = m_surfaceHit.transform;
         //m_isGrounded = true;
         //Debug.Log("char.Up: " + Up);
         #endregion
@@ -242,7 +267,6 @@ public class CharacterMotion : MonoBehaviour
         }
         //Debug.Log("surfaceNormal: " + m_surfaceNormal);
 
-        m_normalRotation = GetRotationByNormal2(m_inputRotation, m_surfaceNormal, Vector3.up);
 
         //calculate when changing surface
         if (m_lastSurfaceNormal != m_surfaceNormal)
@@ -267,6 +291,7 @@ public class CharacterMotion : MonoBehaviour
 
 
         #region GET CHARACTER VALUES: INPUT + SURFACE
+        m_normalRotation = GetRotationByNormal2(m_inputRotation, m_surfaceNormal, Vector3.up);
         m_characterRotation = m_normalRotation * m_inputRotation;
         m_characterForward = m_characterRotation * Vector3.forward;
         m_characterUp = m_characterRotation * Vector3.up;
@@ -395,6 +420,49 @@ public class CharacterMotion : MonoBehaviour
         AssignAnimation();
         #endregion
 
+        #region SNAP CHARACTER TO GROUND
+        if (IsGrounded)
+        {
+            Vector3 _currentFrameSnap = m_surfacePoint;
+            if (m_lastFrameSnapInitialized)
+            {
+
+                //if (!m_lastSurfaceTransform.position.Equals(m_surfaceTransform.position))
+                //{
+                //    Debug.Log("Diff pos:" + (m_surfaceTransform.position- m_lastSurfaceTransform.position));
+                //}
+
+                Vector3 lastPos = m_lastSurfaceTransform.TransformPoint(m_lastFrameSnap);
+                Vector3 newPos = m_surfaceTransform.TransformPoint(m_lastFrameSnap);
+
+                Vector3 _posCorrection = newPos - lastPos;
+                Debug.Log(_posCorrection);
+
+                m_controller.Move(_posCorrection);
+            }
+            m_lastFrameSnap = m_surfaceTransform.InverseTransformPoint(_currentFrameSnap);
+            if (!m_surfaceTransform.TransformPoint(m_lastFrameSnap).Equals(_currentFrameSnap))
+            {
+                Vector3 diff = m_surfaceTransform.TransformPoint(m_lastFrameSnap) - _currentFrameSnap;
+                //Debug.Log("Problem here: " + diff);
+
+            }
+            m_lastFrameSnapInitialized = true;
+        }
+
+        if (m_surfaceTransform != null)
+        {
+
+            m_lastSurfaceTransform.position = m_surfaceTransform.position;
+            m_lastSurfaceTransform.rotation = m_surfaceTransform.rotation;
+            m_lastSurfaceTransform.localScale = m_surfaceTransform.localScale;
+        }
+        else
+        {
+            m_lastFrameSnapInitialized = false;
+        }
+
+        #endregion
 
         #region CHARACTER MOTION
 
@@ -406,7 +474,7 @@ public class CharacterMotion : MonoBehaviour
                 if (characterMovementType == CharacterMovementType.Relative && transform.parent != null)
                 {
                     transform.rotation = Quaternion.Euler(Vector3.zero);
-                    m_characterRenderer.rotation = Quaternion.Euler(0f, m_inputDeltaHeadingAngleInDeg, 0f);
+                    m_characterRenderer.rotation = m_inputRotation;
                 }
                 else
                 {
@@ -417,14 +485,17 @@ public class CharacterMotion : MonoBehaviour
                 //Vector3 _characterMotion = (m_characterDirection * m_characterSpeed) + (m_verticalSpeed * Vector3.up);
                 Vector3 _characterMotion = (m_characterDirection * m_characterSpeed) + m_fallVec;
 
+
                 //Debug.Log("direction: " + (m_characterDirection * m_characterSpeed) + "fallVector:" + m_fallVector + "motion: " + _characterMotion);
-                m_controller.Move(_characterMotion * _dt);
+                m_lastMotionStep = _characterMotion * _dt;
+                m_controller.Move(m_lastMotionStep);
                 break;
             case CharacterMovementType.NoMovement:
                 break;
 
 
         }
+
 
 
 
@@ -442,25 +513,26 @@ public class CharacterMotion : MonoBehaviour
         float _linesLenght = 2f;
         Gizmos.color = Color.blue;
         //forward
-        Gizmos.DrawLine(transform.position, transform.position + (m_characterForward * _linesLenght));
-        Gizmos.DrawSphere(m_surfaceHit.point, 0.5f);
+        // Gizmos.DrawLine(transform.position, transform.position + (m_characterForward * _linesLenght));
+        Gizmos.DrawSphere(m_surfacePoint, 0.5f);
 
         //up
         Gizmos.color = Color.green;
-        Gizmos.DrawLine(transform.position, transform.position + m_characterUp * _linesLenght);
+        // Gizmos.DrawLine(transform.position, transform.position + m_characterUp * _linesLenght * -1f);
 
-        //gravity vector
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(transform.position, transform.position + m_gravVector * _linesLenght);
+        ////gravity vector
+        //Gizmos.color = Color.yellow;
+        //Gizmos.DrawLine(transform.position, transform.position + m_gravVector * _linesLenght);
 
         Gizmos.color = Color.magenta;
         //surfaceNormal
-        Gizmos.DrawLine(m_surfaceHit.point, m_surfaceHit.point + (m_surfaceNormal * _linesLenght));
-
+        //Gizmos.DrawLine(m_surfaceHit.point, m_surfaceHit.point + (m_surfaceNormal * _linesLenght));
+        Gizmos.DrawSphere(m_surfaceTransform.TransformPoint(m_lastFrameSnap), 0.25f);
         //tangent surface
         Gizmos.color = Color.cyan;
         Vector3 _groundPosition = new Vector3(transform.position.x, transform.position.y - m_controller.bounds.extents.y, transform.position.z);
-        Gizmos.DrawLine(_groundPosition, _groundPosition + m_surfaceTangDownwardsNormalized * _linesLenght);
+        //Gizmos.DrawLine(_groundPosition, _groundPosition + m_surfaceTangDownwardsNormalized * _linesLenght);
+        Gizmos.DrawSphere(m_lastSurfaceTransform.TransformPoint(m_lastFrameSnap), 0.25f);
 
     }
 
@@ -509,9 +581,9 @@ public class CharacterMotion : MonoBehaviour
             {
                 if (!m_snappedToPosition)
                 {
-                    Debug.Log("snapping");
-                    transform.position = m_surfaceHitCharacterPosition;
-                    m_snappedToPosition = true;
+                    //Debug.Log("snapping");
+                    //transform.position = m_surfaceHitCharacterPosition;
+                    //m_snappedToPosition = true;
                 }
             }
         }
