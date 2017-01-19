@@ -436,7 +436,7 @@ public class CharacterMotion : MonoBehaviour
                 Vector3 newPos = m_surfaceTransform.TransformPoint(m_lastFrameSnap);
 
                 Vector3 _posCorrection = newPos - lastPos;
-                Debug.Log(_posCorrection);
+
 
                 m_controller.Move(_posCorrection);
             }
@@ -576,7 +576,7 @@ public class CharacterMotion : MonoBehaviour
         m_surfaceHitCharacterPosition = GetSnapPositionByHitPoint(m_collisionPoint);
         m_upHitPoint = GetSnapPositionByHitPoint(m_upHit.point);
 
-        if (Vector3.Distance(transform.position, m_surfaceHitCharacterPosition) >= 0.1f)
+        if (Vector3.Distance(transform.position, m_surfaceHitCharacterPosition) >= 0.5f)
         {
             if (characterState != CharacterState.Gliding && characterState != CharacterState.StrongGliding)
             {
