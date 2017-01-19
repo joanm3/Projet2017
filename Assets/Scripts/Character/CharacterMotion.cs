@@ -154,7 +154,9 @@ public class CharacterMotion : MonoBehaviour
     private float m_verticalSpeed;
     [SerializeField]
     private float m_characterInitialJumpSpeed = 1f;
+    [SerializeField]
     private float m_lerpForcesVelocity = 1f;
+    private bool m_snappedToPosition = false;
 
     #endregion
 
@@ -477,12 +479,12 @@ public class CharacterMotion : MonoBehaviour
         m_gravFallingVector = m_gravVector;
         m_verticalSpeed = 0f;
 
-        if (Input.GetButtonDown("Jump"))
-        {
-            m_tGrav = 0f;
-            //characterState = CharacterState.Jumping;
-            //Jump(m_surfaceNormal);
-        }
+        //if (Input.GetButtonDown("Jump"))
+        //{
+        //    m_tGrav = 0f;
+        //    characterState = CharacterState.Jumping;
+        //    Jump(m_surfaceNormal);
+        //}
 
         //change this to when hitting ground to calculate once, not every frame. 
         m_inputGravityMultiplier = 1f;
@@ -499,11 +501,11 @@ public class CharacterMotion : MonoBehaviour
         {
             if (characterState != CharacterState.Gliding && characterState != CharacterState.StrongGliding)
             {
-                if (m_snap)
+                if (!m_snappedToPosition)
                 {
-
                     Debug.Log("snapping");
                     transform.position = m_surfaceHitCharacterPosition;
+                    m_snappedToPosition = true;
                 }
             }
         }
@@ -513,6 +515,7 @@ public class CharacterMotion : MonoBehaviour
 
     private void OnAirUpdate(float deltaTime)
     {
+        m_snappedToPosition = false;
         //m_verticalSpeed += -m_gravForce * deltaTime;
         m_fallVec += -m_gravForce * -m_gravFallingVector * deltaTime;
         //Debug.Log(m_fallVec);

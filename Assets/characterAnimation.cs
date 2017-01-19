@@ -137,14 +137,13 @@ public class characterAnimation : MonoBehaviour
     private bool playIdle2 = false;
 
 
-
     //Il faut appeller cette fonction toutes les frames
     public void SetMovingMode(float totalSpeed, float speedInputMax)
     {
 
         float _tempSpeed = totalSpeed / speedInputMax;  //Range 0 to 1
         _tempSpeed /= 2f;   //Range 0 to 0.5
-        _tempSpeed = Mathf.Clamp((_tempSpeed * 1.75f) + 0.5f, 0.5f, 1f);    //Range 0.5 to 1. Multiply is used to make the animation run at full speed even if the player isn't
+        _tempSpeed = Mathf.Clamp((_tempSpeed * 1.9f) + 0.5f, 0.5f, 1f);    //Range 0.5 to 1. Multiply is used to make the animation run at full speed even if the player isn't
 
         if (totalSpeed <= 0.1f)
         {

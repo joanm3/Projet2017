@@ -3327,7 +3327,7 @@ MonoBehaviour:
     m_RotationOrder: 0
   m_surfaceAngle: 0
   m_isGrounded: 0
-  m_airGravForce: 4
+  m_airGravForce: 3
   m_gravForceOverTime:
     serializedVersion: 2
     m_Curve:
@@ -3346,7 +3346,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
-  m_jumpForce: 30
+  m_jumpForce: 96.5
   m_gravVector: {x: -0, y: -1, z: -0}
   m_inputGravityMultiplier: 1
   m_tJumpCooldown: 0.2
@@ -3360,14 +3360,14 @@ MonoBehaviour:
   stopThreshold: 1
   Glide: 1
   StartForcesAngle: 15
-  FallInflectionAngle: 44.07
+  FallInflectionAngle: 35.3
   m_gravForce: 9.8
   m_maxForce: 1
   m_inputCurrentForce: 0
   m_surfaceCurrentDescentForce: 0
   m_currentTotalForce: 0
   m_characterInitialJumpSpeed: 1
-  lerpForcesVelocity: 1
+  m_lerpForcesVelocity: 1.5
 --- !u!137 &137389561936333156
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1
