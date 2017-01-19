@@ -580,12 +580,12 @@ public class CharacterMotion : MonoBehaviour
         {
             if (characterState != CharacterState.Gliding && characterState != CharacterState.StrongGliding)
             {
-                //if (!m_snappedToPosition)
-                //{
-                Debug.Log("snapping");
-                transform.position = m_surfaceHitCharacterPosition;
-                m_snappedToPosition = true;
-                //}
+                if (Snap)
+                {
+                    Debug.Log("snapping");
+                    transform.position = m_surfaceHitCharacterPosition;
+                    m_snappedToPosition = true;
+                }
             }
         }
     }

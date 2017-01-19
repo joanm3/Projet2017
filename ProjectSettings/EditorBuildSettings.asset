@@ -6,4 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/PlayGroundGravity.unity
+    path: Assets/Scenes/Terrain1.unity
+  - enabled: 1
+    path: Assets/Scenes/05 giant mecanim scriptable.unity

@@ -133,7 +133,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     [SerializeField]
     Vector3 lookAtPosition = new Vector3();
 
-#if UNITY_EDITOR
+
 
     Vector3 gizmoPoint;
     Vector3 gizmoRayDirection;
@@ -194,7 +194,7 @@ public class ThirdPersonCameraMovement : MonoBehaviour
     [SerializeField]
     private bool m_smoothCollision = true;
 
-#endif
+
 
     private const float minY = 0f;
     private const float maxY = 180f;
