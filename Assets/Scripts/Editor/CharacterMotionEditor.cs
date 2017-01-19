@@ -48,13 +48,14 @@ public class CharacterMotionEditor : Editor
 
     //read only
     private readonly CProperty CHAR_DIRECTION = new CProperty("m_characterDirection", "Character Direction");
-    private readonly CProperty CHAR_CURR_SPEED = new CProperty("m_characterCurrentSpeed", "Current Speed");
+    private readonly CProperty CHAR_CURR_SPEED = new CProperty("m_characterSpeed", "Current Speed");
     private readonly CProperty SURF_GRAV_FORCE = new CProperty("m_gravForce", "Surface Grav Force");
     private readonly CProperty CHAR_MAX_FORCE = new CProperty("m_maxForce", "Max Force");
     private readonly CProperty INPUT_CURR_FORCE = new CProperty("m_inputCurrentForce", "Input Current Force");
     private readonly CProperty SUF_DESC_FORCE = new CProperty("m_surfaceCurrentDescentForce", "Surface Descent Force");
     private readonly CProperty TOTAL_FORCE = new CProperty("m_currentTotalForce", "TOTAL Force");
     private readonly CProperty SURFACE_ANGLE = new CProperty("m_surfaceAngle", "Surface Angle");
+    private readonly CProperty FORCES_LERP = new CProperty("m_lerpForcesVelocity", "Forces Lerp Factor");
 
     private static bool _showCustomInspector = true;
     private static bool _showReferences;
@@ -135,6 +136,7 @@ public class CharacterMotionEditor : Editor
             p.DisplayField(CHAR_VELMAX);
             p.DisplayField(CHAR_STOP_THRESHOLD);
             p.DisplayField(SURF_GLIDE);
+            p.DisplayField(FORCES_LERP);
             p.DisplayField(SURF_START_ANGLE);
             p.DisplayField(SURF_FALL_ANGLE);
             EditorGUILayout.Space();

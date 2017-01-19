@@ -262,8 +262,8 @@ public class ThirdPersonCameraMovement : MonoBehaviour
         //BEHAVIOUR Player too close to the camera
         PlayerFadeOutWhenTooClose();
 
-        float rightX = Input.GetAxis("360_R_Stick_X");
-        float rightY = Input.GetAxis("360_R_Stick_Y");
+        float rightX = Mathf.Abs(Input.GetAxis("360_R_Stick_X")) < 0.4f ? 0f : Input.GetAxis("360_R_Stick_X");
+        float rightY = Mathf.Abs(Input.GetAxis("360_R_Stick_Y")) < 0.4f ? 0f : Input.GetAxis("360_R_Stick_Y");
 
 
         #region Assign Camera Mode

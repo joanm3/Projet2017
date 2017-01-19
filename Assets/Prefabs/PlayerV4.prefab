@@ -3352,20 +3352,22 @@ MonoBehaviour:
   m_tJumpCooldown: 0.2
   characterState: 0
   m_characterDirection: {x: 0, y: 0, z: 0}
+  m_characterSpeed: 0
   m_characterCurrentSpeed: 0
   massPlayer: 1.2
   friction: 0.56
-  velMax: 10
+  velMax: 30
   stopThreshold: 1
   Glide: 1
-  StartForcesAngle: 28
-  FallInflectionAngle: 38.3
+  StartForcesAngle: 15
+  FallInflectionAngle: 44.07
   m_gravForce: 9.8
   m_maxForce: 1
   m_inputCurrentForce: 0
   m_surfaceCurrentDescentForce: 0
   m_currentTotalForce: 0
   m_characterInitialJumpSpeed: 1
+  lerpForcesVelocity: 1
 --- !u!137 &137389561936333156
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 1

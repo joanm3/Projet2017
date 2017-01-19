@@ -117,7 +117,7 @@ public class CharacterMotion : MonoBehaviour
 
     private Vector3 m_characterUp;
     private Vector3 m_characterRight;
-
+    [SerializeField]
     private float m_characterSpeed;
     public float Speed
     {
@@ -154,6 +154,7 @@ public class CharacterMotion : MonoBehaviour
     private float m_verticalSpeed;
     [SerializeField]
     private float m_characterInitialJumpSpeed = 1f;
+    private float m_lerpForcesVelocity = 1f;
 
     #endregion
 
@@ -173,7 +174,6 @@ public class CharacterMotion : MonoBehaviour
 
     private void Update()
     {
-
 
         #region DELTA TIME
         //delta time
@@ -210,12 +210,12 @@ public class CharacterMotion : MonoBehaviour
 
 
 
-        if (m_inputMagnitude >= 0.4f)
+        if (m_inputMagnitude >= 0.5f)
         {
             m_inputDeltaHeadingAngleInDeg = GetAngleInDegFromVectors(m_inputVector, Vector3.forward);
+            m_inputRotation = UpdateInputRotation(m_inputRotation, m_inputDeltaHeadingAngleInDeg);
         }
 
-        m_inputRotation = UpdateInputRotation(m_inputRotation, m_inputDeltaHeadingAngleInDeg);
         m_isGrounded = (m_tGrav > m_tJumpCooldown) ? GetRaycastAtPosition(out m_surfaceHit, -Up, 1f) : false;
         //m_isGrounded = true;
         //Debug.Log("char.Up: " + Up);
@@ -274,12 +274,13 @@ public class CharacterMotion : MonoBehaviour
         m_maxForce = GetMaxForce(friction, velMax, massPlayer);
         m_gravForce = GetGravityFromInflectionAngle(FallInflectionAngle, m_maxForce, massPlayer);
         m_surfaceCurrentDescentForce = (m_characterAngleInDegFromSurfaceTang < 90f) ?
-            GetAngleForce(m_gravForce, m_characterCurrentForwardAngleFromGroundZero, massPlayer) :
-            GetAngleForce(m_gravForce, m_surfaceAngle, massPlayer);
-        m_inputCurrentForce = UpdateInputForce(m_maxForce, m_inputMagnitude, 0.7f);
+            GetAngleForce(m_gravForce, m_characterCurrentForwardAngleFromGroundZero, massPlayer, m_lerpForcesVelocity) :
+            GetAngleForce(m_gravForce, m_surfaceAngle, massPlayer, m_lerpForcesVelocity);
+
+        m_inputCurrentForce = UpdateInputForce(m_maxForce, m_inputMagnitude, 0.7f, m_lerpForcesVelocity);
         m_characterCurrentSpeed = UpdateInputSpeed(ref m_currentTotalForce, m_characterCurrentSpeed, _dt);
 
-        m_characterSpeed = m_characterCurrentSpeed;
+        m_characterSpeed = Mathf.Lerp(m_characterSpeed, m_characterCurrentSpeed, _dt * m_lerpForcesVelocity);
         if (!Glide && m_characterSpeed < 0f && m_surfaceAngle < FallInflectionAngle)
         {
             m_characterSpeed = 0f;
@@ -604,11 +605,14 @@ public class CharacterMotion : MonoBehaviour
         return dot < 0 ? -absAngle : absAngle;
     }
 
-    //apply to get force of surface. 
-    private static float GetAngleForce(float gravityForce, float surfaceAngleInDeg, float mass)
-    {
 
-        return -gravityForce * Mathf.Sin(surfaceAngleInDeg * Mathf.Deg2Rad) * mass;
+
+    //apply to get force of surface. 
+    private float GetAngleForce(float gravityForce, float surfaceAngleInDeg, float mass, float lerpForce)
+    {
+        return Mathf.Lerp(m_surfaceCurrentDescentForce, -gravityForce * Mathf.Sin(surfaceAngleInDeg * Mathf.Deg2Rad) * mass, Time.deltaTime * lerpForce);
+
+        // return -gravityForce * Mathf.Sin(surfaceAngleInDeg * Mathf.Deg2Rad) * mass;
     }
 
     private static float VelMax(float mass, float maxForce, float friction)
@@ -623,13 +627,13 @@ public class CharacterMotion : MonoBehaviour
 
     }
 
-    private float UpdateInputForce(float maxForce, float forceMagnitude, float minMagnitude)
+    private float UpdateInputForce(float maxForce, float forceMagnitude, float minMagnitude, float lerpForce)
     {
 
         if (forceMagnitude < minMagnitude)
             return 0f;
         // magnitude between 0 and 1
-        return maxForce * forceMagnitude;
+        return Mathf.Lerp(m_inputCurrentForce, maxForce * forceMagnitude, Time.deltaTime * lerpForce);
     }
 
     private static float GetGravityFromInflectionAngle(float angleInDeg, float fMax, float mass)
