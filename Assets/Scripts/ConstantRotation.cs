@@ -41,8 +41,8 @@ public class ConstantRotation : MonoBehaviour
 
         bool smallDistance = Mathf.Abs(actualRotation - targetAngle) < rotationAngleForce;
 
-        Debug.Log(Mathf.Abs(actualRotation - targetAngle));
-        Debug.Log(smallDistance);
+//        Debug.Log(Mathf.Abs(actualRotation - targetAngle));
+ //       Debug.Log(smallDistance);
         if (!smallDistance)
         {
             switch (axisRotation)
