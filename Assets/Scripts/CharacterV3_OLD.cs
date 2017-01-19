@@ -2,7 +2,7 @@
 using System.Collections;
 
 [RequireComponent (typeof(CharacterController))]
-public class CharacterV3 : MonoBehaviour
+public class CharacterV3_OLD : MonoBehaviour
 {
 
 	[Header ("Angles")]

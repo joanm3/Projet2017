@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ThirdPersonCameraMovement : MonoBehaviour
+public class ThirdPersonCameraMovementOLD : MonoBehaviour
 {
 
 	public Transform playerTransform;

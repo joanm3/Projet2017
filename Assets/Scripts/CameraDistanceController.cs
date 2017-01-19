@@ -3,7 +3,7 @@ using System.Collections;
 
 public class CameraDistanceController : MonoBehaviour
 {
-	public ThirdPersonCameraMovement thirdPersonCameraMovement;
+	public ThirdPersonCameraMovementOLD thirdPersonCameraMovement;
 
 	public float newDistance = 10f;
 	public float newX = 90f; 
@@ -20,7 +20,7 @@ public class CameraDistanceController : MonoBehaviour
 	{
 		startTime = Time.time; 
 		if (thirdPersonCameraMovement == null)
-			thirdPersonCameraMovement = Camera.main.GetComponentInParent<ThirdPersonCameraMovement> (); 
+			thirdPersonCameraMovement = Camera.main.GetComponentInParent<ThirdPersonCameraMovementOLD> (); 
 		
 		journeyLength = Mathf.Abs (thirdPersonCameraMovement.distance - newDistance); 
 

@@ -26,7 +26,7 @@ public class RotationByEquilibre : MonoBehaviour {
 
 	RaycastHit rayHit;
 	CharacterController myController;
-	CharacterV3 myCharacterV3Script;
+	CharacterV3_OLD myCharacterV3Script;
 	Material feedbackMat;
 
 	Quaternion currentInclinaison = Quaternion.identity;
@@ -45,7 +45,7 @@ public class RotationByEquilibre : MonoBehaviour {
 	void Start()
 	{
 		myController = GetComponent<CharacterController>();
-		myCharacterV3Script = GetComponent<CharacterV3>();
+		myCharacterV3Script = GetComponent<CharacterV3_OLD>();
 
         if(playerRender == null)
         {
@@ -194,7 +194,7 @@ public class RotationByEquilibre : MonoBehaviour {
 
 	void OnValidate()
 	{
-		if(Recovery_Angle < GetComponent<CharacterV3>().Confort_angle)
+		if(Recovery_Angle < GetComponent<CharacterV3_OLD>().Confort_angle)
 		{
 			Debug.LogError("Attention ! un Recovery_Angle inférieur au Confort_Angle signifie que le joueur peut rester bloquer entre les deux après une perte d'équilibre");
 		}
