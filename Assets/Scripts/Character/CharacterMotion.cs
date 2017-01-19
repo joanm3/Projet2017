@@ -207,7 +207,7 @@ public class CharacterMotion : MonoBehaviour
 
 
 
-        if (m_inputMagnitude >= 0.1f)
+        if (m_inputMagnitude >= 0.4f)
         {
             m_inputDeltaHeadingAngleInDeg = GetAngleInDegFromVectors(m_inputVector, Vector3.forward);
         }
@@ -273,7 +273,7 @@ public class CharacterMotion : MonoBehaviour
         m_surfaceCurrentDescentForce = (m_characterAngleInDegFromSurfaceTang < 90f) ?
             GetAngleForce(m_gravForce, m_characterCurrentForwardAngleFromGroundZero, massPlayer) :
             GetAngleForce(m_gravForce, m_surfaceAngle, massPlayer);
-        m_inputCurrentForce = UpdateInputForce(m_maxForce, m_inputMagnitude);
+        m_inputCurrentForce = UpdateInputForce(m_maxForce, m_inputMagnitude, 0.7f);
         m_characterCurrentSpeed = UpdateInputSpeed(ref m_currentTotalForce, m_characterCurrentSpeed, _dt);
 
         m_characterSpeed = m_characterCurrentSpeed;
@@ -615,8 +615,11 @@ public class CharacterMotion : MonoBehaviour
 
     }
 
-    private float UpdateInputForce(float maxForce, float forceMagnitude)
+	private float UpdateInputForce(float maxForce, float forceMagnitude, float minMagnitude)
     {
+
+		if(forceMagnitude < minMagnitude)
+			return 0f; 
         // magnitude between 0 and 1
         return maxForce * forceMagnitude;
     }
@@ -664,6 +667,9 @@ public class CharacterMotion : MonoBehaviour
         if (inputVector.magnitude >= 0.99f)
             inputVector.Normalize();
         //Debug.Log(inputVector.magnitude);
+		if(inputVector.magnitude <= 0.4f)
+			return Vector3.zero;
+
         return inputVector;
     }
 
