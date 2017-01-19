@@ -1,8 +1,8 @@
-﻿using UnityEditor;
+﻿#if UNITY_EDITOR
+using UnityEditor;
 using UnityEngine;
 using System;
 using System.Reflection;
-
 namespace EditorSupport
 {
     public static class ToolsSupport
@@ -25,3 +25,4 @@ namespace EditorSupport
         }
     }
 }
+#endif

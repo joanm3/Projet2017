@@ -24,8 +24,9 @@ public class LevelGridEditor : Editor
     {
         if (!_myTarget)
             _myTarget = target as LevelGrid;
-
+#if UNITY_EDITOR
         ToolsSupport.UnityHandlesHidden = LevelGrid.Ins.hideUnityHandles;
+#endif
         _myTarget.transform.position = Vector3.zero;
 
         float cols = _myTarget.sizeColums;

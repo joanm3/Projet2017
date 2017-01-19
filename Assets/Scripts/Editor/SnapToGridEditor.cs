@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEditor;
+#if UNITY_EDITOR
 using EditorSupport;
+#endif
 
 [CustomEditor(typeof(SnapToGrid))]
 public class SnapToGridEditor : Editor
@@ -46,7 +48,9 @@ public class SnapToGridEditor : Editor
             m_myTarget = target as SnapToGrid;
 
         //we should call this only when changing values, not always... but then again do it later. 
+#if UNITY_EDITOR
         ToolsSupport.UnityHandlesHidden = LevelGrid.Ins.hideUnityHandles;
+#endif
         if (!LevelGrid.Ins.hideUnityHandles && LevelGrid.Ins.autoRectTool)
             Tools.current = Tool.Rect;
 
