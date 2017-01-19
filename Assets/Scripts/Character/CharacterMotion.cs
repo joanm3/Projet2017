@@ -464,7 +464,7 @@ public class CharacterMotion : MonoBehaviour
         {
 
             //fall vector has to have the direction of the tang downwards of the point!
-            m_gravFallingVector = GetSurfaceTangentDownwards(hit.normal, hit.point);
+            //m_gravFallingVector = GetSurfaceTangentDownwards(hit.normal, hit.point);
             Debug.Log("collision while falling");
         }
 
