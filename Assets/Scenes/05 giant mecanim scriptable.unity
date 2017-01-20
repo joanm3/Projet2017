@@ -600,7 +600,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   keyToLoad: 116
-  loadSceneOnSpacePressed: 0
   loadActifScene: 0
   sceneToLoad: 0
 --- !u!114 &586605059
@@ -615,7 +614,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   keyToLoad: 114
-  loadSceneOnSpacePressed: 0
   loadActifScene: 0
   sceneToLoad: 1
 --- !u!4 &586605060
@@ -1676,7 +1674,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4687418695196700, guid: f0e0cd9983e53234fb75040a13996473, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 195
+      value: 207.7
       objectReference: {fileID: 0}
     - target: {fileID: 4687418695196700, guid: f0e0cd9983e53234fb75040a13996473, type: 2}
       propertyPath: m_LocalPosition.z

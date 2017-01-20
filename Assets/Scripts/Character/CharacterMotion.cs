@@ -235,7 +235,7 @@ public class CharacterMotion : MonoBehaviour
             m_inputRotation = UpdateInputRotation(m_inputRotation, m_inputDeltaHeadingAngleInDeg);
         }
 
-        m_isGrounded = GetRaycastAtPosition(out m_surfaceHit, -Up, 3f);
+        m_isGrounded = GetRaycastAtPosition(out m_surfaceHit, -Up, 10f);
         m_surfacePoint = m_surfaceHit.point;
         if (m_surfaceTransform != m_surfaceHit.transform)
             m_lastFrameSnapInitialized = false;
@@ -576,17 +576,17 @@ public class CharacterMotion : MonoBehaviour
         m_surfaceHitCharacterPosition = GetSnapPositionByHitPoint(m_collisionPoint);
         m_upHitPoint = GetSnapPositionByHitPoint(m_upHit.point);
 
-        if (Vector3.Distance(transform.position, m_surfaceHitCharacterPosition) >= 0.5f)
+        //if (Vector3.Distance(transform.position, m_surfaceHitCharacterPosition) >= 0.5f)
+        //{
+        //if (characterState != CharacterState.Gliding && characterState != CharacterState.StrongGliding)
+        //{
+        if (!m_snappedToPosition)
         {
-            if (characterState != CharacterState.Gliding && characterState != CharacterState.StrongGliding)
-            {
-                if (Snap)
-                {
-                    Debug.Log("snapping");
-                    transform.position = m_surfaceHitCharacterPosition;
-                    m_snappedToPosition = true;
-                }
-            }
+            Debug.Log("snapping");
+            transform.position = m_surfaceHitCharacterPosition;
+            m_snappedToPosition = true;
+            //}
+            //}
         }
     }
 
